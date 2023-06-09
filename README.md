@@ -4,6 +4,8 @@
 [![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10-blue)](https://python.org)
 [![ci](https://github.com/samcunliffe/cavendish-particle-tracks/workflows/ci/badge.svg)](https://github.com/samcunliffe/cavendish-particle-tracks/actions)
 [![codecov](https://codecov.io/gh/samcunliffe/cavendish-particle-tracks/branch/main/graph/badge.svg?token=9R8IVMJT90)](https://codecov.io/gh/samcunliffe/cavendish-particle-tracks)
+[![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v0.json)](https://github.com/charliermarsh/ruff)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 <!---
 [![Python Version](https://img.shields.io/pypi/pyversions/cavendish-particle-tracks.svg?color=green)](https://python.org)
 [![PyPI](https://img.shields.io/pypi/v/cavendish-particle-tracks.svg?color=green)](https://pypi.org/project/cavendish-particle-tracks)
