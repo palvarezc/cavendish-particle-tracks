@@ -3,10 +3,10 @@
 [![License MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/samcunliffe/cavendish-particle-tracks/raw/main/LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10-blue)](https://python.org)
 [![ci](https://github.com/samcunliffe/cavendish-particle-tracks/workflows/ci/badge.svg)](https://github.com/samcunliffe/cavendish-particle-tracks/actions)
-[![codecov](https://codecov.io/gh/samcunliffe/cavendish-particle-tracks/branch/main/graph/badge.svg)](https://codecov.io/gh/samcunliffe/cavendish-particle-tracks)
-<!--- 
+[![codecov](https://codecov.io/gh/samcunliffe/cavendish-particle-tracks/branch/main/graph/badge.svg?token=9R8IVMJT90)](https://codecov.io/gh/samcunliffe/cavendish-particle-tracks)
+<!---
 [![Python Version](https://img.shields.io/pypi/pyversions/cavendish-particle-tracks.svg?color=green)](https://python.org)
-[![PyPI](https://img.shields.io/pypi/v/cavendish-particle-tracks.svg?color=green)](https://pypi.org/project/cavendish-particle-tracks) 
+[![PyPI](https://img.shields.io/pypi/v/cavendish-particle-tracks.svg?color=green)](https://pypi.org/project/cavendish-particle-tracks)
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/cavendish-particle-tracks)](https://napari-hub.org/plugins/cavendish-particle-tracks)
 -->
 ----------------------------------
