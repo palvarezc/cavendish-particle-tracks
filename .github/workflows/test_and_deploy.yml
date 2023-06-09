@@ -1,7 +1,7 @@
 # This workflows will upload a Python Package using Twine when a release is created
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
-name: tests
+name: ci
 
 on:
   push:
@@ -60,8 +60,9 @@ jobs:
         env:
           PLATFORM: ${{ matrix.platform }}
 
-      - name: Coverage
+      - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
+          env: CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   deploy:
     # this will run when you have tagged a commit, starting with "v*"
