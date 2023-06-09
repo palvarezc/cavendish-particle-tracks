@@ -62,7 +62,8 @@ jobs:
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
-        env: CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   deploy:
     # this will run when you have tagged a commit, starting with "v*"
