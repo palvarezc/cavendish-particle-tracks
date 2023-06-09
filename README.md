@@ -9,30 +9,17 @@
 [![PyPI](https://img.shields.io/pypi/v/cavendish-particle-tracks.svg?color=green)](https://pypi.org/project/cavendish-particle-tracks) 
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/cavendish-particle-tracks)](https://napari-hub.org/plugins/cavendish-particle-tracks)
 -->
+----------------------------------
 
 A Napari plugin to perform a simple particle tracking analysis for the Cavendish laboratory's Undergraduate Part III Particle Tracks experiment.
 
 ----------------------------------
 
-This [napari] plugin was generated with [Cookiecutter] using [@napari]'s [cookiecutter-napari-plugin] template.
-
-<!--
-Don't miss the full getting started guide to set up your new package:
-https://github.com/napari/cookiecutter-napari-plugin#getting-started
-
-and review the napari docs for plugin developers:
-https://napari.org/stable/plugins/index.html
--->
-
 ## Installation
 
-You can install `cavendish-particle-tracks` via [pip]:
+Firstly, you'll need to [install napari](https://napari.org/stable/tutorials/fundamentals/installation.html).
 
-    pip install cavendish-particle-tracks
-
-
-
-To install latest development version :
+Then you can install this plugin with:
 
     pip install git+https://github.com/samcunliffe/cavendish-particle-tracks.git
 
