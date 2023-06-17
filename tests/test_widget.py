@@ -1,10 +1,13 @@
 import numpy as np
+import pytest
 from cavendish_particle_tracks import ParticleTracksWidget
 
 
-# make_napari_viewer is a pytest fixture that returns a napari viewer object
-# capsys is a pytest fixture that captures stdout and stderr output streams
-def test_example_q_widget(make_napari_viewer, capsys):
+def test_calculate_radius():
+    assert True
+
+
+def test_calculate_radius_ui(make_napari_viewer, capsys):
     # make viewer and add an image layer using our fixture
     viewer = make_napari_viewer()
     viewer.add_image(np.random.random((100, 100)))
@@ -13,8 +16,23 @@ def test_example_q_widget(make_napari_viewer, capsys):
     my_widget = ParticleTracksWidget(viewer)
 
     # call our widget method
-    my_widget._on_click()
+    my_widget._on_click_calculate()
 
     # read captured output and check that it's as we expected
     captured = capsys.readouterr()
-    assert captured.out == "napari has 1 layers\n"
+    assert captured.out == "calculating radius!\n"
+
+
+def test_selected_cells_workflow():
+    assert True
+
+
+@pytest.mark.skip("Not implemented")
+def test_add_new_particle_ui(make_napari_viewer, capsys):
+    viewer = make_napari_viewer()
+    widget = ParticleTracksWidget(viewer)
+    assert widget.table.rowCount() == 1
+
+    widget._on_click_new_particle()
+
+    assert widget.table.rowCount() == 2
