@@ -5,24 +5,23 @@ contributions:
     - id: cavendish-particle-tracks.get_reader
       python_name: cavendish_particle_tracks._reader:napari_get_reader
       title: Open data with Cavendish Particle Tracks Analysis Plugin
+
     - id: cavendish-particle-tracks.write_multiple
       python_name: cavendish_particle_tracks._writer:write_multiple
       title: Save multi-layer data with Cavendish Particle Tracks Analysis Plugin
+
     - id: cavendish-particle-tracks.write_single_image
       python_name: cavendish_particle_tracks._writer:write_single_image
       title: Save image data with Cavendish Particle Tracks Analysis Plugin
+
     - id: cavendish-particle-tracks.make_sample_data
       python_name: cavendish_particle_tracks._sample_data:make_sample_data
       title: Load sample data from Cavendish Particle Tracks Analysis Plugin
+
     - id: cavendish-particle-tracks.make_qwidget
-      python_name: cavendish_particle_tracks._widget:ExampleQWidget
+      python_name: cavendish_particle_tracks._widget:ParticleTracksWidget
       title: Make example QWidget
-    - id: cavendish-particle-tracks.make_magic_widget
-      python_name: cavendish_particle_tracks._widget:example_magic_widget
-      title: Make example magic widget
-    - id: cavendish-particle-tracks.make_func_widget
-      python_name: cavendish_particle_tracks._widget:example_function_widget
-      title: Make example function widget
+
   readers:
     - command: cavendish-particle-tracks.get_reader
       accepts_directories: false
@@ -31,13 +30,16 @@ contributions:
     - command: cavendish-particle-tracks.write_multiple
       layer_types: ['image*','labels*']
       filename_extensions: []
+
     - command: cavendish-particle-tracks.write_single_image
       layer_types: ['image']
       filename_extensions: ['.npy']
+
   sample_data:
     - command: cavendish-particle-tracks.make_sample_data
       display_name: Cavendish Particle Tracks Analysis Plugin
       key: unique_id.1
+
   widgets:
     - command: cavendish-particle-tracks.make_qwidget
       display_name: Cavendish Particle Tracks Analysis

@@ -1,5 +1,5 @@
 import numpy as np
-from cavendish_particle_tracks import ExampleQWidget
+from cavendish_particle_tracks import ParticleTracksWidget
 
 
 # make_napari_viewer is a pytest fixture that returns a napari viewer object
@@ -10,7 +10,7 @@ def test_example_q_widget(make_napari_viewer, capsys):
     viewer.add_image(np.random.random((100, 100)))
 
     # create our widget, passing in the viewer
-    my_widget = ExampleQWidget(viewer)
+    my_widget = ParticleTracksWidget(viewer)
 
     # call our widget method
     my_widget._on_click()
