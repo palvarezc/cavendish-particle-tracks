@@ -40,9 +40,4 @@ contributions:
       key: unique_id.1
   widgets:
     - command: cavendish-particle-tracks.make_qwidget
-      display_name: Example QWidget
-    - command: cavendish-particle-tracks.make_magic_widget
-      display_name: Example Magic Widget
-    - command: cavendish-particle-tracks.make_func_widget
-      autogenerate: true
-      display_name: Example Function Widget
+      display_name: Cavendish Particle Tracks Analysis
