@@ -2,18 +2,6 @@ name: cavendish-particle-tracks
 display_name: Cavendish Particle Tracks Analysis Plugin
 contributions:
   commands:
-    - id: cavendish-particle-tracks.get_reader
-      python_name: cavendish_particle_tracks._reader:napari_get_reader
-      title: Open data with Cavendish Particle Tracks Analysis Plugin
-
-    - id: cavendish-particle-tracks.write_multiple
-      python_name: cavendish_particle_tracks._writer:write_multiple
-      title: Save multi-layer data with Cavendish Particle Tracks Analysis Plugin
-
-    - id: cavendish-particle-tracks.write_single_image
-      python_name: cavendish_particle_tracks._writer:write_single_image
-      title: Save image data with Cavendish Particle Tracks Analysis Plugin
-
     - id: cavendish-particle-tracks.make_sample_data
       python_name: cavendish_particle_tracks._sample_data:make_sample_data
       title: Load sample data from Cavendish Particle Tracks Analysis Plugin
@@ -21,19 +9,6 @@ contributions:
     - id: cavendish-particle-tracks.make_qwidget
       python_name: cavendish_particle_tracks._widget:ParticleTracksWidget
       title: Make example QWidget
-
-  readers:
-    - command: cavendish-particle-tracks.get_reader
-      accepts_directories: false
-      filename_patterns: ['*.npy']
-  writers:
-    - command: cavendish-particle-tracks.write_multiple
-      layer_types: ['image*','labels*']
-      filename_extensions: []
-
-    - command: cavendish-particle-tracks.write_single_image
-      layer_types: ['image']
-      filename_extensions: ['.npy']
 
   sample_data:
     - command: cavendish-particle-tracks.make_sample_data
