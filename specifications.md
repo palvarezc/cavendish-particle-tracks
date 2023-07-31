@@ -4,7 +4,7 @@
 
 > **Note**
 > This [Napari](https://napari.org) plugin is to assist the analysis of digitally scanned frames from CERN bubble-chamber photographic data.
-> It will be used to supplement the Cavendish Laboratory Cambridge Part III Physics Practicals.
+> It will be used to supplement the Cavendish Laboratory Cambridge Part II Physics Practicals.
 
 ## Statement of need
 
