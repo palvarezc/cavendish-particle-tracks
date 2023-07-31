@@ -20,6 +20,5 @@ def radius(a: Point, b: Point, c: Point) -> float:
             c[0] * c[0] + c[1] * c[1],
         ]
     )
-    xc, yc, k = np.linalg.solve(lhs, -1.0 * rhs)
-    print(k)
-    return np.sqrt(xc * xc + yc * yc - k)
+    xc, yc, k = np.linalg.solve(lhs, rhs)
+    return np.sqrt(xc * xc + yc * yc + k)
