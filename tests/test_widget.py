@@ -3,10 +3,6 @@ import pytest
 from cavendish_particle_tracks import ParticleTracksWidget
 
 
-def test_calculate_radius():
-    assert True
-
-
 def test_calculate_radius_ui(make_napari_viewer, capsys):
     # make viewer and add an image layer using our fixture
     viewer = make_napari_viewer()
