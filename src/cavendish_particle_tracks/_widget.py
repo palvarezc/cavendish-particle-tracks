@@ -9,7 +9,7 @@ Replace code below according to your needs.
 
 import napari
 import numpy as np
-from qtpy.QtWidgets import QPushButton, QTableWidget, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QPushButton, QTableWidget, QVBoxLayout, QWidget, QTableWidgetItem
 
 
 class ParticleTracksWidget(QWidget):
@@ -42,7 +42,7 @@ class ParticleTracksWidget(QWidget):
         """Initial setup of the QTableWidget with one row and columns for each
         point and the calculated radius.
         """
-        out = QTableWidget(1, 4)
+        out = QTableWidget(0, 4)
         out.setHorizontalHeaderLabels(["1", "2", "3", "radius"])
         return out
 
@@ -67,3 +67,17 @@ class ParticleTracksWidget(QWidget):
         points_layers = [layer for layer in self.viewer.layers if layer.name=="Points"]
         selected_points = np.array([points_layers[0].data[i] for i in points_layers[0].selected_data])
         print("Adding points to the table: ", selected_points)
+
+        #Forcing only 3 points for the moment
+        if not len(selected_points)==3:
+            print("Can only process 3-point particles, try again.")
+            return 
+
+        #Adding points to the table
+        self.table.insertRow(self.table.rowCount())
+
+        for i in range(3):
+            # This is not optimal for the radius calculation
+            point = selected_points[i]
+            point_text = "["+str(point[0])+", "+str(point[1])+"]"
+            self.table.setItem(self.table.rowCount()-1 , i, QTableWidgetItem(point_text)) 
