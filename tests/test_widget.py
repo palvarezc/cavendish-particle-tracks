@@ -11,12 +11,23 @@ def test_calculate_radius_ui(make_napari_viewer, capsys):
     # create our widget, passing in the viewer
     my_widget = ParticleTracksWidget(viewer)
 
-    # call our widget method
+    # need to click "new particle" to add a row to the table
+    my_widget._on_click_new_particle()
+
+    # add three points to the points layer and select them
+    viewer.add_points([(0, 1), (1, 0), (0, -1)])
+    for layer in viewer.layers:
+        if layer.name == "Points":
+            layer.selected_data = {0, 1, 2}
+
+    # click the calculate radius button
     my_widget._on_click_calculate()
 
     # read captured output and check that it's as we expected
     captured = capsys.readouterr()
-    assert captured.out == "calculating radius!\n"
+    expected_lines = ["Adding points to the table:", "calculating radius!"]
+    for expected in expected_lines:
+        assert expected in captured.out
 
 
 def test_selected_cells_workflow():
