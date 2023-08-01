@@ -8,6 +8,7 @@ Replace code below according to your needs.
 """
 
 import napari
+import numpy as np
 from qtpy.QtWidgets import QPushButton, QTableWidget, QVBoxLayout, QWidget
 
 
@@ -61,3 +62,8 @@ class ParticleTracksWidget(QWidget):
         the table and select the first cell ready to recieve the first point.
         """
         print("napari has", len(self.viewer.layers), "layers")
+
+        #Filtering selected points
+        points_layers = [layer for layer in self.viewer.layers if layer.name=="Points"]
+        selected_points = np.array([points_layers[0].data[i] for i in points_layers[0].selected_data])
+        print("Adding points to the table: ", selected_points)
