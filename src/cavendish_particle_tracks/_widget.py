@@ -21,11 +21,15 @@ class ParticleTracksWidget(QWidget):
 
         # define QtWidgets
         cal = QPushButton("Calculate radius")
+        lgth = QPushButton("Calculate length")
+        stsh = QPushButton("Calculate stereoshift")
         ptc = QPushButton("New particle")
         self.table = self._set_up_table()
 
         # connect callbacks
         cal.clicked.connect(self._on_click_calculate)
+        lgth.clicked.connect(self._on_click_length)
+        stsh.clicked.connect(self._on_click_stereoshift)
         ptc.clicked.connect(self._on_click_new_particle)
         # TODO: find which of thsese works
         # https://napari.org/stable/gallery/custom_mouse_functions.html
@@ -34,16 +38,18 @@ class ParticleTracksWidget(QWidget):
 
         # layout
         self.setLayout(QVBoxLayout())
-        self.layout().addWidget(self.table)
-        self.layout().addWidget(cal)
         self.layout().addWidget(ptc)
+        self.layout().addWidget(cal)
+        self.layout().addWidget(lgth)
+        self.layout().addWidget(stsh)
+        self.layout().addWidget(self.table)
 
     def _set_up_table(self) -> QTableWidget:
         """Initial setup of the QTableWidget with one row and columns for each
         point and the calculated radius.
         """
-        out = QTableWidget(0, 4)
-        out.setHorizontalHeaderLabels(["1", "2", "3", "radius"])
+        out = QTableWidget(0, 5)
+        out.setHorizontalHeaderLabels(["Type", "1", "2", "3", "radius"])
         return out
 
     def _on_mouse_press(self) -> None:
@@ -53,16 +59,9 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_calculate(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
-        for the currently selected table row.
+        for the currently selected points and assign it to the currently selected table row.
         """
-        print("calculating radius!")
-
-    def _on_click_new_particle(self) -> None:
-        """When the 'New particle' button is clicked, append a new blank row to
-        the table and select the first cell ready to recieve the first point.
-        """
-        print("napari has", len(self.viewer.layers), "layers")
-
+                    
         #Filtering selected points
         points_layers = [layer for layer in self.viewer.layers if layer.name=="Points"]
         selected_points = np.array([points_layers[0].data[i] for i in points_layers[0].selected_data])
@@ -73,11 +72,39 @@ class ParticleTracksWidget(QWidget):
             print("Can only process 3-point particles, try again.")
             return 
 
-        #Adding points to the table
-        self.table.insertRow(self.table.rowCount())
+        # Assigns the points and radius to the (first) selected row
+        select = self.table.selectionModel()
+        rows = select.selectedRows()
+        if not len(rows)==1:
+            print("Select (only) one particle from the table to calculate the radius.")        
 
         for i in range(3):
             # This is not optimal for the radius calculation
             point = selected_points[i]
             point_text = "["+str(point[0])+", "+str(point[1])+"]"
-            self.table.setItem(self.table.rowCount()-1 , i, QTableWidgetItem(point_text)) 
+            self.table.setItem(rows[0].row(), i+1, QTableWidgetItem(point_text)) 
+
+        print("calculating radius!")
+
+    def _on_click_length(self) -> None:
+        """When the 'Calculate radius' button is clicked, calculate the radius
+        for the currently selected table row.
+        """
+        print("calculating legth!")
+
+    def _on_click_stereoshift(self) -> None:
+        """When the 'Calculate radius' button is clicked, calculate the radius
+        for the currently selected table row.
+        """
+        print("calculating stereo-shift!")
+
+    def _on_click_new_particle(self) -> None:
+        """When the 'New particle' button is clicked, append a new blank row to
+        the table and select the first cell ready to recieve the first point.
+        """
+        print("napari has", len(self.viewer.layers), "layers")
+
+        #Adding particles to the table (for the moment all Sigma+)
+        self.table.insertRow(self.table.rowCount())
+        self.table.setItem(self.table.rowCount()-1 , 0, QTableWidgetItem("Sigma+")) 
+
