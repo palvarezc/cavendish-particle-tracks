@@ -118,8 +118,9 @@ class ParticleTracksWidget(QWidget):
         """
         print("napari has", len(self.viewer.layers), "layers")
 
-        # Adding particles to the table (for the moment all Sigma+)
+        # add particle (== new row) to the table and select it (for the moment all Sigma+)
         self.table.insertRow(self.table.rowCount())
+        self.table.selectRow(self.table.rowCount() - 1)
         self.table.setItem(
             self.table.rowCount() - 1, 0, QTableWidgetItem("Sigma+")
         )
