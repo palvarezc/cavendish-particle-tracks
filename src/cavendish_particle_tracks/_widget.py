@@ -9,7 +9,13 @@ Replace code below according to your needs.
 
 import napari
 import numpy as np
-from qtpy.QtWidgets import QPushButton, QTableWidget, QVBoxLayout, QWidget, QTableWidgetItem
+from qtpy.QtWidgets import (
+    QPushButton,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class ParticleTracksWidget(QWidget):
@@ -61,28 +67,36 @@ class ParticleTracksWidget(QWidget):
         """When the 'Calculate radius' button is clicked, calculate the radius
         for the currently selected points and assign it to the currently selected table row.
         """
-                    
-        #Filtering selected points
-        points_layers = [layer for layer in self.viewer.layers if layer.name=="Points"]
-        selected_points = np.array([points_layers[0].data[i] for i in points_layers[0].selected_data])
+
+        # Filtering selected points
+        points_layers = [
+            layer for layer in self.viewer.layers if layer.name == "Points"
+        ]
+        selected_points = np.array(
+            [points_layers[0].data[i] for i in points_layers[0].selected_data]
+        )
         print("Adding points to the table: ", selected_points)
 
-        #Forcing only 3 points for the moment
-        if not len(selected_points)==3:
+        # Forcing only 3 points for the moment
+        if len(selected_points) != 3:
             print("Can only process 3-point particles, try again.")
-            return 
+            return
 
         # Assigns the points and radius to the (first) selected row
         select = self.table.selectionModel()
         rows = select.selectedRows()
-        if not len(rows)==1:
-            print("Select (only) one particle from the table to calculate the radius.")        
+        if len(rows) != 1:
+            print(
+                "Select (only) one particle from the table to calculate the radius."
+            )
 
         for i in range(3):
             # This is not optimal for the radius calculation
             point = selected_points[i]
-            point_text = "["+str(point[0])+", "+str(point[1])+"]"
-            self.table.setItem(rows[0].row(), i+1, QTableWidgetItem(point_text)) 
+            point_text = "[" + str(point[0]) + ", " + str(point[1]) + "]"
+            self.table.setItem(
+                rows[0].row(), i + 1, QTableWidgetItem(point_text)
+            )
 
         print("calculating radius!")
 
@@ -104,7 +118,8 @@ class ParticleTracksWidget(QWidget):
         """
         print("napari has", len(self.viewer.layers), "layers")
 
-        #Adding particles to the table (for the moment all Sigma+)
+        # Adding particles to the table (for the moment all Sigma+)
         self.table.insertRow(self.table.rowCount())
-        self.table.setItem(self.table.rowCount()-1 , 0, QTableWidgetItem("Sigma+")) 
-
+        self.table.setItem(
+            self.table.rowCount() - 1, 0, QTableWidgetItem("Sigma+")
+        )
