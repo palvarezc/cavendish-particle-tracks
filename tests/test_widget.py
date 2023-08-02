@@ -11,6 +11,7 @@ def test_calculate_radius_ui(make_napari_viewer, capsys):
     my_widget = ParticleTracksWidget(viewer)
 
     # need to click "new particle" to add a row to the table
+    my_widget.cb.setCurrentIndex(1)
     my_widget._on_click_new_particle()
 
     # add three points to the points layer and select them
@@ -38,6 +39,7 @@ def test_add_new_particle_ui(make_napari_viewer, capsys):
     widget = ParticleTracksWidget(viewer)
     assert widget.table.rowCount() == 0
 
+    widget.cb.setCurrentIndex(1)
     widget._on_click_new_particle()
 
     assert widget.table.rowCount() == 1

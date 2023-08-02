@@ -10,12 +10,15 @@ Replace code below according to your needs.
 import napari
 import numpy as np
 from qtpy.QtWidgets import (
+    QComboBox,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
+
+EXPECTED_PARTICLES = ["New particle", "Σ+", "Σ-", "Λ0"]
 
 
 class ParticleTracksWidget(QWidget):
@@ -25,18 +28,21 @@ class ParticleTracksWidget(QWidget):
         super().__init__()
         self.viewer = napari_viewer
 
+        self.cb = QComboBox()
+        self.cb.addItems(EXPECTED_PARTICLES)
+        self.cb.setCurrentIndex(0)
+        self.cb.currentIndexChanged.connect(self._on_click_new_particle)
+
         # define QtWidgets
         cal = QPushButton("Calculate radius")
         lgth = QPushButton("Calculate length")
         stsh = QPushButton("Calculate stereoshift")
-        ptc = QPushButton("New particle")
         self.table = self._set_up_table()
 
         # connect callbacks
         cal.clicked.connect(self._on_click_calculate)
         lgth.clicked.connect(self._on_click_length)
         stsh.clicked.connect(self._on_click_stereoshift)
-        ptc.clicked.connect(self._on_click_new_particle)
         # TODO: find which of thsese works
         # https://napari.org/stable/gallery/custom_mouse_functions.html
         # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
@@ -44,11 +50,18 @@ class ParticleTracksWidget(QWidget):
 
         # layout
         self.setLayout(QVBoxLayout())
-        self.layout().addWidget(ptc)
+        self.layout().addWidget(self.cb)
         self.layout().addWidget(cal)
         self.layout().addWidget(lgth)
         self.layout().addWidget(stsh)
         self.layout().addWidget(self.table)
+
+    def _selectionchange(self, i) -> None:
+        print("Items in the list are :")
+
+        for count in range(self.cb.count()):
+            print(self.cb.itemText(count))
+        print("Current index", i, "selection changed ", self.cb.currentText())
 
     def _set_up_table(self) -> QTableWidget:
         """Initial setup of the QTableWidget with one row and columns for each
@@ -120,9 +133,15 @@ class ParticleTracksWidget(QWidget):
         """
         print("napari has", len(self.viewer.layers), "layers")
 
-        # add particle (== new row) to the table and select it (for the moment all Sigma+)
+        if self.cb.currentIndex() < 1:
+            return
+
+        # add particle (== new row) to the table and select it
         self.table.insertRow(self.table.rowCount())
         self.table.selectRow(self.table.rowCount() - 1)
         self.table.setItem(
-            self.table.rowCount() - 1, 0, QTableWidgetItem("Sigma+")
+            self.table.rowCount() - 1,
+            0,
+            QTableWidgetItem(self.cb.currentText()),
         )
+        self.cb.setCurrentIndex(0)
