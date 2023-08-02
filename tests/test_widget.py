@@ -29,6 +29,11 @@ def test_calculate_radius_ui(make_napari_viewer, capsys):
     for expected in expected_lines:
         assert expected in captured.out
 
+    assert my_widget.table.item(0, 1)
+    assert my_widget.table.item(0, 2)
+    assert my_widget.table.item(0, 3)
+    assert my_widget.table.item(0, 4)
+
 
 def test_selected_cells_workflow():
     assert True

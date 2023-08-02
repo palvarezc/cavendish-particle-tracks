@@ -17,6 +17,8 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from cavendish_particle_tracks._calculate import radius
+
 
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
@@ -82,6 +84,11 @@ class ParticleTracksWidget(QWidget):
             print("Can only process 3-point particles, try again.")
             return
 
+        print("calculating radius!")
+
+        # Calculate radius
+        rad = radius(*selected_points)
+
         # Assigns the points and radius to the (first) selected row
         select = self.table.selectionModel()
         rows = select.selectedRows()
@@ -91,14 +98,12 @@ class ParticleTracksWidget(QWidget):
             )
 
         for i in range(3):
-            # This is not optimal for the radius calculation
             point = selected_points[i]
-            "[" + str(point[0]) + ", " + str(point[1]) + "]"
             self.table.setItem(
                 rows[0].row(), i + 1, QTableWidgetItem(str(point))
             )
 
-        print("calculating radius!")
+        self.table.setItem(rows[0].row(), 4, QTableWidgetItem(str(rad)))
 
     def _on_click_length(self) -> None:
         """When the 'Calculate length' button is clicked, calculate the length
