@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 from cavendish_particle_tracks import ParticleTracksWidget
 
 
@@ -34,12 +33,11 @@ def test_selected_cells_workflow():
     assert True
 
 
-@pytest.mark.skip("Not implemented")
 def test_add_new_particle_ui(make_napari_viewer, capsys):
     viewer = make_napari_viewer()
     widget = ParticleTracksWidget(viewer)
-    assert widget.table.rowCount() == 1
+    assert widget.table.rowCount() == 0
 
     widget._on_click_new_particle()
 
-    assert widget.table.rowCount() == 2
+    assert widget.table.rowCount() == 1
