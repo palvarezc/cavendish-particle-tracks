@@ -54,8 +54,10 @@ class ParticleTracksWidget(QWidget):
         """Initial setup of the QTableWidget with one row and columns for each
         point and the calculated radius.
         """
-        out = QTableWidget(0, 5)
-        out.setHorizontalHeaderLabels(["Type", "1", "2", "3", "radius"])
+        out = QTableWidget(0, 6)
+        out.setHorizontalHeaderLabels(
+            ["Type", "1", "2", "3", "radius", "decay length"]
+        )
         return out
 
     def _on_mouse_press(self) -> None:
