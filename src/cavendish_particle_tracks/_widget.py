@@ -93,24 +93,24 @@ class ParticleTracksWidget(QWidget):
         for i in range(3):
             # This is not optimal for the radius calculation
             point = selected_points[i]
-            point_text = "[" + str(point[0]) + ", " + str(point[1]) + "]"
+            "[" + str(point[0]) + ", " + str(point[1]) + "]"
             self.table.setItem(
-                rows[0].row(), i + 1, QTableWidgetItem(point_text)
+                rows[0].row(), i + 1, QTableWidgetItem(str(point))
             )
 
         print("calculating radius!")
 
     def _on_click_length(self) -> None:
-        """When the 'Calculate radius' button is clicked, calculate the radius
+        """When the 'Calculate length' button is clicked, calculate the length
         for the currently selected table row.
         """
         print("calculating legth!")
 
     def _on_click_stereoshift(self) -> None:
-        """When the 'Calculate radius' button is clicked, calculate the radius
+        """When the 'Calculate stereoshift' button is clicked, calculate the stereoshift
         for the currently selected table row.
         """
-        print("calculating stereo-shift!")
+        print("calculating stereoshift!")
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
