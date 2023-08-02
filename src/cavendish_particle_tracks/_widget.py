@@ -99,7 +99,6 @@ class ParticleTracksWidget(QWidget):
 
         for i in range(3):
             point = selected_points[i]
-            "[" + str(point[0]) + ", " + str(point[1]) + "]"
             self.table.setItem(
                 rows[0].row(), i + 1, QTableWidgetItem(str(point))
             )
