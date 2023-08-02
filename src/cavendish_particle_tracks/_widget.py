@@ -17,9 +17,11 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from cavendish_particle_tracks._calculate import radius, length
+
+from cavendish_particle_tracks._calculate import radius
 
 EXPECTED_PARTICLES = ["New particle", "Σ+", "Σ-", "Λ0"]
+
 
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
