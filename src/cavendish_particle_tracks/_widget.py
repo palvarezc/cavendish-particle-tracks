@@ -17,6 +17,8 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from cavendish_particle_tracks._calculate import length
+
 
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
@@ -49,6 +51,28 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(lgth)
         self.layout().addWidget(stsh)
         self.layout().addWidget(self.table)
+
+    def _get_selected_points(self) -> np.array:
+        """Returns array of selected points in the viewer"""
+
+        # Filtering selected points
+        points_layers = [
+            layer for layer in self.viewer.layers if layer.name == "Points"
+        ]
+        selected_points = np.array(
+            [points_layers[0].data[i] for i in points_layers[0].selected_data]
+        )
+
+        return selected_points
+
+    def _get_selected_row(self) -> np.array:
+        """Returns index of the (first) selected row in the table"""
+
+        # Assigns the points and radius to the (first) selected row
+        select = self.table.selectionModel()
+        rows = select.selectedRows()
+
+        return rows
 
     def _set_up_table(self) -> QTableWidget:
         """Initial setup of the QTableWidget with one row and columns for each
@@ -104,7 +128,30 @@ class ParticleTracksWidget(QWidget):
         """When the 'Calculate length' button is clicked, calculate the length
         for the currently selected table row.
         """
+
+        selected_points = self._get_selected_points()
+
+        # Forcing only 2 points
+        if len(selected_points) != 2:
+            print("Select only two points to calculate the decay length.")
+            return
+
+        selected_rows = self._get_selected_row()
+
+        if len(selected_rows) != 1:
+            print(
+                "Select (only) one particle from the table to calculate the length."
+            )
+
         print("calculating legth!")
+        declen = length(selected_points[0], selected_points[1])
+
+        print("The length is: ", declen)
+
+        # needs the extra column in the table
+        # self.table.setItem(
+        #     selected_rows[0].row(), 5, QTableWidgetItem(str(declen))
+        #     )
 
     def _on_click_stereoshift(self) -> None:
         """When the 'Calculate stereoshift' button is clicked, calculate the stereoshift
