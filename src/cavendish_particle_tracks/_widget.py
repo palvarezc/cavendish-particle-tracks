@@ -87,9 +87,7 @@ class ParticleTracksWidget(QWidget):
         print("calculating radius!")
 
         # Calculate radius
-        rad = radius(
-            selected_points[0], selected_points[1], selected_points[2]
-        )
+        rad = radius(*selected_points)
 
         # Assigns the points and radius to the (first) selected row
         select = self.table.selectionModel()
