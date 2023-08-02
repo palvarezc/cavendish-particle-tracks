@@ -13,7 +13,7 @@
 -->
 ----------------------------------
 
-A Napari plugin to perform a simple particle tracking analysis for the Cavendish laboratory's Undergraduate Part III Particle Tracks experiment.
+A Napari plugin to perform a simple particle tracking analysis for the Cavendish laboratory's Undergraduate Part II Particle Tracks experiment.
 
 ----------------------------------
 
