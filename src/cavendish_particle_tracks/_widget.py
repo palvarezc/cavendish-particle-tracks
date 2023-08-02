@@ -144,7 +144,7 @@ class ParticleTracksWidget(QWidget):
             )
 
         print("calculating legth!")
-        declen = length(selected_points[0], selected_points[1])
+        declen = length(*selected_points)
 
         print("The length is: ", declen)
 
