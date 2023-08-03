@@ -132,7 +132,7 @@ class ParticleTracksWidget(QWidget):
         )
 
     def _on_click_length(self) -> None:
-        """When the 'Calculate length' button is clicked, calculate the length
+        """When the 'Calculate length' button is clicked, calculate the decay length
         for the currently selected table row.
         """
 
@@ -147,10 +147,10 @@ class ParticleTracksWidget(QWidget):
 
         if len(selected_rows) != 1:
             print(
-                "Select (only) one particle from the table to calculate the length."
+                "Select (only) one particle from the table to calculate the decay length."
             )
 
-        print("calculating legth!")
+        print("calculating decay length!")
         declen = length(*selected_points)
 
         self.table.setItem(
