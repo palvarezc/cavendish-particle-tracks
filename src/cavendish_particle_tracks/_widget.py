@@ -17,10 +17,11 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from cavendish_particle_tracks._calculate import radius, length
-from cavendish_particle_tracks._calculate import radius
+
+from cavendish_particle_tracks._calculate import length, radius
 
 EXPECTED_PARTICLES = ["New particle", "Σ+", "Σ-", "Λ0"]
+
 
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
@@ -73,7 +74,6 @@ class ParticleTracksWidget(QWidget):
     def _get_selected_row(self) -> np.array:
         """Returns index of the (first) selected row in the table"""
 
-        # Assigns the points and radius to the (first) selected row
         select = self.table.selectionModel()
         rows = select.selectedRows()
 
@@ -99,40 +99,37 @@ class ParticleTracksWidget(QWidget):
         for the currently selected points and assign it to the currently selected table row.
         """
 
-        # Filtering selected points
-        points_layers = [
-            layer for layer in self.viewer.layers if layer.name == "Points"
-        ]
-        selected_points = np.array(
-            [points_layers[0].data[i] for i in points_layers[0].selected_data]
-        )
+        selected_points = self._get_selected_points()
+
+        # Forcing only 3 points
+        if len(selected_points) != 3:
+            print("Select (only) three points to calculate the decay radius.")
+            return
+
+        selected_rows = self._get_selected_row()
+
+        if len(selected_rows) != 1:
+            print(
+                "Select (only) one particle from the table to calculate the radius."
+            )
+
         print("Adding points to the table: ", selected_points)
 
-        # Forcing only 3 points for the moment
-        if len(selected_points) != 3:
-            print("Can only process 3-point particles, try again.")
-            return
+        # Assigns the points and radius to the (first) selected row
+        for i in range(3):
+            point = selected_points[i]
+            self.table.setItem(
+                selected_rows[0].row(), i + 1, QTableWidgetItem(str(point))
+            )
 
         print("calculating radius!")
 
         # Calculate radius
         rad = radius(*selected_points)
 
-        # Assigns the points and radius to the (first) selected row
-        select = self.table.selectionModel()
-        rows = select.selectedRows()
-        if len(rows) != 1:
-            print(
-                "Select (only) one particle from the table to calculate the radius."
-            )
-
-        for i in range(3):
-            point = selected_points[i]
-            self.table.setItem(
-                rows[0].row(), i + 1, QTableWidgetItem(str(point))
-            )
-
-        self.table.setItem(rows[0].row(), 4, QTableWidgetItem(str(rad)))
+        self.table.setItem(
+            selected_rows[0].row(), 4, QTableWidgetItem(str(rad))
+        )
 
     def _on_click_length(self) -> None:
         """When the 'Calculate length' button is clicked, calculate the length
@@ -143,7 +140,7 @@ class ParticleTracksWidget(QWidget):
 
         # Forcing only 2 points
         if len(selected_points) != 2:
-            print("Select only two points to calculate the decay length.")
+            print("Select (only) two points to calculate the decay length.")
             return
 
         selected_rows = self._get_selected_row()
@@ -156,12 +153,9 @@ class ParticleTracksWidget(QWidget):
         print("calculating legth!")
         declen = length(*selected_points)
 
-        print("The length is: ", declen)
-
-        # needs the extra column in the table
-        # self.table.setItem(
-        #     selected_rows[0].row(), 5, QTableWidgetItem(str(declen))
-        #     )
+        self.table.setItem(
+            selected_rows[0].row(), 5, QTableWidgetItem(str(declen))
+        )
 
     def _on_click_stereoshift(self) -> None:
         """When the 'Calculate stereoshift' button is clicked, calculate the stereoshift
