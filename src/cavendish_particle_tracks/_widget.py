@@ -7,6 +7,8 @@ see: https://napari.org/stable/plugins/guides.html?#widgets
 Replace code below according to your needs.
 """
 
+from typing import List
+
 import napari
 import numpy as np
 from qtpy.QtCore import QPoint
@@ -23,23 +25,16 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from cavendish_particle_tracks._calculate import length, radius
+from cavendish_particle_tracks._calculate import (
+    FIDUCIAL_BACK,
+    FIDUCIAL_FRONT,
+    Fiducial,
+    length,
+    magnification,
+    radius,
+)
 
 EXPECTED_PARTICLES = ["New particle", "Σ+", "Σ-", "Λ0"]
-FIDUCIAL_FRONT = {
-    "C’": [0.0, 0.0, 0.0],
-    "F’": [14.97, -8.67, 0.0],
-    "B’": [15.00, 8.66, 0.0],
-    "D’": [29.91, -0.07, 0.0],
-}  # cm
-FIDUCIAL_BACK = {
-    "C": [-0.02, 0.01, 31.6],
-    "F": [14.95, -8.63, 31.6],
-    "B": [14.92, 8.67, 31.6],
-    "D": [29.90, 0.02, 31.6],
-    "E": [-14.96, -8.62, 31.6],
-    "A": [-15.00, 8.68, 31.6],
-}  # cm
 
 
 class ParticleTracksWidget(QWidget):
@@ -220,6 +215,11 @@ class MagnificationDialog(QDialog):
 
         self.setWindowTitle("Magnification")
 
+        self.f1 = Fiducial()
+        self.f2 = Fiducial()
+        self.b1 = Fiducial()
+        self.b2 = Fiducial()
+
         # drop-down lists of fiducials
         self.cbf1 = QComboBox()
         self.cbf2 = QComboBox()
@@ -255,6 +255,12 @@ class MagnificationDialog(QDialog):
         self.cob1.clicked.connect(self._on_click_add_coords_b1)
         self.cob2.clicked.connect(self._on_click_add_coords_b2)
 
+        self.bmag = QPushButton("Calculate magnification")
+        self.bmag.clicked.connect(self._on_click_magnification)
+
+        self.table = QTableWidget(1, 2)
+        self.table.setHorizontalHeaderLabels(["a", "b"])
+
         QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
         self.buttonBox.accepted.connect(self.accept)
@@ -280,7 +286,15 @@ class MagnificationDialog(QDialog):
         self.layout().addWidget(self.cbb2, 5, 0)
         self.layout().addWidget(self.txb2, 5, 1)
         self.layout().addWidget(self.cob2, 5, 2)
-        self.layout().addWidget(self.buttonBox, 6, 0, 1, 3)
+
+        self.layout().addWidget(self.bmag, 6, 0, 1, 3)
+
+        self.layout().addWidget(
+            QLabel("Magnification parameters (M = a + b z)"), 7, 0, 1, 3
+        )
+        self.layout().addWidget(self.table, 8, 0, 1, 3)
+
+        self.layout().addWidget(self.buttonBox, 9, 0, 1, 3)
 
         self.cal_layer = self.parent.viewer.add_points(
             name="Points_Calibration"
@@ -302,23 +316,26 @@ class MagnificationDialog(QDialog):
 
     def _on_click_add_coords_f1(self) -> None:
         """Add first front fiducial"""
-        return self._on_click_add_coords(0)
+        self.f1.name = self.cbf1.currentText()
+        self.f1.x, self.f2.y = self._add_coords(0)
 
     def _on_click_add_coords_f2(self) -> None:
         """Add first front fiducial"""
-        return self._on_click_add_coords(1)
+        self.f2.name = self.cbf2.currentText()
+        self.f2.x, self.f2.y = self._add_coords(1)
 
     def _on_click_add_coords_b1(self) -> None:
         """Add first front fiducial"""
-        return self._on_click_add_coords(2)
+        self.b1.name = self.cbb1.currentText()
+        self.b1.x, self.b1.y = self._add_coords(2)
 
     def _on_click_add_coords_b2(self) -> None:
         """Add first front fiducial"""
-        return self._on_click_add_coords(3)
+        self.b2.name = self.cbb2.currentText()
+        self.b2.x, self.b2.y = self._add_coords(3)
 
-    def _on_click_add_coords(self, fiducial: int) -> None:
+    def _add_coords(self, fiducial: int) -> List[float]:
         """When 'Add' is selected, the selected point is added to the corresponding fiducial text box"""
-        textbox = self.txboxes[fiducial]
 
         selected_points = self.parent._get_selected_points(
             "Points_Calibration"
@@ -327,9 +344,24 @@ class MagnificationDialog(QDialog):
         # Forcing only 1 points
         if len(selected_points) != 1:
             print("Select (only) one point to add fiducial.")
-            return
+            return [-1.0e6, -1.0e6]
 
+        textbox = self.txboxes[fiducial]
         textbox.setText(str(selected_points[0]))
+
+        return selected_points[0]
+
+    def _on_click_magnification(self) -> None:
+        """When 'Calculate magnification' button is clicked, calculate magnification and populate table"""
+
+        # # Need something like this (but that would work) at some point
+        # if not (self.f1 and self.f2 and self.b1 and sefl.b2):
+        #     print("Select fiducials to calcuate the magnification")
+
+        a, b = magnification(self.f1, self.f2, self.b1, self.b2)
+
+        self.table.setItem(0, 0, QTableWidgetItem(str(a)))
+        self.table.setItem(0, 1, QTableWidgetItem(str(b)))
 
     def accept(self) -> None:
         """On accept propagate the calibration information to the main window and remove the points_Calibration layer"""
