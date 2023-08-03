@@ -22,3 +22,9 @@ def radius(a: Point, b: Point, c: Point) -> float:
     )
     xc, yc, k = np.linalg.solve(lhs, rhs)
     return np.sqrt(xc * xc + yc * yc + k)
+
+
+def length(a: Point, b: Point) -> float:
+    pa = np.array(a)
+    pb = np.array(b)
+    return np.linalg.norm(pa - pb)
