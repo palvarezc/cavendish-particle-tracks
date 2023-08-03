@@ -11,6 +11,10 @@ import napari
 import numpy as np
 from qtpy.QtWidgets import (
     QComboBox,
+    QDialog,
+    QDialogButtonBox,
+    QGridLayout,
+    QLabel,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
@@ -21,6 +25,20 @@ from qtpy.QtWidgets import (
 from cavendish_particle_tracks._calculate import length, radius
 
 EXPECTED_PARTICLES = ["New particle", "Σ+", "Σ-", "Λ0"]
+FIDUCIAL_FRONT = {
+    "C’": [0.0, 0.0, 0.0],
+    "F’": [14.97, -8.67, 0.0],
+    "B’": [15.00, 8.66, 0.0],
+    "D’": [29.91, -0.07, 0.0],
+}  # cm
+FIDUCIAL_BACK = {
+    "C": [-0.02, 0.01, 31.6],
+    "F": [14.95, -8.63, 31.6],
+    "B": [14.92, 8.67, 31.6],
+    "D": [29.90, 0.02, 31.6],
+    "E": [-14.96, -8.62, 31.6],
+    "A": [-15.00, 8.68, 31.6],
+}  # cm
 
 
 class ParticleTracksWidget(QWidget):
@@ -30,21 +48,22 @@ class ParticleTracksWidget(QWidget):
         super().__init__()
         self.viewer = napari_viewer
 
+        # define QtWidgets
         self.cb = QComboBox()
         self.cb.addItems(EXPECTED_PARTICLES)
         self.cb.setCurrentIndex(0)
         self.cb.currentIndexChanged.connect(self._on_click_new_particle)
-
-        # define QtWidgets
         cal = QPushButton("Calculate radius")
         lgth = QPushButton("Calculate length")
         stsh = QPushButton("Calculate stereoshift")
         self.table = self._set_up_table()
+        mag = QPushButton("Calculate magnification")
 
         # connect callbacks
         cal.clicked.connect(self._on_click_calculate)
         lgth.clicked.connect(self._on_click_length)
         stsh.clicked.connect(self._on_click_stereoshift)
+        mag.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
         # https://napari.org/stable/gallery/custom_mouse_functions.html
         # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
@@ -57,13 +76,14 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(lgth)
         self.layout().addWidget(stsh)
         self.layout().addWidget(self.table)
+        self.layout().addWidget(mag)
 
-    def _get_selected_points(self) -> np.array:
+    def _get_selected_points(self, layer_name="Points") -> np.array:
         """Returns array of selected points in the viewer"""
 
         # Filtering selected points
         points_layers = [
-            layer for layer in self.viewer.layers if layer.name == "Points"
+            layer for layer in self.viewer.layers if layer.name == layer_name
         ]
         selected_points = np.array(
             [points_layers[0].data[i] for i in points_layers[0].selected_data]
@@ -181,3 +201,135 @@ class ParticleTracksWidget(QWidget):
             QTableWidgetItem(self.cb.currentText()),
         )
         self.cb.setCurrentIndex(0)
+
+    def _on_click_magnification(self) -> None:
+        """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
+
+        dlg = MagnificationDialog(self)
+        dlg.show()
+
+
+class MagnificationDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.parent = parent
+
+        self.setWindowTitle("Magnification")
+
+        # drop-down lists of fiducials
+        self.cbf1 = QComboBox()
+        self.cbf2 = QComboBox()
+        self.cbf1.addItems(FIDUCIAL_FRONT.keys())
+        self.cbf2.addItems(FIDUCIAL_FRONT.keys())
+        self.cbb1 = QComboBox()
+        self.cbb2 = QComboBox()
+        self.cbb1.addItems(FIDUCIAL_BACK.keys())
+        self.cbb2.addItems(FIDUCIAL_BACK.keys())
+
+        self.cbf1.currentIndexChanged.connect(self._on_click_fiducial)
+        self.cbf2.currentIndexChanged.connect(self._on_click_fiducial)
+        self.cbb1.currentIndexChanged.connect(self._on_click_fiducial)
+        self.cbb2.currentIndexChanged.connect(self._on_click_fiducial)
+
+        # text boxes
+        self.txf1 = QLabel(self)
+        self.txf2 = QLabel(self)
+        self.txb1 = QLabel(self)
+        self.txb2 = QLabel(self)
+
+        self.txboxes = [self.txf1, self.txf2, self.txb1, self.txb2]
+        for txt in self.txboxes:
+            txt.setMinimumWidth(200)
+
+        # add coords buttons
+        self.cof1 = QPushButton("Add")
+        self.cof2 = QPushButton("Add")
+        self.cob1 = QPushButton("Add")
+        self.cob2 = QPushButton("Add")
+        self.cof1.clicked.connect(self._on_click_add_coords_f1)
+        self.cof2.clicked.connect(self._on_click_add_coords_f2)
+        self.cob1.clicked.connect(self._on_click_add_coords_b1)
+        self.cob2.clicked.connect(self._on_click_add_coords_b2)
+
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        # layout
+        self.setLayout(QGridLayout())
+        self.layout().addWidget(
+            QLabel("Select front fiducial marks"), 0, 0, 1, 3
+        )
+        self.layout().addWidget(self.cbf1, 1, 0)
+        self.layout().addWidget(self.txf1, 1, 1)
+        self.layout().addWidget(self.cof1, 1, 2)
+        self.layout().addWidget(self.cbf2, 2, 0)
+        self.layout().addWidget(self.txf2, 2, 1)
+        self.layout().addWidget(self.cof2, 2, 2)
+        self.layout().addWidget(
+            QLabel("Select back fiducial marks"), 3, 0, 1, 3
+        )
+        self.layout().addWidget(self.cbb1, 4, 0)
+        self.layout().addWidget(self.txb1, 4, 1)
+        self.layout().addWidget(self.cob1, 4, 2)
+        self.layout().addWidget(self.cbb2, 5, 0)
+        self.layout().addWidget(self.txb2, 5, 1)
+        self.layout().addWidget(self.cob2, 5, 2)
+        self.layout().addWidget(self.buttonBox, 6, 0, 1, 3)
+
+        self.parent.viewer.add_points(name="Points_Calibration")
+
+    def _on_click_fiducial(self) -> None:
+        """When fiducial is selected, we locate ourselves in the Points_calibration layer and select option 'Add point'"""
+
+        # Would be cool if we could wait for a click here and add that as the selected fiducial, but no clue how to do that yet
+        # layers  = [
+        #     layer for layer in self.parent.viewer.layers if layer.name == "Points_Calibration"
+        # ]
+        # layer = layers[0]
+        # @layer.mouse_drag_callbacks.append
+        # def callback(layer, event):  # (0,0) is the center of the upper left pixel
+        #     print(self.parent.viewer.cursor.position)
+
+        print("Add fiducial point")
+
+    def _on_click_add_coords_f1(self) -> None:
+        """Add first front fiducial"""
+        return self._on_click_add_coords(0)
+
+    def _on_click_add_coords_f2(self) -> None:
+        """Add first front fiducial"""
+        return self._on_click_add_coords(1)
+
+    def _on_click_add_coords_b1(self) -> None:
+        """Add first front fiducial"""
+        return self._on_click_add_coords(2)
+
+    def _on_click_add_coords_b2(self) -> None:
+        """Add first front fiducial"""
+        return self._on_click_add_coords(3)
+
+    def _on_click_add_coords(self, fiducial: int) -> None:
+        """When 'Add' is selected, the selected point is added to the corresponding fiducial text box"""
+        textbox = self.txboxes[fiducial]
+
+        selected_points = self.parent._get_selected_points(
+            "Points_Calibration"
+        )
+
+        # Forcing only 1 points
+        if len(selected_points) != 1:
+            print("Select (only) one point to add fiducial.")
+            return
+
+        textbox.setText(str(selected_points[0]))
+
+    def accept(self) -> None:
+        """On accept propagate the calibration information to the main window and remove the points_Calibration layer"""
+        return super().accept()
+
+    def reject(self) -> None:
+        """On reject remove the points_Calibration layer"""
+        return super().reject()
