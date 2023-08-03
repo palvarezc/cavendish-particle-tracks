@@ -9,6 +9,7 @@ Replace code below according to your needs.
 
 import napari
 import numpy as np
+from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
     QComboBox,
     QDialog,
@@ -207,6 +208,8 @@ class ParticleTracksWidget(QWidget):
 
         dlg = MagnificationDialog(self)
         dlg.show()
+        point = QPoint(self.pos().x() + self.width(), self.pos().y())
+        dlg.move(point)
 
 
 class MagnificationDialog(QDialog):
@@ -279,7 +282,9 @@ class MagnificationDialog(QDialog):
         self.layout().addWidget(self.cob2, 5, 2)
         self.layout().addWidget(self.buttonBox, 6, 0, 1, 3)
 
-        self.parent.viewer.add_points(name="Points_Calibration")
+        self.cal_layer = self.parent.viewer.add_points(
+            name="Points_Calibration"
+        )
 
     def _on_click_fiducial(self) -> None:
         """When fiducial is selected, we locate ourselves in the Points_calibration layer and select option 'Add point'"""
@@ -328,8 +333,14 @@ class MagnificationDialog(QDialog):
 
     def accept(self) -> None:
         """On accept propagate the calibration information to the main window and remove the points_Calibration layer"""
+
+        # This is a problem, the layer still exists... not sure how to remove it
+        self.parent.viewer.layers.remove(self.cal_layer)
         return super().accept()
 
     def reject(self) -> None:
         """On reject remove the points_Calibration layer"""
+
+        # This is a problem, the layer still exists... not sure how to remove it
+        self.parent.viewer.layers.remove(self.cal_layer)
         return super().reject()
