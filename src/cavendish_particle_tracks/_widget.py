@@ -77,7 +77,9 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(mag)
 
         # Data analysis
-        self.data: List[NewParticle]
+        # pre-commit told me to do this and it broke the tests!
+        # self.data: List[NewParticle]
+        self.data = []
         # might not need this eventually
         self.mag_a = 1.0
         self.mag_b = 0.0
