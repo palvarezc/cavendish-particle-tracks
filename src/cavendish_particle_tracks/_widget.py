@@ -221,19 +221,10 @@ class MagnificationDialog(QDialog):
         self.b2 = Fiducial()
 
         # drop-down lists of fiducials
-        self.cbf1 = QComboBox()
-        self.cbf2 = QComboBox()
-        self.cbf1.addItems(FIDUCIAL_FRONT.keys())
-        self.cbf2.addItems(FIDUCIAL_FRONT.keys())
-        self.cbb1 = QComboBox()
-        self.cbb2 = QComboBox()
-        self.cbb1.addItems(FIDUCIAL_BACK.keys())
-        self.cbb2.addItems(FIDUCIAL_BACK.keys())
-
-        self.cbf1.currentIndexChanged.connect(self._on_click_fiducial)
-        self.cbf2.currentIndexChanged.connect(self._on_click_fiducial)
-        self.cbb1.currentIndexChanged.connect(self._on_click_fiducial)
-        self.cbb2.currentIndexChanged.connect(self._on_click_fiducial)
+        self.cbf1 = self._setup_dropdown_fiducials_combobox()
+        self.cbf2 = self._setup_dropdown_fiducials_combobox()
+        self.cbb1 = self._setup_dropdown_fiducials_combobox(back=True)
+        self.cbb2 = self._setup_dropdown_fiducials_combobox(back=True)
 
         # text boxes
         self.txf1 = QLabel(self)
@@ -271,21 +262,17 @@ class MagnificationDialog(QDialog):
         self.layout().addWidget(
             QLabel("Select front fiducial marks"), 0, 0, 1, 3
         )
-        self.layout().addWidget(self.cbf1, 1, 0)
-        self.layout().addWidget(self.txf1, 1, 1)
-        self.layout().addWidget(self.cof1, 1, 2)
-        self.layout().addWidget(self.cbf2, 2, 0)
-        self.layout().addWidget(self.txf2, 2, 1)
-        self.layout().addWidget(self.cof2, 2, 2)
+        for i, widget in enumerate(
+            [self.cbf1, self.txf1, self.cof1, self.cbf2, self.txf2, self.cof2]
+        ):
+            self.layout().addWidget(widget, i // 3 + 1, i % 3)
         self.layout().addWidget(
             QLabel("Select back fiducial marks"), 3, 0, 1, 3
         )
-        self.layout().addWidget(self.cbb1, 4, 0)
-        self.layout().addWidget(self.txb1, 4, 1)
-        self.layout().addWidget(self.cob1, 4, 2)
-        self.layout().addWidget(self.cbb2, 5, 0)
-        self.layout().addWidget(self.txb2, 5, 1)
-        self.layout().addWidget(self.cob2, 5, 2)
+        for i, widget in enumerate(
+            [self.cbb1, self.txb1, self.cob1, self.cbb2, self.txb2, self.cob2]
+        ):
+            self.layout().addWidget(widget, i // 3 + 4, i % 3)
 
         self.layout().addWidget(self.bmag, 6, 0, 1, 3)
 
@@ -299,6 +286,16 @@ class MagnificationDialog(QDialog):
         self.cal_layer = self.parent.viewer.add_points(
             name="Points_Calibration"
         )
+
+    def _setup_dropdown_fiducials_combobox(self, back=False):
+        """Sets up a drop-down list of fiducials for the `back` or front (`back=False`)."""
+        combobox = QComboBox()
+        if back:
+            combobox.addItems(FIDUCIAL_BACK.keys())
+        else:
+            combobox.addItems(FIDUCIAL_FRONT.keys())
+        combobox.currentIndexChanged.connect(self._on_click_fiducial)
+        return combobox
 
     def _on_click_fiducial(self) -> None:
         """When fiducial is selected, we locate ourselves in the Points_calibration layer and select option 'Add point'"""
@@ -354,9 +351,12 @@ class MagnificationDialog(QDialog):
     def _on_click_magnification(self) -> None:
         """When 'Calculate magnification' button is clicked, calculate magnification and populate table"""
 
-        # # Need something like this (but that would work) at some point
-        # if not (self.f1 and self.f2 and self.b1 and sefl.b2):
-        #     print("Select fiducials to calcuate the magnification")
+        # Need something like this but a bit better
+        if not (
+            self.f1.name and self.f2.name and self.b1.name and self.b2.name
+        ):
+            print("Select fiducials to calcuate the magnification")
+            return
 
         a, b = magnification(self.f1, self.f2, self.b1, self.b2)
 

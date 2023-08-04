@@ -11,6 +11,15 @@ class Fiducial:
         self.x = x
         self.y = y
 
+    @property
+    def xy(self):
+        return np.array([self.x, self.y])
+
+    @xy.setter
+    def xy(self, point):
+        self.x = point[0]
+        self.y = point[1]
+
 
 CHAMBER_DEPTH = 31.6
 
@@ -58,20 +67,13 @@ def length(a: Point, b: Point) -> float:
 def magnification(f1: Fiducial, f2: Fiducial, b1: Fiducial, b2: Fiducial):
     # (Delta t)/(Delta p) = a + b*z
     tf1 = np.array(FIDUCIAL_FRONT[f1.name])
-    pf1 = np.array([f1.x, f1.y])
-
     tf2 = np.array(FIDUCIAL_FRONT[f2.name])
-    pf2 = np.array([f2.x, f2.y])
-
     tb1 = np.array(FIDUCIAL_BACK[b1.name])
-    pb1 = np.array([b1.x, b1.y])
-
     tb2 = np.array(FIDUCIAL_BACK[b2.name])
-    pb2 = np.array([b2.x, b2.y])
 
-    a = np.linalg.norm(tf1 - tf2) / np.linalg.norm(pf1 - pf2)
+    a = np.linalg.norm(tf1 - tf2) / np.linalg.norm(f1.xy - f2.xy)
     b = (
-        np.linalg.norm(tb1 - tb2) / np.linalg.norm(pb1 - pb2) - a
+        np.linalg.norm(tb1 - tb2) / np.linalg.norm(b1.xy - b2.xy) - a
     ) / CHAMBER_DEPTH
 
     return a, b

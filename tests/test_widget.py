@@ -63,7 +63,7 @@ def test_calculate_length_ui(make_napari_viewer, capsys):
     my_widget._on_click_new_particle()
 
     # add three points to the points layer and select them
-    viewer.add_points([(0, 1), (1, 0)])
+    viewer.add_points([(0, 1), (0, 0)])
     for layer in viewer.layers:
         if layer.name == "Points":
             layer.selected_data = {0, 1}
@@ -71,10 +71,5 @@ def test_calculate_length_ui(make_napari_viewer, capsys):
     # click the calculate radius button
     my_widget._on_click_length()
 
-    # read captured output and check that it's as we expected
-    captured = capsys.readouterr()
-    expected_lines = ["calculating decay length!"]
-    for expected in expected_lines:
-        assert expected in captured.out
-
     assert my_widget.table.item(0, 5)
+    assert my_widget.table.item(0, 5).text() == "1.0"
