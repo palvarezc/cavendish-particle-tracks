@@ -12,21 +12,21 @@ class Fiducial:
         self.y = y
 
 
-BCdepth = 31.6
+CHAMBER_DEPTH = 31.6
 
 FIDUCIAL_FRONT = {
-    "C’": [0.0, 0.0, 0.0],
-    "F’": [14.97, -8.67, 0.0],
-    "B’": [15.00, 8.66, 0.0],
-    "D’": [29.91, -0.07, 0.0],
+    "C’": [0.0, 0.0],
+    "F’": [14.97, -8.67],
+    "B’": [15.00, 8.66],
+    "D’": [29.91, -0.07],
 }  # cm
 FIDUCIAL_BACK = {
-    "C": [-0.02, 0.01, 31.6],
-    "F": [14.95, -8.63, 31.6],
-    "B": [14.92, 8.67, 31.6],
-    "D": [29.90, 0.02, 31.6],
-    "E": [-14.96, -8.62, 31.6],
-    "A": [-15.00, 8.68, 31.6],
+    "C": [-0.02, 0.01],
+    "F": [14.95, -8.63],
+    "B": [14.92, 8.67],
+    "D": [29.90, 0.02],
+    "E": [-14.96, -8.62],
+    "A": [-15.00, 8.68],
 }  # cm
 
 
@@ -55,7 +55,23 @@ def length(a: Point, b: Point) -> float:
     return np.linalg.norm(pa - pb)
 
 
-def magnification(f1, f2, b1, b2):
-    a = 1.0
-    b = 1.0
+def magnification(f1: Fiducial, f2: Fiducial, b1: Fiducial, b2: Fiducial):
+    # (Delta t)/(Delta p) = a + b*z
+    tf1 = np.array(FIDUCIAL_FRONT[f1.name])
+    pf1 = np.array([f1.x, f1.y])
+
+    tf2 = np.array(FIDUCIAL_FRONT[f2.name])
+    pf2 = np.array([f2.x, f2.y])
+
+    tb1 = np.array(FIDUCIAL_BACK[b1.name])
+    pb1 = np.array([b1.x, b1.y])
+
+    tb2 = np.array(FIDUCIAL_BACK[b2.name])
+    pb2 = np.array([b2.x, b2.y])
+
+    a = np.linalg.norm(tf1 - tf2) / np.linalg.norm(pf1 - pf2)
+    b = (
+        np.linalg.norm(tb1 - tb2) / np.linalg.norm(pb1 - pb2) - a
+    ) / CHAMBER_DEPTH
+
     return a, b
