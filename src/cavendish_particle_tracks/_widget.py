@@ -25,16 +25,18 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from cavendish_particle_tracks._calculate import (
+from cavendish_particle_tracks._analysis import (
+    EXPECTED_PARTICLES,
     FIDUCIAL_BACK,
     FIDUCIAL_FRONT,
+    NewParticle,
+)
+from cavendish_particle_tracks._calculate import (
     Fiducial,
     length,
     magnification,
     radius,
 )
-
-EXPECTED_PARTICLES = ["New particle", "Σ+", "Σ-", "Λ0"]
 
 
 class ParticleTracksWidget(QWidget):
@@ -56,7 +58,7 @@ class ParticleTracksWidget(QWidget):
         mag = QPushButton("Calculate magnification")
 
         # connect callbacks
-        cal.clicked.connect(self._on_click_calculate)
+        cal.clicked.connect(self._on_click_radius)
         lgth.clicked.connect(self._on_click_length)
         stsh.clicked.connect(self._on_click_stereoshift)
         mag.clicked.connect(self._on_click_magnification)
@@ -74,7 +76,9 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.table)
         self.layout().addWidget(mag)
 
-        # Magnification parameters
+        # Data analysis
+        self.data: List[NewParticle]
+        # might not need this eventually
         self.mag_a = 1.0
         self.mag_b = 0.0
 
@@ -114,7 +118,7 @@ class ParticleTracksWidget(QWidget):
         print("clicked!")
         # layer.world_to_data(viewer.cursor.position)
 
-    def _on_click_calculate(self) -> None:
+    def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
         for the currently selected points and assign it to the currently selected table row.
         """
@@ -142,6 +146,8 @@ class ParticleTracksWidget(QWidget):
                 selected_rows[0].row(), i + 1, QTableWidgetItem(str(point))
             )
 
+        self.data[selected_rows[0].row()].rpoints = selected_points
+
         print("calculating radius!")
 
         # Calculate radius
@@ -150,6 +156,11 @@ class ParticleTracksWidget(QWidget):
         self.table.setItem(
             selected_rows[0].row(), 4, QTableWidgetItem(str(rad))
         )
+
+        self.data[selected_rows[0].row()].radius = rad
+
+        print("Modified particle ", selected_rows[0].row())
+        print(self.data[selected_rows[0].row()])
 
     def _on_click_length(self) -> None:
         """When the 'Calculate length' button is clicked, calculate the decay length
@@ -172,10 +183,16 @@ class ParticleTracksWidget(QWidget):
 
         print("calculating decay length!")
         declen = length(*selected_points)
+        self.data[selected_rows[0].row()].dpoints = selected_points
 
         self.table.setItem(
             selected_rows[0].row(), 5, QTableWidgetItem(str(declen))
         )
+
+        self.data[selected_rows[0].row()].decay_length = declen
+
+        print("Modified particle ", selected_rows[0].row())
+        print(self.data[selected_rows[0].row()])
 
     def _on_click_stereoshift(self) -> None:
         """When the 'Calculate stereoshift' button is clicked, calculate the stereoshift
@@ -187,8 +204,6 @@ class ParticleTracksWidget(QWidget):
         """When the 'New particle' button is clicked, append a new blank row to
         the table and select the first cell ready to recieve the first point.
         """
-        print("napari has", len(self.viewer.layers), "layers")
-
         if self.cb.currentIndex() < 1:
             return
 
@@ -200,6 +215,12 @@ class ParticleTracksWidget(QWidget):
             0,
             QTableWidgetItem(self.cb.currentText()),
         )
+
+        # add new particle to data
+        np = NewParticle()
+        np.Type = self.cb.currentText()
+        self.data += [np]
+        print(self.data[-1])
         self.cb.setCurrentIndex(0)
 
     def _on_click_magnification(self) -> None:
@@ -209,6 +230,13 @@ class ParticleTracksWidget(QWidget):
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         dlg.move(point)
+
+    def _apply_magnification(self, a: float, b: float) -> None:
+        self.mag_a = a
+        self.mag_b = b
+        for particle in self.data:
+            particle.mag_a = a
+            particle.mag_b = b
 
 
 class MagnificationDialog(QDialog):
@@ -371,8 +399,7 @@ class MagnificationDialog(QDialog):
         """On accept propagate the calibration information to the main window and remove the points_Calibration layer"""
 
         print("Propagating magnification to table.")
-        self.parent.mag_a = self.a
-        self.parent.mag_b = self.b
+        self.parent._apply_magnification(self.a, self.b)
         # This is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.remove(self.cal_layer)
         return super().accept()

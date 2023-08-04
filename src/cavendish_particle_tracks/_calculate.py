@@ -2,6 +2,12 @@ from typing import Tuple
 
 import numpy as np
 
+from cavendish_particle_tracks._analysis import (
+    CHAMBER_DEPTH,
+    FIDUCIAL_BACK,
+    FIDUCIAL_FRONT,
+)
+
 Point = Tuple[float, float]
 
 
@@ -19,24 +25,6 @@ class Fiducial:
     def xy(self, point):
         self.x = point[0]
         self.y = point[1]
-
-
-CHAMBER_DEPTH = 31.6
-
-FIDUCIAL_FRONT = {
-    "C'": [0.0, 0.0],
-    "F'": [14.97, -8.67],
-    "B'": [15.00, 8.66],
-    "D'": [29.91, -0.07],
-}  # cm
-FIDUCIAL_BACK = {
-    "C": [-0.02, 0.01],
-    "F": [14.95, -8.63],
-    "B": [14.92, 8.67],
-    "D": [29.90, 0.02],
-    "E": [-14.96, -8.62],
-    "A": [-15.00, 8.68],
-}  # cm
 
 
 def radius(a: Point, b: Point, c: Point) -> float:
