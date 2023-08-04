@@ -74,6 +74,10 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.table)
         self.layout().addWidget(mag)
 
+        # Magnification parameters
+        self.mag_a = 1.0
+        self.mag_b = 0.0
+
     def _get_selected_points(self, layer_name="Points") -> np.array:
         """Returns array of selected points in the viewer"""
 
@@ -358,14 +362,17 @@ class MagnificationDialog(QDialog):
             print("Select fiducials to calcuate the magnification")
             return
 
-        a, b = magnification(self.f1, self.f2, self.b1, self.b2)
+        self.a, self.b = magnification(self.f1, self.f2, self.b1, self.b2)
 
-        self.table.setItem(0, 0, QTableWidgetItem(str(a)))
-        self.table.setItem(0, 1, QTableWidgetItem(str(b)))
+        self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
+        self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
 
     def accept(self) -> None:
         """On accept propagate the calibration information to the main window and remove the points_Calibration layer"""
 
+        print("Propagating magnification to table.")
+        self.parent.mag_a = self.a
+        self.parent.mag_b = self.b
         # This is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.remove(self.cal_layer)
         return super().accept()
