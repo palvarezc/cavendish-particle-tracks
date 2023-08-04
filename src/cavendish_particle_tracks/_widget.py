@@ -225,6 +225,9 @@ class ParticleTracksWidget(QWidget):
         print(self.data[-1])
         self.cb.setCurrentIndex(0)
 
+        # # napari notifications
+        # napari.utils.notifications.show_info("I created a new particle")
+
     def _on_click_magnification(self) -> None:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
 
@@ -403,6 +406,7 @@ class MagnificationDialog(QDialog):
         print("Propagating magnification to table.")
         self.parent._apply_magnification(self.a, self.b)
         # This is a problem, the layer still exists... not sure how to remove it
+        self.parent.viewer.layers.select_previous()
         self.parent.viewer.layers.remove(self.cal_layer)
         return super().accept()
 
@@ -410,5 +414,6 @@ class MagnificationDialog(QDialog):
         """On reject remove the points_Calibration layer"""
 
         # This is a problem, the layer still exists... not sure how to remove it
+        self.parent.viewer.layers.select_previous()
         self.parent.viewer.layers.remove(self.cal_layer)
         return super().reject()
