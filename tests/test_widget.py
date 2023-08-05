@@ -37,10 +37,6 @@ def test_calculate_radius_ui(make_napari_viewer, capsys):
     assert my_widget.data[0].radius == 1.0
 
 
-def test_selected_cells_workflow():
-    assert True
-
-
 def test_add_new_particle_ui(make_napari_viewer, capsys):
     viewer = make_napari_viewer()
     widget = ParticleTracksWidget(viewer)
