@@ -405,7 +405,7 @@ class MagnificationDialog(QDialog):
 
         print("Propagating magnification to table.")
         self.parent._apply_magnification(self.a, self.b)
-        # This is a problem, the layer still exists... not sure how to remove it
+        # TODO: this is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.select_previous()
         self.parent.viewer.layers.remove(self.cal_layer)
         return super().accept()
