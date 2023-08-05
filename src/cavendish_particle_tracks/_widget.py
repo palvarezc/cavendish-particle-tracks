@@ -220,7 +220,7 @@ class ParticleTracksWidget(QWidget):
 
         # add new particle to data
         np = NewParticle()
-        np.Type = self.cb.currentText()
+        np.name = self.cb.currentText()
         self.data += [np]
         print(self.data[-1])
         self.cb.setCurrentIndex(0)

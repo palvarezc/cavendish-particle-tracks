@@ -60,7 +60,7 @@ class Fiducial:
 # Idea is to save a list of NewParticles as we go along, and then pandas.DataFrame(list_of_new_particles) does all the magic
 @dataclass
 class NewParticle:
-    Type: str = ""
+    name: str = ""
     r1: list[float] = field(default_factory=list)
     r2: list[float] = field(default_factory=list)
     r3: list[float] = field(default_factory=list)
@@ -83,15 +83,13 @@ class NewParticle:
 
     @rpoints.setter
     def rpoints(self, points):
-        self.r1 = points[0]
-        self.r2 = points[1]
-        self.r3 = points[2]
-
+        self.r1, self.r2, self.r3 = points
+        
     @property
     def dpoints(self):
         return np.array([self.d1, self.d2])
 
     @dpoints.setter
     def dpoints(self, points):
-        self.d1 = points[0]
-        self.d2 = points[1]
+        self.d1, self.d2 = points
+        
