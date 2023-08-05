@@ -243,8 +243,9 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_apply_magnification(self) -> None:
         """Changes the visualisation of the table to show calibrated values for radius and decay_length"""
-        self._apply_magnification()
-        self._set_table_visible_vars(True)
+        if self.cal.isChecked():
+            self._apply_magnification()
+        self._set_table_visible_vars(self.cal.isChecked())
 
     def _apply_magnification(self) -> None:
         """Calculates magnification and calibrated radius and length for each particle in data"""
