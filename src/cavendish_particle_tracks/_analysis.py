@@ -21,25 +21,6 @@ FIDUCIAL_BACK = {
 
 EXPECTED_PARTICLES = ["New particle", "Σ+", "Σ-", "Λ0"]
 
-DATA_STRUCTURE = {
-    "Type": "",
-    "r1": [-1.0e6, -1.0e6],
-    "r2": [-1.0e6, -1.0e6],
-    "r3": [-1.0e6, -1.0e6],
-    "radius": 0.0,
-    "d1": [-1.0e6, -1.0e6],
-    "d2": [-1.0e6, -1.0e6],
-    "decay length": 0.0,
-    "sf1": [-1.0e6, -1.0e6],
-    "sf2": [-1.0e6, -1.0e6],
-    "sp1": [-1.0e6, -1.0e6],
-    "sp2": [-1.0e6, -1.0e6],
-    "stereoshift": -1.0,
-    "mag_a": -1.0,
-    "mag_b": -1.0,
-    "evtNumber": -1,
-}
-
 
 @dataclass
 class Fiducial:
@@ -60,7 +41,7 @@ class Fiducial:
 # Idea is to save a list of NewParticles as we go along, and then pandas.DataFrame(list_of_new_particles) does all the magic
 @dataclass
 class NewParticle:
-    name: str = ""
+    Name: str = ""
     r1: list[float] = field(default_factory=list)
     r2: list[float] = field(default_factory=list)
     r3: list[float] = field(default_factory=list)
@@ -84,7 +65,7 @@ class NewParticle:
     @rpoints.setter
     def rpoints(self, points):
         self.r1, self.r2, self.r3 = points
-        
+
     @property
     def dpoints(self):
         return np.array([self.d1, self.d2])
@@ -92,4 +73,3 @@ class NewParticle:
     @dpoints.setter
     def dpoints(self, points):
         self.d1, self.d2 = points
-        
