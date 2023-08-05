@@ -21,7 +21,7 @@ def test_calculate_radius_ui(make_napari_viewer, capsys):
             layer.selected_data = {0, 1, 2}
 
     # click the calculate radius button
-    my_widget._on_click_calculate()
+    my_widget._on_click_radius()
 
     # read captured output and check that it's as we expected
     captured = capsys.readouterr()
@@ -33,6 +33,8 @@ def test_calculate_radius_ui(make_napari_viewer, capsys):
     assert my_widget.table.item(0, 2)
     assert my_widget.table.item(0, 3)
     assert my_widget.table.item(0, 4)
+
+    assert my_widget.data[0].radius == 1.0
 
 
 def test_selected_cells_workflow():
@@ -48,6 +50,7 @@ def test_add_new_particle_ui(make_napari_viewer, capsys):
     widget._on_click_new_particle()
 
     assert widget.table.rowCount() == 1
+    assert len(widget.data) == 1
 
 
 def test_calculate_length_ui(make_napari_viewer, capsys):
@@ -73,3 +76,4 @@ def test_calculate_length_ui(make_napari_viewer, capsys):
 
     assert my_widget.table.item(0, 5)
     assert my_widget.table.item(0, 5).text() == "1.0"
+    assert my_widget.data[0].decay_length == 1.0
