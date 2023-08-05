@@ -79,7 +79,7 @@ class ParticleTracksWidget(QWidget):
         # Data analysis
         # pre-commit told me to do this and it broke the tests!
         # self.data: List[NewParticle]
-        self.data = []
+        self.data: List[NewParticle] = []
         # might not need this eventually
         self.mag_a = 1.0
         self.mag_b = 0.0
