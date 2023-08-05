@@ -13,6 +13,7 @@ import napari
 import numpy as np
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
+    QAbstractItemView,
     QComboBox,
     QPushButton,
     QTableWidget,
@@ -107,6 +108,8 @@ class ParticleTracksWidget(QWidget):
             # ["Type", "1", "2", "3", "radius", "decay length"]
             columns
         )
+        out.setSelectionBehavior(QAbstractItemView.SelectRows)
+        out.setSelectionMode(QAbstractItemView.SingleSelection)
         return out
 
     def _on_click_radius(self) -> None:
@@ -120,17 +123,10 @@ class ParticleTracksWidget(QWidget):
         if len(selected_points) != 3:
             print("Select (only) three points to calculate the decay radius.")
             return
-
-        selected_rows = self._get_selected_row()
-
-        if len(selected_rows) != 1:
-            print(
-                "Select (only) one particle from the table to calculate the radius."
-            )
-
         print("Adding points to the table: ", selected_points)
 
-        # Assigns the points and radius to the (first) selected row
+        # Assigns the points and radius to the selected row
+        selected_rows = self._get_selected_row()
         for i in range(3):
             point = selected_points[i]
             self.table.setItem(
@@ -140,8 +136,6 @@ class ParticleTracksWidget(QWidget):
         self.data[selected_rows[0].row()].rpoints = selected_points
 
         print("calculating radius!")
-
-        # Calculate radius
         rad = radius(*selected_points)
 
         self.table.setItem(
