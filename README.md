@@ -1,7 +1,7 @@
 # cavendish-particle-tracks
 
 [![License MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/samcunliffe/cavendish-particle-tracks/raw/main/LICENSE)
-[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10-blue)](https://python.org)
+[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)](https://python.org)
 [![ci](https://github.com/samcunliffe/cavendish-particle-tracks/workflows/ci/badge.svg)](https://github.com/samcunliffe/cavendish-particle-tracks/actions)
 [![codecov](https://codecov.io/gh/samcunliffe/cavendish-particle-tracks/branch/main/graph/badge.svg?token=9R8IVMJT90)](https://codecov.io/gh/samcunliffe/cavendish-particle-tracks)
 [![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v0.json)](https://github.com/charliermarsh/ruff)
@@ -42,7 +42,7 @@ Presumably also with the testing dependencies:
     python -m pip install -e ".[testing]"
 
 
-Tests are run with [tox] across python 3.8, 3.9, and 3.10.
+Tests are run with [tox] across python 3.8, 3.9, 3.10 and 3.11.
 You can also check quickly with `pytest` if you installed the `testing` extras.
 Please ensure the coverage at least stays the same before you submit a pull request.
 
