@@ -179,10 +179,11 @@ class MagnificationDialog(QDialog):
         """On accept propagate the calibration information to the main window and remove the points_Calibration layer"""
 
         print("Propagating magnification to table.")
-        self.parent._apply_magnification(self.a, self.b)
+        self.parent._propagate_magnification(self.a, self.b)
         # TODO: this is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.select_previous()
         self.parent.viewer.layers.remove(self.cal_layer)
+        self.parent.cal.setEnabled(True)
         # self.parent.mag.setEnabled(False)
         self.parent.mag.setText("Update magnification")
         return super().accept()

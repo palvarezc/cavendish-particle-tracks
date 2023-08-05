@@ -16,6 +16,7 @@ from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QPushButton,
+    QRadioButton,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -45,16 +46,25 @@ class ParticleTracksWidget(QWidget):
         self.cb.addItems(EXPECTED_PARTICLES)
         self.cb.setCurrentIndex(0)
         self.cb.currentIndexChanged.connect(self._on_click_new_particle)
-        cal = QPushButton("Calculate radius")
+        rad = QPushButton("Calculate radius")
         lgth = QPushButton("Calculate length")
         stsh = QPushButton("Calculate stereoshift")
-        self.table = self._set_up_table()
         self.mag = QPushButton("Calculate magnification")
 
+        # setup particle table
+        self.table = self._set_up_table()
+        self._set_table_visible_vars(False)
+
+        # Apply magnification disabled until the magnification parameters are computed
+        self.cal = QRadioButton("Apply magnification")
+        self.cal.setEnabled(False)
+
         # connect callbacks
-        cal.clicked.connect(self._on_click_radius)
+        rad.clicked.connect(self._on_click_radius)
         lgth.clicked.connect(self._on_click_length)
         stsh.clicked.connect(self._on_click_stereoshift)
+        self.cal.toggled.connect(self._on_click_apply_magnification)
+
         self.mag.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
         # https://napari.org/stable/gallery/custom_mouse_functions.html
@@ -64,10 +74,11 @@ class ParticleTracksWidget(QWidget):
         # layout
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.cb)
-        self.layout().addWidget(cal)
+        self.layout().addWidget(rad)
         self.layout().addWidget(lgth)
         self.layout().addWidget(stsh)
         self.layout().addWidget(self.table)
+        self.layout().addWidget(self.cal)
         self.layout().addWidget(self.mag)
 
         # Data analysis
@@ -103,15 +114,28 @@ class ParticleTracksWidget(QWidget):
         point and the calculated radius.
         """
         np = NewParticle()
-        columns = np.__dict__.keys()
-        out = QTableWidget(0, len(columns))
-        out.setHorizontalHeaderLabels(
-            # ["Type", "1", "2", "3", "radius", "decay length"]
-            columns
-        )
+        self.columns = np.__dict__.keys()
+        self.columns_show_calibrated = np._vars_to_show(True)
+        self.columns_show_uncalibrated = np._vars_to_show(False)
+        out = QTableWidget(0, len(self.columns))
+        out.setHorizontalHeaderLabels(self.columns)
         out.setSelectionBehavior(QAbstractItemView.SelectRows)
         out.setSelectionMode(QAbstractItemView.SingleSelection)
         return out
+
+    def _set_table_visible_vars(self, calibrated) -> None:
+        for _ in range(len(self.columns)):
+            self.table.setColumnHidden(_, True)
+        show = (
+            self.columns_show_calibrated
+            if calibrated
+            else self.columns_show_uncalibrated
+        )
+        show_index = [
+            i for i, item in enumerate(self.columns) if item in set(show)
+        ]
+        for _ in show_index:
+            self.table.setColumnHidden(_, False)
 
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
@@ -209,9 +233,22 @@ class ParticleTracksWidget(QWidget):
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         dlg.move(point)
 
-    def _apply_magnification(self, a: float, b: float) -> None:
+    def _propagate_magnification(self, a: float, b: float) -> None:
+        """Assigns a and b to the class magnification parameters and to each of the particles in data"""
         self.mag_a = a
         self.mag_b = b
         for particle in self.data:
             particle.magnification_a = a
             particle.magnification_b = b
+
+    def _on_click_apply_magnification(self) -> None:
+        """Changes the visualisation of the table to show calibrated values for radius and decay_length"""
+        self._apply_magnification()
+        self._set_table_visible_vars(True)
+
+    def _apply_magnification(self) -> None:
+        """Calculates magnification and calibrated radius and length for each particle in data"""
+
+        print("Applying/Deapplying(?) magnification to the data")
+        # for particle in self.data:
+        #     particle.apply_magnification()

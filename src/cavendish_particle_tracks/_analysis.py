@@ -46,9 +46,11 @@ class NewParticle:
     r2: list[float] = field(default_factory=list)
     r3: list[float] = field(default_factory=list)
     radius: float = 0.0
+    radius_cm: float = 0.0
     d1: list[float] = field(default_factory=list)
     d2: list[float] = field(default_factory=list)
     decay_length: float = 0.0
+    decay_length_cm: float = 0.0
     sf1: list[float] = field(default_factory=list)
     sf2: list[float] = field(default_factory=list)
     sp1: list[float] = field(default_factory=list)
@@ -56,7 +58,26 @@ class NewParticle:
     stereoshift: float = -1.0
     magnification_a: float = -1.0
     magnification_b: float = -1.0
+    magnification: float = 1.0
     event_number: int = -1
+
+    def _vars_to_show(self, calibrated=False):
+        if calibrated:
+            return [
+                "Name",
+                "radius_cm",
+                "decay_length_cm",
+                "stereoshift",
+                "magnification",
+            ]
+        else:
+            return [
+                "Name",
+                "radius",
+                "decay_length",
+                "stereoshift",
+                "magnification",
+            ]
 
     @property
     def rpoints(self):
