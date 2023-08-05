@@ -6,25 +6,10 @@ from cavendish_particle_tracks._analysis import (
     CHAMBER_DEPTH,
     FIDUCIAL_BACK,
     FIDUCIAL_FRONT,
+    Fiducial,
 )
 
 Point = Tuple[float, float]
-
-
-class Fiducial:
-    def __init__(self, name="", x=-1.0e6, y=-1.0e6):
-        self.name = name
-        self.x = x
-        self.y = y
-
-    @property
-    def xy(self):
-        return np.array([self.x, self.y])
-
-    @xy.setter
-    def xy(self, point):
-        self.x = point[0]
-        self.y = point[1]
 
 
 def radius(a: Point, b: Point, c: Point) -> float:

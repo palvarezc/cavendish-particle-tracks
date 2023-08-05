@@ -29,10 +29,10 @@ from cavendish_particle_tracks._analysis import (
     EXPECTED_PARTICLES,
     FIDUCIAL_BACK,
     FIDUCIAL_FRONT,
+    Fiducial,
     NewParticle,
 )
 from cavendish_particle_tracks._calculate import (
-    Fiducial,
     length,
     magnification,
     radius,

@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-CHAMBER_DEPTH = 31.6
+CHAMBER_DEPTH = 31.6  # cm
 
 FIDUCIAL_FRONT = {
     "C'": [0.0, 0.0],
@@ -39,6 +39,22 @@ DATA_STRUCTURE = {
     "mag_b": -1.0,
     "evtNumber": -1,
 }
+
+
+@dataclass
+class Fiducial:
+    name: str = ""
+    x: float = -1.0e6
+    y: float = -1.0e6
+
+    @property
+    def xy(self):
+        return np.array([self.x, self.y])
+
+    @xy.setter
+    def xy(self, point):
+        self.x = point[0]
+        self.y = point[1]
 
 
 # Idea is to save a list of NewParticles as we go along, and then pandas.DataFrame(list_of_new_particles) does all the magic
