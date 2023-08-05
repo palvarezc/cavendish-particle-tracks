@@ -109,11 +109,6 @@ class ParticleTracksWidget(QWidget):
         )
         return out
 
-    def _on_mouse_press(self) -> None:
-        """When the mouse is clicked, record the cursor position."""
-        print("clicked!")
-        # layer.world_to_data(viewer.cursor.position)
-
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
         for the currently selected points and assign it to the currently selected table row.
