@@ -73,9 +73,9 @@ class NewParticle:
     sp1: list[float] = field(default_factory=list)
     sp2: list[float] = field(default_factory=list)
     stereoshift: float = -1.0
-    mag_a: float = -1.0
-    mag_b: float = -1.0
-    evtNumber: int = -1
+    magnification_a: float = -1.0
+    magnification_b: float = -1.0
+    event_number: int = -1
 
     @property
     def rpoints(self):
