@@ -51,11 +51,13 @@ class NewParticle:
     d2: list[float] = field(default_factory=list)
     decay_length: float = 0.0
     decay_length_cm: float = 0.0
+    stereoshift_fiducial: Fiducial = field(default_factory=Fiducial)
     sf1: list[float] = field(default_factory=list)
     sf2: list[float] = field(default_factory=list)
     sp1: list[float] = field(default_factory=list)
     sp2: list[float] = field(default_factory=list)
     stereoshift: float = -1.0
+    depth: float = 0.0
     magnification_a: float = -1.0
     magnification_b: float = -1.0
     magnification: float = 1.0
@@ -94,3 +96,11 @@ class NewParticle:
     @dpoints.setter
     def dpoints(self, points):
         self.d1, self.d2 = points
+
+    def calibrate(self) -> None:
+        self.radius_cm = (
+            self.magnification_a + self.magnification_b * self.depth
+        ) * self.radius
+        self.decay_length_cm = (
+            self.magnification_a + self.magnification_b * self.depth
+        ) * self.decay_length

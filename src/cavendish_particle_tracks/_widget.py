@@ -137,6 +137,15 @@ class ParticleTracksWidget(QWidget):
         for _ in show_index:
             self.table.setColumnHidden(_, False)
 
+    def _get_table_column_index(self, columntext: str) -> int:
+        """Given a column title, return the column index in the table"""
+        for i, item in enumerate(self.columns):
+            if item == columntext:
+                return i
+
+        print("Column ", columntext, " not in the table")
+        return -1
+
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
         for the currently selected points and assign it to the currently selected table row.
@@ -250,6 +259,5 @@ class ParticleTracksWidget(QWidget):
     def _apply_magnification(self) -> None:
         """Calculates magnification and calibrated radius and length for each particle in data"""
 
-        print("Applying/Deapplying(?) magnification to the data")
-        # for particle in self.data:
-        #     particle.apply_magnification()
+        for i in range(len(self.data)):
+            self.data[i].calibrate()
