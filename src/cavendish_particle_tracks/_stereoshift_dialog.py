@@ -9,13 +9,14 @@ from qtpy.QtWidgets import (
     QLabel,
     QPushButton,
     QTableWidget,
+    QTableWidgetItem,
 )
 
 from cavendish_particle_tracks._analysis import (
+    FIDUCIAL_BACK,
     Fiducial,
 )
-
-# from cavendish_particle_tracks._calculate import stereoshift
+from cavendish_particle_tracks._calculate import depth, length, stereoshift
 
 
 class StereoshiftDialog(QDialog):
@@ -26,14 +27,15 @@ class StereoshiftDialog(QDialog):
 
         self.setWindowTitle("Stereoshift")
 
-        self.f1 = Fiducial(name="Fiducial view1")
-        self.f2 = Fiducial(name="Fiducial view2")
-        self.b1 = Fiducial(name="Point view1")
-        self.b2 = Fiducial(name="Point view2")
+        self.f1 = Fiducial()
+        self.f2 = Fiducial()
+        self.b1 = Fiducial()
+        self.b2 = Fiducial()
 
         # drop-down lists of fiducials
         self.cbf1 = QComboBox()
-        self.cbf1.addItems(["Front", "Back"])
+        self.cbf1.addItems(FIDUCIAL_BACK)
+        self.cbf1.setCurrentIndex(-1)
         self.cbf1.currentIndexChanged.connect(self._on_click_fiducial)
 
         # text boxes
@@ -104,33 +106,34 @@ class StereoshiftDialog(QDialog):
         self.cal_layer = self._setup_stereoshift_layer()
 
     def _on_click_fiducial(self) -> None:
-        """When fiducial is selected, we locate ourselves in the Points_calibration layer and select option 'Add point'"""
+        """When fiducial is selected, update the name of the fiducial in the points text"""
 
-        # Would be cool if we could wait for a click here and add that as the selected fiducial, but no clue how to do that yet
-        # layers  = [
-        #     layer for layer in self.parent.viewer.layers if layer.name == "Points_Calibration"
-        # ]
-        # layer = layers[0]
-        # @layer.mouse_drag_callbacks.append
-        # def callback(layer, event):  # (0,0) is the center of the upper left pixel
-        #     print(self.parent.viewer.cursor.position)
-
-        print("Add fiducial point")
+        self.cal_layer.text.string.array[1] = (
+            self.cbf1.currentText() + " view1"
+        )
+        self.cal_layer.text.string.array[2] = (
+            self.cbf1.currentText() + " view2"
+        )
+        self.cal_layer.refresh()
 
     def _on_click_add_coords_f1(self) -> None:
         """Add fiducial view1"""
-        self.f1.x, self.f2.y = self._add_coords(0)
+        self.f1.name = self.cbf1.currentText()
+        self.f1.x, self.f1.y = self._add_coords(0)
 
     def _on_click_add_coords_f2(self) -> None:
         """Add fiducial view2"""
+        self.f2.name = self.cbf1.currentText()
         self.f2.x, self.f2.y = self._add_coords(1)
 
     def _on_click_add_coords_b1(self) -> None:
         """Add point view1"""
+        self.b1.name = "Point"
         self.b1.x, self.b1.y = self._add_coords(2)
 
     def _on_click_add_coords_b2(self) -> None:
         """Add point view2"""
+        self.b2.name = "Point"
         self.b2.x, self.b2.y = self._add_coords(3)
 
     def _add_coords(self, fiducial: int) -> List[float]:
@@ -162,10 +165,26 @@ class StereoshiftDialog(QDialog):
             )
             return
 
-        # self.table.setItem(0, 0, QTableWidgetItem(str(shift_f)))
-        # self.table.setItem(0, 1, QTableWidgetItem(str(shift_p)))
-        # self.table.setItem(0, 2, QTableWidgetItem(str(ratio)))
-        # self.table.setItem(0, 1, QTableWidgetItem(str(depth_p)))
+        self.table.setItem(
+            0, 0, QTableWidgetItem(str(length(self.f1.xy, self.f2.xy)))
+        )
+        self.table.setItem(
+            0, 1, QTableWidgetItem(str(length(self.b1.xy, self.b2.xy)))
+        )
+        self.table.setItem(
+            0,
+            2,
+            QTableWidgetItem(
+                str(
+                    stereoshift(self.f1.xy, self.f2.xy, self.b1.xy, self.b2.xy)
+                )
+            ),
+        )
+        self.table.setItem(
+            0,
+            3,
+            QTableWidgetItem(str(depth(self.f1, self.f2, self.b1, self.b2))),
+        )
 
     def _setup_stereoshift_layer(self):
         # add the points
@@ -174,11 +193,11 @@ class StereoshiftDialog(QDialog):
         )
 
         labels = [
-            "Reference",
-            self.f1.name,
-            self.f2.name,
-            self.b1.name,
-            self.b2.name,
+            "Reference (Front)",
+            "Back fiducial view1",
+            "Back fiducial view2",
+            "Point view1",
+            "Point view2",
         ]
         colors = ["green", "blue", "blue", "red", "red"]
 
