@@ -2,18 +2,9 @@ name: cavendish-particle-tracks
 display_name: Cavendish Particle Tracks Analysis Plugin
 contributions:
   commands:
-    - id: cavendish-particle-tracks.make_sample_data
-      python_name: cavendish_particle_tracks._sample_data:make_sample_data
-      title: Load sample data from Cavendish Particle Tracks Analysis Plugin
-
     - id: cavendish-particle-tracks.make_qwidget
       python_name: cavendish_particle_tracks._widget:ParticleTracksWidget
       title: Make example QWidget
-
-  sample_data:
-    - command: cavendish-particle-tracks.make_sample_data
-      display_name: Cavendish Particle Tracks Analysis Plugin
-      key: unique_id.1
 
   widgets:
     - command: cavendish-particle-tracks.make_qwidget

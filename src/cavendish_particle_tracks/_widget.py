@@ -13,6 +13,7 @@ import napari
 import numpy as np
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
+    QAbstractItemView,
     QComboBox,
     QPushButton,
     QTableWidget,
@@ -89,12 +90,13 @@ class ParticleTracksWidget(QWidget):
         return selected_points
 
     def _get_selected_row(self) -> np.array:
-        """Returns index of the (first) selected row in the table"""
+        """Returns the selected row in the table.
 
+        Note: due to our selection mode only one row selection is possible.
+        """
         select = self.table.selectionModel()
         rows = select.selectedRows()
-
-        return rows
+        return rows[0].row()
 
     def _set_up_table(self) -> QTableWidget:
         """Initial setup of the QTableWidget with one row and columns for each
@@ -107,12 +109,9 @@ class ParticleTracksWidget(QWidget):
             # ["Type", "1", "2", "3", "radius", "decay length"]
             columns
         )
+        out.setSelectionBehavior(QAbstractItemView.SelectRows)
+        out.setSelectionMode(QAbstractItemView.SingleSelection)
         return out
-
-    def _on_mouse_press(self) -> None:
-        """When the mouse is clicked, record the cursor position."""
-        print("clicked!")
-        # layer.world_to_data(viewer.cursor.position)
 
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
@@ -125,38 +124,27 @@ class ParticleTracksWidget(QWidget):
         if len(selected_points) != 3:
             print("Select (only) three points to calculate the decay radius.")
             return
-
-        selected_rows = self._get_selected_row()
-
-        if len(selected_rows) != 1:
-            print(
-                "Select (only) one particle from the table to calculate the radius."
-            )
-
         print("Adding points to the table: ", selected_points)
 
-        # Assigns the points and radius to the (first) selected row
+        # Assigns the points and radius to the selected row
+        selected_row = self._get_selected_row()
         for i in range(3):
             point = selected_points[i]
             self.table.setItem(
-                selected_rows[0].row(), i + 1, QTableWidgetItem(str(point))
+                selected_row, i + 1, QTableWidgetItem(str(point))
             )
 
-        self.data[selected_rows[0].row()].rpoints = selected_points
+        self.data[selected_row].rpoints = selected_points
 
         print("calculating radius!")
-
-        # Calculate radius
         rad = radius(*selected_points)
 
-        self.table.setItem(
-            selected_rows[0].row(), 4, QTableWidgetItem(str(rad))
-        )
+        self.table.setItem(selected_row, 4, QTableWidgetItem(str(rad)))
 
-        self.data[selected_rows[0].row()].radius = rad
+        self.data[selected_row].radius = rad
 
-        print("Modified particle ", selected_rows[0].row())
-        print(self.data[selected_rows[0].row()])
+        print("Modified particle ", selected_row)
+        print(self.data[selected_row])
 
     def _on_click_length(self) -> None:
         """When the 'Calculate length' button is clicked, calculate the decay length
@@ -170,25 +158,16 @@ class ParticleTracksWidget(QWidget):
             print("Select (only) two points to calculate the decay length.")
             return
 
-        selected_rows = self._get_selected_row()
-
-        if len(selected_rows) != 1:
-            print(
-                "Select (only) one particle from the table to calculate the decay length."
-            )
-
         print("calculating decay length!")
         declen = length(*selected_points)
-        self.data[selected_rows[0].row()].dpoints = selected_points
+        selected_row = self._get_selected_row()
+        self.data[selected_row].dpoints = selected_points
 
-        self.table.setItem(
-            selected_rows[0].row(), 5, QTableWidgetItem(str(declen))
-        )
+        self.table.setItem(selected_row, 5, QTableWidgetItem(str(declen)))
+        self.data[selected_row].decay_length = declen
 
-        self.data[selected_rows[0].row()].decay_length = declen
-
-        print("Modified particle ", selected_rows[0].row())
-        print(self.data[selected_rows[0].row()])
+        print("Modified particle ", selected_row)
+        print(self.data[selected_row])
 
     def _on_click_stereoshift(self) -> None:
         """When the 'Calculate stereoshift' button is clicked, calculate the stereoshift
