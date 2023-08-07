@@ -46,17 +46,39 @@ class NewParticle:
     r2: list[float] = field(default_factory=list)
     r3: list[float] = field(default_factory=list)
     radius: float = 0.0
+    radius_cm: float = 0.0
     d1: list[float] = field(default_factory=list)
     d2: list[float] = field(default_factory=list)
     decay_length: float = 0.0
+    decay_length_cm: float = 0.0
+    stereoshift_fiducial: Fiducial = field(default_factory=Fiducial)
     sf1: list[float] = field(default_factory=list)
     sf2: list[float] = field(default_factory=list)
     sp1: list[float] = field(default_factory=list)
     sp2: list[float] = field(default_factory=list)
     stereoshift: float = -1.0
+    depth: float = 0.0
     magnification_a: float = -1.0
-    magnification_b: float = -1.0
+    magnification_b: float = 0.0
+    # magnification: float = -1.0
     event_number: int = -1
+
+    def _vars_to_show(self, calibrated=False):
+        if calibrated:
+            return [
+                "Name",
+                "radius_cm",
+                "decay_length_cm",
+                "depth",
+                "magnification",
+            ]
+        else:
+            return [
+                "Name",
+                "radius",
+                "decay_length",
+                "depth",
+            ]
 
     @property
     def rpoints(self):
@@ -73,3 +95,11 @@ class NewParticle:
     @dpoints.setter
     def dpoints(self, points):
         self.d1, self.d2 = points
+
+    @property
+    def magnification(self):
+        return self.magnification_a + self.magnification_b * self.depth
+
+    def calibrate(self) -> None:
+        self.radius_cm = self.magnification * self.radius
+        self.decay_length_cm = self.magnification * self.decay_length

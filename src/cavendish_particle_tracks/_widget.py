@@ -16,6 +16,7 @@ from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QPushButton,
+    QRadioButton,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -45,16 +46,25 @@ class ParticleTracksWidget(QWidget):
         self.cb.addItems(EXPECTED_PARTICLES)
         self.cb.setCurrentIndex(0)
         self.cb.currentIndexChanged.connect(self._on_click_new_particle)
-        cal = QPushButton("Calculate radius")
+        rad = QPushButton("Calculate radius")
         lgth = QPushButton("Calculate length")
         stsh = QPushButton("Calculate stereoshift")
-        self.table = self._set_up_table()
         self.mag = QPushButton("Calculate magnification")
 
+        # setup particle table
+        self.table = self._set_up_table()
+        self._set_table_visible_vars(False)
+
+        # Apply magnification disabled until the magnification parameters are computed
+        self.cal = QRadioButton("Apply magnification")
+        self.cal.setEnabled(False)
+
         # connect callbacks
-        cal.clicked.connect(self._on_click_radius)
+        rad.clicked.connect(self._on_click_radius)
         lgth.clicked.connect(self._on_click_length)
         stsh.clicked.connect(self._on_click_stereoshift)
+        self.cal.toggled.connect(self._on_click_apply_magnification)
+
         self.mag.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
         # https://napari.org/stable/gallery/custom_mouse_functions.html
@@ -64,16 +74,17 @@ class ParticleTracksWidget(QWidget):
         # layout
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.cb)
-        self.layout().addWidget(cal)
+        self.layout().addWidget(rad)
         self.layout().addWidget(lgth)
         self.layout().addWidget(stsh)
         self.layout().addWidget(self.table)
+        self.layout().addWidget(self.cal)
         self.layout().addWidget(self.mag)
 
         # Data analysis
         self.data: List[NewParticle] = []
         # might not need this eventually
-        self.mag_a = 1.0
+        self.mag_a = -1.0
         self.mag_b = 0.0
 
     def _get_selected_points(self, layer_name="Points") -> np.array:
@@ -103,15 +114,38 @@ class ParticleTracksWidget(QWidget):
         point and the calculated radius.
         """
         np = NewParticle()
-        columns = np.__dict__.keys()
-        out = QTableWidget(0, len(columns))
-        out.setHorizontalHeaderLabels(
-            # ["Type", "1", "2", "3", "radius", "decay length"]
-            columns
-        )
+        self.columns = list(np.__dict__.keys())
+        self.columns += ["magnification"]
+        self.columns_show_calibrated = np._vars_to_show(True)
+        self.columns_show_uncalibrated = np._vars_to_show(False)
+        out = QTableWidget(0, len(self.columns))
+        out.setHorizontalHeaderLabels(self.columns)
         out.setSelectionBehavior(QAbstractItemView.SelectRows)
         out.setSelectionMode(QAbstractItemView.SingleSelection)
         return out
+
+    def _set_table_visible_vars(self, calibrated) -> None:
+        for _ in range(len(self.columns)):
+            self.table.setColumnHidden(_, True)
+        show = (
+            self.columns_show_calibrated
+            if calibrated
+            else self.columns_show_uncalibrated
+        )
+        show_index = [
+            i for i, item in enumerate(self.columns) if item in set(show)
+        ]
+        for _ in show_index:
+            self.table.setColumnHidden(_, False)
+
+    def _get_table_column_index(self, columntext: str) -> int:
+        """Given a column title, return the column index in the table"""
+        for i, item in enumerate(self.columns):
+            if item == columntext:
+                return i
+
+        print("Column ", columntext, " not in the table")
+        return -1
 
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
@@ -131,7 +165,9 @@ class ParticleTracksWidget(QWidget):
         for i in range(3):
             point = selected_points[i]
             self.table.setItem(
-                selected_row, i + 1, QTableWidgetItem(str(point))
+                selected_row,
+                self._get_table_column_index("r" + str(i + 1)),
+                QTableWidgetItem(str(point)),
             )
 
         self.data[selected_row].rpoints = selected_points
@@ -139,9 +175,24 @@ class ParticleTracksWidget(QWidget):
         print("calculating radius!")
         rad = radius(*selected_points)
 
-        self.table.setItem(selected_row, 4, QTableWidgetItem(str(rad)))
+        self.table.setItem(
+            selected_row,
+            self._get_table_column_index("radius"),
+            QTableWidgetItem(str(rad)),
+        )
 
         self.data[selected_row].radius = rad
+
+        ## Add the calibrated radius to the table
+        self.data[selected_row].radius_cm = (
+            self.data[selected_row].magnification
+            * self.data[selected_row].radius
+        )
+        self.table.setItem(
+            selected_row,
+            self._get_table_column_index("radius_cm"),
+            QTableWidgetItem(str(self.data[selected_row].radius_cm)),
+        )
 
         print("Modified particle ", selected_row)
         print(self.data[selected_row])
@@ -158,13 +209,36 @@ class ParticleTracksWidget(QWidget):
             print("Select (only) two points to calculate the decay length.")
             return
 
-        print("calculating decay length!")
-        declen = length(*selected_points)
+        # Assigns the points and radius to the selected row
         selected_row = self._get_selected_row()
+        for i in range(2):
+            point = selected_points[i]
+            self.table.setItem(
+                selected_row,
+                self._get_table_column_index("d" + str(i + 1)),
+                QTableWidgetItem(str(point)),
+            )
         self.data[selected_row].dpoints = selected_points
 
-        self.table.setItem(selected_row, 5, QTableWidgetItem(str(declen)))
+        print("calculating decay length!")
+        declen = length(*selected_points)
+        self.table.setItem(
+            selected_row,
+            self._get_table_column_index("decay_length"),
+            QTableWidgetItem(str(declen)),
+        )
         self.data[selected_row].decay_length = declen
+
+        ## Add the calibrated decay length to the table
+        self.data[selected_row].decay_length_cm = (
+            self.data[selected_row].magnification
+            * self.data[selected_row].decay_length
+        )
+        self.table.setItem(
+            selected_row,
+            self._get_table_column_index("decay_length_cm"),
+            QTableWidgetItem(str(self.data[selected_row].decay_length_cm)),
+        )
 
         print("Modified particle ", selected_row)
         print(self.data[selected_row])
@@ -182,19 +256,27 @@ class ParticleTracksWidget(QWidget):
         if self.cb.currentIndex() < 1:
             return
 
+        # add new particle to data
+        np = NewParticle()
+        np.Name = self.cb.currentText()
+        np.magnification_a = self.mag_a
+        np.magnification_b = self.mag_b
+        self.data += [np]
+
         # add particle (== new row) to the table and select it
         self.table.insertRow(self.table.rowCount())
         self.table.selectRow(self.table.rowCount() - 1)
         self.table.setItem(
             self.table.rowCount() - 1,
-            0,
-            QTableWidgetItem(self.cb.currentText()),
+            self._get_table_column_index("Name"),
+            QTableWidgetItem(np.Name),
+        )
+        self.table.setItem(
+            self.table.rowCount() - 1,
+            self._get_table_column_index("magnification"),
+            QTableWidgetItem(str(np.magnification)),
         )
 
-        # add new particle to data
-        np = NewParticle()
-        np.Name = self.cb.currentText()
-        self.data += [np]
         print(self.data[-1])
         self.cb.setCurrentIndex(0)
 
@@ -209,9 +291,37 @@ class ParticleTracksWidget(QWidget):
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         dlg.move(point)
 
-    def _apply_magnification(self, a: float, b: float) -> None:
+    def _propagate_magnification(self, a: float, b: float) -> None:
+        """Assigns a and b to the class magnification parameters and to each of the particles in data"""
         self.mag_a = a
         self.mag_b = b
         for particle in self.data:
             particle.magnification_a = a
             particle.magnification_b = b
+
+    def _on_click_apply_magnification(self) -> None:
+        """Changes the visualisation of the table to show calibrated values for radius and decay_length"""
+        if self.cal.isChecked():
+            self._apply_magnification()
+        self._set_table_visible_vars(self.cal.isChecked())
+
+    def _apply_magnification(self) -> None:
+        """Calculates magnification and calibrated radius and length for each particle in data"""
+
+        for i in range(len(self.data)):
+            self.data[i].calibrate()
+            self.table.setItem(
+                i,
+                self._get_table_column_index("magnification"),
+                QTableWidgetItem(str(self.data[i].magnification)),
+            )
+            self.table.setItem(
+                i,
+                self._get_table_column_index("radius_cm"),
+                QTableWidgetItem(str(self.data[i].radius_cm)),
+            )
+            self.table.setItem(
+                i,
+                self._get_table_column_index("decay_length_cm"),
+                QTableWidgetItem(str(self.data[i].decay_length_cm)),
+            )
