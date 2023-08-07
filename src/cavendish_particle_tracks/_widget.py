@@ -31,6 +31,7 @@ from cavendish_particle_tracks._calculate import (
     radius,
 )
 from cavendish_particle_tracks._magnification_dialog import MagnificationDialog
+from cavendish_particle_tracks._stereoshift_dialog import StereoshiftDialog
 
 
 class ParticleTracksWidget(QWidget):
@@ -170,10 +171,11 @@ class ParticleTracksWidget(QWidget):
         print(self.data[selected_row])
 
     def _on_click_stereoshift(self) -> None:
-        """When the 'Calculate stereoshift' button is clicked, calculate the stereoshift
-        for the currently selected table row.
-        """
-        print("calculating stereoshift!")
+        """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
+        dlg = StereoshiftDialog(self)
+        dlg.show()
+        point = QPoint(self.pos().x() + self.width(), self.pos().y())
+        dlg.move(point)
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
