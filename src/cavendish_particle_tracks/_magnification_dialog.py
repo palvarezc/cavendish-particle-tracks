@@ -129,17 +129,17 @@ class MagnificationDialog(QDialog):
         self.f1.x, self.f2.y = self._add_coords(0)
 
     def _on_click_add_coords_f2(self) -> None:
-        """Add first front fiducial"""
+        """Add second front fiducial"""
         self.f2.name = self.cbf2.currentText()
         self.f2.x, self.f2.y = self._add_coords(1)
 
     def _on_click_add_coords_b1(self) -> None:
-        """Add first front fiducial"""
+        """Add first back fiducial"""
         self.b1.name = self.cbb1.currentText()
         self.b1.x, self.b1.y = self._add_coords(2)
 
     def _on_click_add_coords_b2(self) -> None:
-        """Add first front fiducial"""
+        """Add second back fiducial"""
         self.b2.name = self.cbb2.currentText()
         self.b2.x, self.b2.y = self._add_coords(3)
 
@@ -179,10 +179,11 @@ class MagnificationDialog(QDialog):
         """On accept propagate the calibration information to the main window and remove the points_Calibration layer"""
 
         print("Propagating magnification to table.")
-        self.parent._apply_magnification(self.a, self.b)
+        self.parent._propagate_magnification(self.a, self.b)
         # TODO: this is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.select_previous()
         self.parent.viewer.layers.remove(self.cal_layer)
+        self.parent.cal.setEnabled(True)
         # self.parent.mag.setEnabled(False)
         self.parent.mag.setText("Update magnification")
         return super().accept()

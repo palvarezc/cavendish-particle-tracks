@@ -112,8 +112,15 @@ def test_calculate_length_ui(make_napari_viewer, capsys):
     # click the calculate radius button
     my_widget._on_click_length()
 
-    assert my_widget.table.item(0, 5)
-    assert my_widget.table.item(0, 5).text() == "1.0"
+    assert my_widget.table.item(
+        0, my_widget._get_table_column_index("decay_length")
+    )
+    assert (
+        my_widget.table.item(
+            0, my_widget._get_table_column_index("decay_length")
+        ).text()
+        == "1.0"
+    )
 
 
 @pytest.mark.parametrize("npoints", [1, 3, 4, 5])
