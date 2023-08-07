@@ -59,8 +59,8 @@ class NewParticle:
     stereoshift: float = -1.0
     depth: float = 0.0
     magnification_a: float = -1.0
-    magnification_b: float = -1.0
-    magnification: float = 1.0
+    magnification_b: float = 0.0
+    # magnification: float = -1.0
     event_number: int = -1
 
     def _vars_to_show(self, calibrated=False):
@@ -69,7 +69,7 @@ class NewParticle:
                 "Name",
                 "radius_cm",
                 "decay_length_cm",
-                "stereoshift",
+                "depth",
                 "magnification",
             ]
         else:
@@ -77,8 +77,7 @@ class NewParticle:
                 "Name",
                 "radius",
                 "decay_length",
-                "stereoshift",
-                "magnification",
+                "depth",
             ]
 
     @property
@@ -97,10 +96,10 @@ class NewParticle:
     def dpoints(self, points):
         self.d1, self.d2 = points
 
+    @property
+    def magnification(self):
+        return self.magnification_a + self.magnification_b * self.depth
+
     def calibrate(self) -> None:
-        self.radius_cm = (
-            self.magnification_a + self.magnification_b * self.depth
-        ) * self.radius
-        self.decay_length_cm = (
-            self.magnification_a + self.magnification_b * self.depth
-        ) * self.decay_length
+        self.radius_cm = self.magnification * self.radius
+        self.decay_length_cm = self.magnification * self.decay_length
