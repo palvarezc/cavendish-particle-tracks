@@ -246,10 +246,10 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_stereoshift(self) -> None:
         """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
-        dlg = StereoshiftDialog(self)
-        dlg.show()
+        self.dlg = StereoshiftDialog(self)
+        self.dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        dlg.move(point)
+        self.dlg.move(point)
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
