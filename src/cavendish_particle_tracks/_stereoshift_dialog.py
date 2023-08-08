@@ -50,7 +50,12 @@ class StereoshiftDialog(QDialog):
         self.tstereoshift = QLabel(self)
         self.tdepth = QLabel(self)
 
-        self.results = [self.txf1, self.txf2, self.txb1, self.txb2]
+        self.results = [
+            self.tshift_fiducial,
+            self.tshift_point,
+            self.tstereoshift,
+            self.tdepth,
+        ]
         for txt in self.txboxes:
             txt.setMinimumWidth(200)
 
