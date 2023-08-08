@@ -62,8 +62,16 @@ def stereoshift(fa: Point, fb: Point, pa: Point, pb: Point):
     return np.linalg.norm(npa - npb) / np.linalg.norm(nfa - nfb)
 
 
-def depth(fa: Fiducial, fb: Fiducial, pa: Fiducial, pb: Fiducial):
-    # depth_p = (Delta p)/(Delta f) * depth_f
-    depth_p = stereoshift(fa.xy, fb.xy, pa.xy, pb.xy) * CHAMBER_DEPTH
-
-    return depth_p
+def depth(
+    fa: Fiducial,
+    fb: Fiducial,
+    pa: Fiducial,
+    pb: Fiducial,
+    reverse: bool = False,
+):
+    if reverse:
+        # depth_p = (1 - (Delta p)/(Delta f)) * depth_f
+        return (1 - stereoshift(fa.xy, fb.xy, pa.xy, pb.xy)) * CHAMBER_DEPTH
+    else:
+        # depth_p = (Delta p)/(Delta f) * depth_f
+        return stereoshift(fa.xy, fb.xy, pa.xy, pb.xy) * CHAMBER_DEPTH

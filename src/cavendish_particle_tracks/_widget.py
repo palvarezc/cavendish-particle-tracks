@@ -49,8 +49,8 @@ class ParticleTracksWidget(QWidget):
         self.cb.currentIndexChanged.connect(self._on_click_new_particle)
         rad = QPushButton("Calculate radius")
         lgth = QPushButton("Calculate length")
-        stsh = QPushButton("Calculate stereoshift")
-        self.mag = QPushButton("Calculate magnification")
+        stsh = QPushButton("Stereoshift")
+        self.mag = QPushButton("Magnification")
 
         # setup particle table
         self.table = self._set_up_table()
@@ -77,9 +77,9 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.cb)
         self.layout().addWidget(rad)
         self.layout().addWidget(lgth)
-        self.layout().addWidget(stsh)
         self.layout().addWidget(self.table)
         self.layout().addWidget(self.cal)
+        self.layout().addWidget(stsh)
         self.layout().addWidget(self.mag)
 
         # Data analysis
