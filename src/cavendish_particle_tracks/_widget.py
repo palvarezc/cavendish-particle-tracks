@@ -178,16 +178,16 @@ class ParticleTracksWidget(QWidget):
 
         self.table.setItem(
             selected_row,
-            self._get_table_column_index("radius"),
+            self._get_table_column_index("radius_px"),
             QTableWidgetItem(str(rad)),
         )
 
-        self.data[selected_row].radius = rad
+        self.data[selected_row].radius_px = rad
 
         ## Add the calibrated radius to the table
         self.data[selected_row].radius_cm = (
             self.data[selected_row].magnification
-            * self.data[selected_row].radius
+            * self.data[selected_row].radius_px
         )
         self.table.setItem(
             selected_row,
@@ -225,15 +225,15 @@ class ParticleTracksWidget(QWidget):
         declen = length(*selected_points)
         self.table.setItem(
             selected_row,
-            self._get_table_column_index("decay_length"),
+            self._get_table_column_index("decay_length_px"),
             QTableWidgetItem(str(declen)),
         )
-        self.data[selected_row].decay_length = declen
+        self.data[selected_row].decay_length_px = declen
 
         ## Add the calibrated decay length to the table
         self.data[selected_row].decay_length_cm = (
             self.data[selected_row].magnification
-            * self.data[selected_row].decay_length
+            * self.data[selected_row].decay_length_px
         )
         self.table.setItem(
             selected_row,

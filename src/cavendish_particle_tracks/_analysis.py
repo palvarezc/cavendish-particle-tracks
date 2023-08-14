@@ -45,11 +45,11 @@ class NewParticle:
     r1: list[float] = field(default_factory=list)
     r2: list[float] = field(default_factory=list)
     r3: list[float] = field(default_factory=list)
-    radius: float = 0.0
+    radius_px: float = 0.0
     radius_cm: float = 0.0
     d1: list[float] = field(default_factory=list)
     d2: list[float] = field(default_factory=list)
-    decay_length: float = 0.0
+    decay_length_px: float = 0.0
     decay_length_cm: float = 0.0
     sf1: list[float] = field(default_factory=list)
     sf2: list[float] = field(default_factory=list)
@@ -76,8 +76,8 @@ class NewParticle:
         else:
             return [
                 "Name",
-                "radius",
-                "decay_length",
+                "radius_px",
+                "decay_length_px",
                 "depth_cm",
             ]
 
@@ -110,5 +110,5 @@ class NewParticle:
         return self.magnification_a + self.magnification_b * self.depth_cm
 
     def calibrate(self) -> None:
-        self.radius_cm = self.magnification * self.radius
-        self.decay_length_cm = self.magnification * self.decay_length
+        self.radius_cm = self.magnification * self.radius_px
+        self.decay_length_cm = self.magnification * self.decay_length_px
