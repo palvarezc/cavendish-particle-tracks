@@ -23,10 +23,20 @@ class StereoshiftDialog(QDialog):
 
         self.setWindowTitle("Stereoshift")
 
-        self.f1 = Fiducial("Back fiducial view1")
-        self.f2 = Fiducial("Back fiducial view2")
-        self.b1 = Fiducial("Point view1")
-        self.b2 = Fiducial("Point view2")
+        FIDUCIAL_VIEWS = [
+            "Back fiducial view1",
+            "Back fiducial view2",
+            "Point view1",
+            "Point view2",
+        ]
+        self._fiducial_views = [
+            Fiducial(view_name) for view_name in FIDUCIAL_VIEWS
+        ]
+
+        # self.f1 = Fiducial("Back fiducial view1")
+        # self.f2 = Fiducial("Back fiducial view2")
+        # self.b1 = Fiducial("Point view1")
+        # self.b2 = Fiducial("Point view2")
 
         # drop-down lists of fiducials
         self.cbf1 = QComboBox()
@@ -34,17 +44,10 @@ class StereoshiftDialog(QDialog):
         self.cbf1.addItem("Back / Front")
         self.cbf1.currentIndexChanged.connect(self._on_click_fiducial)
 
-        # text boxes points
-        self.txf1 = QLabel(self)
-        self.txf2 = QLabel(self)
-        self.txb1 = QLabel(self)
-        self.txb2 = QLabel(self)
+        # text boxes for points
+        self.textboxes = [QLabel(self) for _ in range(4)]
 
-        self.txboxes = [self.txf1, self.txf2, self.txb1, self.txb2]
-        for txt in self.txboxes:
-            txt.setMinimumWidth(200)
-
-        # text boxes results
+        # text boxes for results
         self.tshift_fiducial = QLabel(self)
         self.tshift_point = QLabel(self)
         self.tstereoshift = QLabel(self)
@@ -56,8 +59,8 @@ class StereoshiftDialog(QDialog):
             self.tstereoshift,
             self.tdepth,
         ]
-        for txt in self.txboxes:
-            txt.setMinimumWidth(200)
+        for textbox in self.textboxes + self.results:
+            textbox.setMinimumWidth(200)
 
         bss = QPushButton("Calculate")
         bss.clicked.connect(self._on_click_calculate)
@@ -84,10 +87,14 @@ class StereoshiftDialog(QDialog):
         )
         self.layout().addWidget(QLabel("Fiducial coordinates"), 1, 0, 1, 2)
         self.layout().addWidget(self.cbf1, 0, 2)
-        for i, widget in enumerate([lviewf1, self.txf1, lviewf2, self.txf2]):
+        for i, widget in enumerate(
+            [lviewf1, self.textboxes[0], lviewf2, self.textboxes[1]]
+        ):
             self.layout().addWidget(widget, i // 2 + 2, i % 2 + 1)
         self.layout().addWidget(QLabel("Point coordinates"), 4, 0, 1, 2)
-        for i, widget in enumerate([lviewb1, self.txb1, lviewb2, self.txb2]):
+        for i, widget in enumerate(
+            [lviewb1, self.textboxes[2], lviewb2, self.textboxes[3]]
+        ):
             self.layout().addWidget(widget, i // 2 + 5, i % 2 + 1)
 
         self.layout().addWidget(bss, 7, 0, 1, 3)
@@ -127,13 +134,10 @@ class StereoshiftDialog(QDialog):
             [[100, 100], [200, 300], [333, 111], [400, 350], [500, 150]]
         )
 
-        labels = [
-            "Reference (Front)",
-            self.f1.name,
-            self.f2.name,
-            self.b1.name,
-            self.b2.name,
-        ]
+        labels = ["Reference (Front)"]
+        for item in self._fiducial_views:
+            labels += [item.name]
+
         colors = ["green", "blue", "blue", "red", "red"]
 
         text = {
@@ -162,25 +166,35 @@ class StereoshiftDialog(QDialog):
 
         return points_layer
 
+    def f(self, i) -> Fiducial:
+        if i not in [1, 2]:
+            raise IndexError()
+        return self._fiducial_views[i - 1]
+
+    def b(self, i) -> Fiducial:
+        if i not in [1, 2]:
+            raise IndexError()
+        return self._fiducial_views[i + 1]
+
     def _on_click_fiducial(self) -> None:
         """When fiducial is selected, update the name of the fiducial and the points text"""
 
         if self.cbf1.currentIndex() == 0:
-            self.f1.name = "Back fiducial view1"
-            self.f2.name = "Back fiducial view2"
+            self.f(1).name = "Back fiducial view1"
+            self.f(2).name = "Back fiducial view2"
             self.cal_layer.text.string.array[0] = "Reference (Front)"
-            self.cal_layer.text.string.array[1] = self.f1.name
-            self.cal_layer.text.string.array[2] = self.f2.name
+            self.cal_layer.text.string.array[1] = self.f(1).name
+            self.cal_layer.text.string.array[2] = self.f(2).name
             self.label_stereoshift.setText(
                 "Stereo shift (shift_p/shift_f = depth_p/depth_f)"
             )
 
         if self.cbf1.currentIndex() == 1:
-            self.f1.name = "Front fiducial view1"
-            self.f2.name = "Front fiducial view2"
+            self.f(1).name = "Front fiducial view1"
+            self.f(2).name = "Front fiducial view2"
             self.cal_layer.text.string.array[0] = "Reference (Back)"
-            self.cal_layer.text.string.array[1] = self.f1.name
-            self.cal_layer.text.string.array[2] = self.f2.name
+            self.cal_layer.text.string.array[1] = self.f(1).name
+            self.cal_layer.text.string.array[2] = self.f(2).name
             self.label_stereoshift.setText(
                 "Stereo shift (shift_p/shift_f = 1 - depth_p/depth_f)"
             )
@@ -191,19 +205,25 @@ class StereoshiftDialog(QDialog):
         """When 'Calculate' button is clicked, calculate stereoshift and populate table"""
 
         # Add points coords to corresponding text box
-        points = [self.f1, self.f2, self.b1, self.b2]
-        for i in range(len(points)):
-            points[i].x, points[i].y = self.cal_layer.data[i + 1]
-            self.txboxes[i].setText(str(points[i].xy))
+        for i in range(len(self._fiducial_views)):
+            (
+                self._fiducial_views[i].x,
+                self._fiducial_views[i].y,
+            ) = self.cal_layer.data[i + 1]
+            self.textboxes[i].setText(str(self._fiducial_views[i].xy))
 
         # Calculate stereoshift and depth
-        self.shift_fiducial = length(self.f1.xy, self.f2.xy)
-        self.shift_point = length(self.b1.xy, self.b2.xy)
+        self.shift_fiducial = length(self.f(1).xy, self.f(2).xy)
+        self.shift_point = length(self.b(1).xy, self.b(2).xy)
         self.point_stereoshift = stereoshift(
-            self.f1.xy, self.f2.xy, self.b1.xy, self.b2.xy
+            self.f(1).xy, self.f(2).xy, self.b(1).xy, self.b(2).xy
         )
         self.point_depth = depth(
-            self.f1, self.f2, self.b1, self.b2, reverse=self.cbf1.currentIndex
+            self.f(1),
+            self.f(2),
+            self.b(1),
+            self.b(2),
+            reverse=self.cbf1.currentIndex,
         )
         self.spoints = self.cal_layer.data[1:]
 

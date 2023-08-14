@@ -62,7 +62,7 @@ def test_calculate_stereoshift_ui(make_napari_viewer, points, FS, PS, S, D):
 
     # Check recorded points
     for i in range(4):
-        assert my_widget.dlg.txboxes[i].text() == str(points[i])
+        assert my_widget.dlg.textboxes[i].text() == str(points[i])
 
     # Check calculated values
     assert my_widget.dlg.tshift_fiducial.text() == str(FS)
