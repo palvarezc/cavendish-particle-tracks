@@ -41,7 +41,7 @@ def test_calculate_radius_ui(make_napari_viewer, capsys):
     assert my_widget.table.item(0, 3)
     assert my_widget.table.item(0, 4)
 
-    assert my_widget.data[0].radius == 1.0
+    assert my_widget.data[0].radius_px == 1.0
 
 
 @pytest.mark.parametrize("npoints", [1, 2, 4, 5])
@@ -109,15 +109,15 @@ def test_calculate_length_ui(make_napari_viewer, capsys):
         if layer.name == "Points":
             layer.selected_data = {0, 1}
 
-    # click the calculate radius button
+    # click the calculate decay length button
     my_widget._on_click_length()
 
     assert my_widget.table.item(
-        0, my_widget._get_table_column_index("decay_length")
+        0, my_widget._get_table_column_index("decay_length_px")
     )
     assert (
         my_widget.table.item(
-            0, my_widget._get_table_column_index("decay_length")
+            0, my_widget._get_table_column_index("decay_length_px")
         ).text()
         == "1.0"
     )
@@ -146,7 +146,7 @@ def test_calculate_length_fails_with_wrong_number_of_points(
         if layer.name == "Points":
             layer.selected_data = set(range(npoints))
 
-    # click the calculate radius button
+    # click the calculate decay length button
     widget._on_click_length()
     captured = capsys.readouterr()
 

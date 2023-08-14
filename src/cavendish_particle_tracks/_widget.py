@@ -32,6 +32,7 @@ from cavendish_particle_tracks._calculate import (
     radius,
 )
 from cavendish_particle_tracks._magnification_dialog import MagnificationDialog
+from cavendish_particle_tracks._stereoshift_dialog import StereoshiftDialog
 
 
 class ParticleTracksWidget(QWidget):
@@ -48,8 +49,8 @@ class ParticleTracksWidget(QWidget):
         self.cb.currentIndexChanged.connect(self._on_click_new_particle)
         rad = QPushButton("Calculate radius")
         lgth = QPushButton("Calculate length")
-        stsh = QPushButton("Calculate stereoshift")
-        self.mag = QPushButton("Calculate magnification")
+        stsh = QPushButton("Stereoshift")
+        self.mag = QPushButton("Magnification")
 
         # setup particle table
         self.table = self._set_up_table()
@@ -76,9 +77,9 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.cb)
         self.layout().addWidget(rad)
         self.layout().addWidget(lgth)
-        self.layout().addWidget(stsh)
         self.layout().addWidget(self.table)
         self.layout().addWidget(self.cal)
+        self.layout().addWidget(stsh)
         self.layout().addWidget(self.mag)
 
         # Data analysis
@@ -177,16 +178,16 @@ class ParticleTracksWidget(QWidget):
 
         self.table.setItem(
             selected_row,
-            self._get_table_column_index("radius"),
+            self._get_table_column_index("radius_px"),
             QTableWidgetItem(str(rad)),
         )
 
-        self.data[selected_row].radius = rad
+        self.data[selected_row].radius_px = rad
 
         ## Add the calibrated radius to the table
         self.data[selected_row].radius_cm = (
             self.data[selected_row].magnification
-            * self.data[selected_row].radius
+            * self.data[selected_row].radius_px
         )
         self.table.setItem(
             selected_row,
@@ -224,15 +225,15 @@ class ParticleTracksWidget(QWidget):
         declen = length(*selected_points)
         self.table.setItem(
             selected_row,
-            self._get_table_column_index("decay_length"),
+            self._get_table_column_index("decay_length_px"),
             QTableWidgetItem(str(declen)),
         )
-        self.data[selected_row].decay_length = declen
+        self.data[selected_row].decay_length_px = declen
 
         ## Add the calibrated decay length to the table
         self.data[selected_row].decay_length_cm = (
             self.data[selected_row].magnification
-            * self.data[selected_row].decay_length
+            * self.data[selected_row].decay_length_px
         )
         self.table.setItem(
             selected_row,
@@ -244,10 +245,11 @@ class ParticleTracksWidget(QWidget):
         print(self.data[selected_row])
 
     def _on_click_stereoshift(self) -> None:
-        """When the 'Calculate stereoshift' button is clicked, calculate the stereoshift
-        for the currently selected table row.
-        """
-        print("calculating stereoshift!")
+        """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
+        self.dlg = StereoshiftDialog(self)
+        self.dlg.show()
+        point = QPoint(self.pos().x() + self.width(), self.pos().y())
+        self.dlg.move(point)
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to

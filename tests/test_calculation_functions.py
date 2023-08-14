@@ -7,9 +7,11 @@ from cavendish_particle_tracks._calculate import CHAMBER_DEPTH as CD
 from cavendish_particle_tracks._calculate import FIDUCIAL_BACK as FB
 from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
 from cavendish_particle_tracks._calculate import (
+    depth,
     length,
     magnification,
     radius,
+    stereoshift,
 )
 
 
@@ -67,3 +69,38 @@ def test_calculate_magnification(f1, f2, b1, b2, M):
     a, b = magnification(f1, f2, b1, b2)
     assert a == pytest.approx(M[0], rel=1e-3)
     assert b == pytest.approx(M[1], rel=1e-3)
+
+
+@pytest.mark.parametrize(
+    "f1, f2, p1, p2, S",
+    [
+        ((0, 1), (1, 0), (0, 0.5), (0.5, 0), 0.5),
+        ((0, 0), (2, 2), (-1, 0), (0, -1), 0.5),
+    ],
+)
+def test_calculate_stereoshift(f1, f2, p1, p2, S):
+    assert stereoshift(f1, f2, p1, p2) == pytest.approx(S, rel=1e-3)
+
+
+@pytest.mark.parametrize(
+    "f1, f2, p1, p2, S",
+    [
+        (
+            Fiducial("C", 0, 1),
+            Fiducial("C", 1, 0),
+            Fiducial("Point_view1", 0, 0.5),
+            Fiducial("Point_view2", 0.5, 0),
+            0.5 * CD,
+        ),
+        (
+            Fiducial("C", 0, 0),
+            Fiducial("C", 2, 2),
+            Fiducial("Point_view1", -1, 0),
+            Fiducial("Point_view2", 0, -1),
+            0.5 * CD,
+        ),
+    ],
+)
+def test_calculate_depth(f1, f2, p1, p2, S):
+    assert depth(f1, f2, p1, p2) == pytest.approx(S, rel=1e-3)
+    assert depth(f1, f2, p1, p2, reverse=True) == pytest.approx(S, rel=1e-3)

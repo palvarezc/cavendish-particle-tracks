@@ -45,19 +45,20 @@ class NewParticle:
     r1: list[float] = field(default_factory=list)
     r2: list[float] = field(default_factory=list)
     r3: list[float] = field(default_factory=list)
-    radius: float = 0.0
+    radius_px: float = 0.0
     radius_cm: float = 0.0
     d1: list[float] = field(default_factory=list)
     d2: list[float] = field(default_factory=list)
-    decay_length: float = 0.0
+    decay_length_px: float = 0.0
     decay_length_cm: float = 0.0
-    stereoshift_fiducial: Fiducial = field(default_factory=Fiducial)
     sf1: list[float] = field(default_factory=list)
     sf2: list[float] = field(default_factory=list)
     sp1: list[float] = field(default_factory=list)
     sp2: list[float] = field(default_factory=list)
+    shift_fiducial: Fiducial = field(default_factory=Fiducial)
+    shift_point: Fiducial = field(default_factory=Fiducial)
     stereoshift: float = -1.0
-    depth: float = 0.0
+    depth_cm: float = 0.0
     magnification_a: float = -1.0
     magnification_b: float = 0.0
     # magnification: float = -1.0
@@ -69,15 +70,15 @@ class NewParticle:
                 "Name",
                 "radius_cm",
                 "decay_length_cm",
-                "depth",
+                "depth_cm",
                 "magnification",
             ]
         else:
             return [
                 "Name",
-                "radius",
-                "decay_length",
-                "depth",
+                "radius_px",
+                "decay_length_px",
+                "depth_cm",
             ]
 
     @property
@@ -97,9 +98,17 @@ class NewParticle:
         self.d1, self.d2 = points
 
     @property
+    def spoints(self):
+        return np.array([self.sf1, self.sf2, self.sp1, self.sp2])
+
+    @spoints.setter
+    def spoints(self, points):
+        self.sf1, self.sf2, self.sp1, self.sp2 = points
+
+    @property
     def magnification(self):
-        return self.magnification_a + self.magnification_b * self.depth
+        return self.magnification_a + self.magnification_b * self.depth_cm
 
     def calibrate(self) -> None:
-        self.radius_cm = self.magnification * self.radius
-        self.decay_length_cm = self.magnification * self.decay_length
+        self.radius_cm = self.magnification * self.radius_px
+        self.decay_length_cm = self.magnification * self.decay_length_px
