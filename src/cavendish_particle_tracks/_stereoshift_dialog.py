@@ -33,11 +33,6 @@ class StereoshiftDialog(QDialog):
             Fiducial(view_name) for view_name in FIDUCIAL_VIEWS
         ]
 
-        # self.f1 = Fiducial("Back fiducial view1")
-        # self.f2 = Fiducial("Back fiducial view2")
-        # self.b1 = Fiducial("Point view1")
-        # self.b2 = Fiducial("Point view2")
-
         # drop-down lists of fiducials
         self.cbf1 = QComboBox()
         self.cbf1.addItem("Front / Back")
@@ -216,7 +211,7 @@ class StereoshiftDialog(QDialog):
         self.shift_fiducial = length(self.f(1).xy, self.f(2).xy)
         self.shift_point = length(self.b(1).xy, self.b(2).xy)
         self.point_stereoshift = stereoshift(
-            self.f(1).xy, self.f(2).xy, self.b(1).xy, self.b(2).xy
+            *[view.xy for view in self._fiducial_views]
         )
         self.point_depth = depth(
             self.f(1),
