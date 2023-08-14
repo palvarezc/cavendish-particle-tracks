@@ -69,5 +69,3 @@ def test_calculate_stereoshift_ui(make_napari_viewer, points, FS, PS, S, D):
     assert my_widget.dlg.tshift_point.text() == str(PS)
     assert my_widget.dlg.tstereoshift.text() == str(S)
     assert my_widget.dlg.tdepth.text() == str(D)
-
-    # assert my_widget.data[0].radius == 1.0
