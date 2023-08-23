@@ -31,6 +31,7 @@ from cavendish_particle_tracks._calculate import (
     length,
     radius,
 )
+from cavendish_particle_tracks._decay_angles_dialog import DecayAnglesDialog
 from cavendish_particle_tracks._magnification_dialog import MagnificationDialog
 from cavendish_particle_tracks._stereoshift_dialog import StereoshiftDialog
 
@@ -49,6 +50,7 @@ class ParticleTracksWidget(QWidget):
         self.cb.currentIndexChanged.connect(self._on_click_new_particle)
         rad = QPushButton("Calculate radius")
         lgth = QPushButton("Calculate length")
+        ang = QPushButton("Calculate decay angles")
         stsh = QPushButton("Stereoshift")
         self.mag = QPushButton("Magnification")
 
@@ -63,6 +65,7 @@ class ParticleTracksWidget(QWidget):
         # connect callbacks
         rad.clicked.connect(self._on_click_radius)
         lgth.clicked.connect(self._on_click_length)
+        ang.clicked.connect(self._on_click_decay_angles)
         stsh.clicked.connect(self._on_click_stereoshift)
         self.cal.toggled.connect(self._on_click_apply_magnification)
 
@@ -77,6 +80,7 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.cb)
         self.layout().addWidget(rad)
         self.layout().addWidget(lgth)
+        self.layout().addWidget(ang)
         self.layout().addWidget(self.table)
         self.layout().addWidget(self.cal)
         self.layout().addWidget(stsh)
@@ -244,12 +248,20 @@ class ParticleTracksWidget(QWidget):
         print("Modified particle ", selected_row)
         print(self.data[selected_row])
 
-    def _on_click_stereoshift(self) -> None:
-        """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
-        self.dlg = StereoshiftDialog(self)
-        self.dlg.show()
+    def _on_click_decay_angles(self) -> None:
+        """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
+        dlg = DecayAnglesDialog(self)
+        dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        self.dlg.move(point)
+        dlg.move(point)
+
+    def _on_click_stereoshift(self) -> StereoshiftDialog:
+        """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
+        dlg = StereoshiftDialog(self)
+        dlg.show()
+        point = QPoint(self.pos().x() + self.width(), self.pos().y())
+        dlg.move(point)
+        return dlg
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to

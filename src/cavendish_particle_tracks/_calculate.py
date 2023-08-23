@@ -75,3 +75,19 @@ def depth(
     else:
         # depth_p = (Delta p)/(Delta f) * depth_f
         return stereoshift(fa.xy, fb.xy, pa.xy, pb.xy) * CHAMBER_DEPTH
+
+
+def track(line):
+    slope = (line[0][1] - line[1][1]) / (line[0][0] - line[1][0])
+    intercept = line[0][1] - slope * line[0][0]
+    return slope, intercept
+
+
+def angle(line1, line2):
+    l1 = np.array(line1)
+    l2 = np.array(line2)
+    v1 = l1[1] - l1[0]
+    v2 = l2[1] - l2[0]
+    return np.arccos(
+        np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+    )
