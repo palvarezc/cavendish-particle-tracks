@@ -5,6 +5,7 @@ from qtpy.QtWidgets import (
     QGridLayout,
     QLabel,
     QPushButton,
+    QTableWidgetItem,
 )
 
 from cavendish_particle_tracks._calculate import angle, track
@@ -74,7 +75,7 @@ class DecayAnglesDialog(QDialog):
         # Decay Angles related parameters
         self.phi_proton = 0.0
         self.phi_pion = 0.0
-        self.apoints = []
+        self.alines = []
 
     def _setup_decayangles_layer(self):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
@@ -124,21 +125,19 @@ class DecayAnglesDialog(QDialog):
         self.textboxes_phi[0].setText(str(self.phi_proton))
         self.textboxes_phi[1].setText(str(self.phi_pion))
 
-        # # Save points
-        # self.apoints = self.cal_layer.data
+        # Save points
+        self.alines = self.cal_layer.data
 
     def _on_click_save_to_table(self) -> None:
         """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
 
         # Propagate to particle
-        self.parent._get_selected_row()
-        # self.parent.data[selected_row].spoints = self.spoints
-        # self.parent.data[selected_row].shift_fiducial = self.shift_fiducial
-        # self.parent.data[selected_row].shift_point = self.shift_point
-        # self.parent.data[selected_row].stereoshift = self.point_stereoshift
-        # self.parent.data[selected_row].depth_cm = self.point_depth
+        selected_row = self.parent._get_selected_row()
+        # self.parent.data[selected_row].spoints = self.alines
+        self.parent.data[selected_row].phi_proton = self.phi_proton
+        self.parent.data[selected_row].phi_pion = self.phi_pion
 
-        # # Propagate to parent table
+        # Propagate to parent table
         # for i in range(2):
         #     self.parent.table.setItem(
         #         selected_row,
@@ -150,26 +149,16 @@ class DecayAnglesDialog(QDialog):
         #         self.parent._get_table_column_index("sp" + str(i + 1)),
         #         QTableWidgetItem(str(self.spoints[i + 2])),
         #     )
-        # self.parent.table.setItem(
-        #     selected_row,
-        #     self.parent._get_table_column_index("shift_fiducial"),
-        #     QTableWidgetItem(str(self.shift_fiducial)),
-        # )
-        # self.parent.table.setItem(
-        #     selected_row,
-        #     self.parent._get_table_column_index("shift_point"),
-        #     QTableWidgetItem(str(self.shift_point)),
-        # )
-        # self.parent.table.setItem(
-        #     selected_row,
-        #     self.parent._get_table_column_index("stereoshift"),
-        #     QTableWidgetItem(str(self.point_stereoshift)),
-        # )
-        # self.parent.table.setItem(
-        #     selected_row,
-        #     self.parent._get_table_column_index("depth_cm"),
-        #     QTableWidgetItem(str(self.point_depth)),
-        # )
+        self.parent.table.setItem(
+            selected_row,
+            self.parent._get_table_column_index("phi_proton"),
+            QTableWidgetItem(str(self.phi_proton)),
+        )
+        self.parent.table.setItem(
+            selected_row,
+            self.parent._get_table_column_index("phi_pion"),
+            QTableWidgetItem(str(self.phi_pion)),
+        )
 
     def cancel(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
