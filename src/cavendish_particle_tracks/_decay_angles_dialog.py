@@ -8,7 +8,7 @@ from qtpy.QtWidgets import (
     QTableWidgetItem,
 )
 
-from cavendish_particle_tracks._calculate import angle, track
+from cavendish_particle_tracks._calculate import angle, track_parameters
 
 
 class DecayAnglesDialog(QDialog):
@@ -112,13 +112,15 @@ class DecayAnglesDialog(QDialog):
         """When 'Calculate' button is clicked, calculate opening angles and populate table"""
 
         # Compute tracks and angles
-        tracks = [track(line) for line in self.cal_layer.data]
+        tracks = [track_parameters(line) for line in self.cal_layer.data]
 
         self.phi_proton = angle(self.cal_layer.data[0], self.cal_layer.data[1])
         self.phi_pion = angle(self.cal_layer.data[0], self.cal_layer.data[2])
 
         # # Populate the table
-        for slobe, intercept, track in zip(self.textboxes_slope, self.textboxes_intercept, tracks):
+        for slope, intercept, track in zip(
+            self.textboxes_slope, self.textboxes_intercept, tracks
+        ):
             slope.setText(str(track[0]))
             intercept.setText(str(track[1]))
 
