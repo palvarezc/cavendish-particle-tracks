@@ -83,11 +83,8 @@ def track(line):
     return slope, intercept
 
 
-def angle(line1, line2):
-    l1 = np.array(line1)
-    l2 = np.array(line2)
-    v1 = l1[1] - l1[0]
-    v2 = l2[1] - l2[0]
+def angle(line1: np.array, line2: np.array) -> float:
+    v1, v2 = np.diff(line1), np.diff(line2)
     return np.arccos(
         np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
     )
