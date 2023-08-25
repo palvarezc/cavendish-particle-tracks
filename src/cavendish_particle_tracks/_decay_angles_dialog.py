@@ -118,9 +118,9 @@ class DecayAnglesDialog(QDialog):
         self.phi_pion = angle(self.cal_layer.data[0], self.cal_layer.data[2])
 
         # # Populate the table
-        for i in range(3):
-            self.textboxes_slope[i].setText(str(tracks[i][0]))
-            self.textboxes_intercept[i].setText(str(tracks[i][1]))
+        for slobe, intercept, track in zip(self.textboxes_slope, self.textboxes_intercept, tracks):
+            slope.setText(str(track[0]))
+            intercept.setText(str(track[1]))
 
         self.textboxes_phi[0].setText(str(self.phi_proton))
         self.textboxes_phi[1].setText(str(self.phi_pion))
