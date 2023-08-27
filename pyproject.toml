@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cavendish-particle-tracks"
-description = "A Napari plugin to perform a simple particle tracking analysis for the Cavendish laboratorys Undergraduate Part III Particle Tracks experiment."
+description = "A Napari plugin to perform a simple particle tracking analysis for the Cavendish Laboratory's Undergraduate Part II Particle Tracks experiment."
 authors = [
     {name = "Sam Cunliffe", email = "s.cunliffe@ucl.ac.uk"},
     {name = "Paula Alvarez Cartelle", email = "palvarez@hep.phy.cam.ac.uk"},
