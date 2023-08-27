@@ -2,7 +2,7 @@
 requires = [
     "setuptools>=61.2",
     "setuptools_scm",
-    #"wheel",
+    "wheel",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -64,7 +64,7 @@ testing = [
     "pytest-mock",
     "pytest-qt", # https://pytest-qt.readthedocs.io/en/latest/
     "napari",
-    #"pyqt5",
+    "pyqt5",
 ]
 
 [tool.setuptools]
