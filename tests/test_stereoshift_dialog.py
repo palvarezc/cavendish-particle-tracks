@@ -51,21 +51,21 @@ def test_calculate_stereoshift_ui(make_napari_viewer, points, FS, PS, S, D):
     my_widget.cb.setCurrentIndex(1)
     my_widget._on_click_new_particle()
 
-    my_widget._on_click_stereoshift()
+    dlg = my_widget._on_click_stereoshift()
 
     # move points to parameterised positions
     for i in range(4):
-        my_widget.dlg.cal_layer.data[1 + i] = points[i]
+        dlg.cal_layer.data[1 + i] = points[i]
 
     # record points and calculate
-    my_widget.dlg._on_click_calculate()
+    dlg._on_click_calculate()
 
     # Check recorded points
     for i in range(4):
-        assert my_widget.dlg.textboxes[i].text() == str(points[i])
+        assert dlg.textboxes[i].text() == str(points[i])
 
     # Check calculated values
-    assert my_widget.dlg.tshift_fiducial.text() == str(FS)
-    assert my_widget.dlg.tshift_point.text() == str(PS)
-    assert my_widget.dlg.tstereoshift.text() == str(S)
-    assert my_widget.dlg.tdepth.text() == str(D)
+    assert dlg.tshift_fiducial.text() == str(FS)
+    assert dlg.tshift_point.text() == str(PS)
+    assert dlg.tstereoshift.text() == str(S)
+    assert dlg.tdepth.text() == str(D)

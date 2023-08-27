@@ -63,6 +63,8 @@ class NewParticle:
     magnification_b: float = 0.0
     # magnification: float = -1.0
     event_number: int = -1
+    phi_proton: float = -100
+    phi_pion: float = -100
 
     def _vars_to_show(self, calibrated=False):
         if calibrated:
@@ -72,6 +74,8 @@ class NewParticle:
                 "decay_length_cm",
                 "depth_cm",
                 "magnification",
+                "phi_proton",
+                "phi_pion",
             ]
         else:
             return [
@@ -79,6 +83,9 @@ class NewParticle:
                 "radius_px",
                 "decay_length_px",
                 "depth_cm",
+                "magnification",
+                "phi_proton",
+                "phi_pion",
             ]
 
     @property
