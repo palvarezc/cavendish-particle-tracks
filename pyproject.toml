@@ -55,6 +55,7 @@ cavendish-particle-tracks = "cavendish_particle_tracks:napari.yaml"
 [project.optional-dependencies]
 docs = [
     "sphinx",
+    "sphinx-pyproject", # (take project conf from pyproject.toml) https://sphinx-pyproject.readthedocs.io
     "pydata-sphinx-theme",
 ]
 testing = [
