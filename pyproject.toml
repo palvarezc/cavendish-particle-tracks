@@ -58,6 +58,7 @@ docs = [
     "sphinx-pyproject", # (take project conf from pyproject.toml) https://sphinx-pyproject.readthedocs.io
     "pydata-sphinx-theme",
     "myst-parser",
+    "pyqt5",
 ]
 testing = [
     "tox",
