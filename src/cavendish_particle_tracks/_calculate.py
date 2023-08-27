@@ -2,7 +2,7 @@ from typing import Tuple
 
 import numpy as np
 
-from cavendish_particle_tracks._analysis import (
+from ._analysis import (
     CHAMBER_DEPTH,
     FIDUCIAL_BACK,
     FIDUCIAL_FRONT,
