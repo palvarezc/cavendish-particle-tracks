@@ -67,43 +67,6 @@ testing = [
     "pyqt5",
 ]
 
-[tox]
-envlist =
-    py38
-    py39
-    py310
-    py311
-isolated_build = "true"
-
-[gh-actions]
-python = """
-3.8: py38
-3.9: py39
-3.10: py310
-3.11: py311"""
-
-["gh-actions:env"]
-platform = """
-ubuntu-latest: linux
-macos-latest: macos
-windows-latest: windows"""
-
-[testenv]
-platform = """
-macos: darwin
-linux: linux
-windows: win32"""
-passenv = """
-CI
-GITHUB_ACTIONS
-DISPLAY
-XAUTHORITY
-NUMPY_EXPERIMENTAL_ARRAY_FUNCTION
-PYVISTA_OFF_SCREEN"""
-extras = """
-testing"""
-commands = "pytest -v --color=yes --cov=cavendish_particle_tracks --cov-report=xml"
-
 [tool.setuptools]
 include-package-data = true
 package-dir = {"" = "src"}
@@ -170,3 +133,40 @@ exclude = [
 
 target-version = "py38"
 fix = true
+
+[tool.tox]
+legacy_tox_ini = """
+
+[tox]
+envlist = py{38,39,310,311}-{linux,macos,windows}
+isolated_build=true
+
+[gh-actions]
+python =
+    3.8: py38
+    3.9: py39
+    3.10: py310
+    3.11: py311
+
+[gh-actions:env]
+PLATFORM =
+    ubuntu-latest: linux
+    macos-latest: macos
+    windows-latest: windows
+
+[testenv]
+platform =
+    macos: darwin
+    linux: linux
+    windows: win32
+passenv =
+    CI
+    GITHUB_ACTIONS
+    DISPLAY
+    XAUTHORITY
+    NUMPY_EXPERIMENTAL_ARRAY_FUNCTION
+    PYVISTA_OFF_SCREEN
+extras =
+    testing
+commands = pytest -v --color=yes --cov=cavendish_particle_tracks --cov-report=xml
+"""
