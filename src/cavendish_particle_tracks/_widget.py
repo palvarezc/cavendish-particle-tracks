@@ -27,10 +27,7 @@ from ._analysis import (
     EXPECTED_PARTICLES,
     NewParticle,
 )
-from ._calculate import (
-    length,
-    radius,
-)
+from ._calculate import length, radius
 from ._decay_angles_dialog import DecayAnglesDialog
 from ._magnification_dialog import MagnificationDialog
 from ._stereoshift_dialog import StereoshiftDialog
