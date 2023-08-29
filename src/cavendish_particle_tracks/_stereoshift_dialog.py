@@ -9,10 +9,8 @@ from qtpy.QtWidgets import (
     QTableWidgetItem,
 )
 
-from cavendish_particle_tracks._analysis import (
-    Fiducial,
-)
-from cavendish_particle_tracks._calculate import depth, length, stereoshift
+from ._analysis import Fiducial
+from ._calculate import depth, length, stereoshift
 
 
 class StereoshiftDialog(QDialog):

@@ -11,12 +11,12 @@ from qtpy.QtWidgets import (
     QTableWidgetItem,
 )
 
-from cavendish_particle_tracks._analysis import (
+from ._analysis import (
     FIDUCIAL_BACK,
     FIDUCIAL_FRONT,
     Fiducial,
 )
-from cavendish_particle_tracks._calculate import magnification
+from ._calculate import magnification
 
 
 class MagnificationDialog(QDialog):

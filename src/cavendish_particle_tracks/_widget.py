@@ -23,17 +23,14 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from cavendish_particle_tracks._analysis import (
+from ._analysis import (
     EXPECTED_PARTICLES,
     NewParticle,
 )
-from cavendish_particle_tracks._calculate import (
-    length,
-    radius,
-)
-from cavendish_particle_tracks._decay_angles_dialog import DecayAnglesDialog
-from cavendish_particle_tracks._magnification_dialog import MagnificationDialog
-from cavendish_particle_tracks._stereoshift_dialog import StereoshiftDialog
+from ._calculate import length, radius
+from ._decay_angles_dialog import DecayAnglesDialog
+from ._magnification_dialog import MagnificationDialog
+from ._stereoshift_dialog import StereoshiftDialog
 
 
 class ParticleTracksWidget(QWidget):
