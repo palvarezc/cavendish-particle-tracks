@@ -9,9 +9,7 @@ from qtpy.QtWidgets import (
     QTableWidgetItem,
 )
 
-from ._analysis import (
-    Fiducial,
-)
+from ._analysis import Fiducial
 from ._calculate import depth, length, stereoshift
 
 
