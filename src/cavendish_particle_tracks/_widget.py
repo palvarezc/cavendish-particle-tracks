@@ -7,6 +7,7 @@ see: https://napari.org/stable/plugins/guides.html?#widgets
 Replace code below according to your needs.
 """
 
+from datetime import datetime
 from typing import List
 
 import napari
@@ -22,7 +23,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from datetime import datetime
+
 from ._analysis import (
     EXPECTED_PARTICLES,
     NewParticle,
@@ -347,14 +348,13 @@ class ParticleTracksWidget(QWidget):
             print("Not data to be saved")
             return
 
-        filename = str( datetime.now().strftime("%Y-%m-%d_%H-%M-%S") ) + '.cvs'
-    
-        with open(filename, 'w', encoding='UTF8', newline='') as f:
+        filename = str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + ".cvs"
+
+        with open(filename, "w", encoding="UTF8", newline="") as f:
             # write the header
-            f.write(",".join(self.data[0]._vars_to_save())+"\n")
+            f.write(",".join(self.data[0]._vars_to_save()) + "\n")
 
             # write the data
             f.writelines([particle.to_cvs() for particle in self.data])
 
-        print("Saved data to ",filename)
-
+        print("Saved data to ", filename)

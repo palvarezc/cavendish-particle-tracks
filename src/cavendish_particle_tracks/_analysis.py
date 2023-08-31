@@ -123,9 +123,9 @@ class NewParticle:
     def calibrate(self) -> None:
         self.radius_cm = self.magnification * self.radius_px
         self.decay_length_cm = self.magnification * self.decay_length_px
-   
+
     def to_cvs(self):
         mystring = ""
         for var in self._vars_to_save():
-            mystring+= str(getattr(self,var))+","
-        return mystring[0:-1]+"\n"
+            mystring += str(getattr(self, var)) + ","
+        return mystring[0:-1] + "\n"
