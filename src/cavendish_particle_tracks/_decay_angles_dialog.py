@@ -8,7 +8,7 @@ from qtpy.QtWidgets import (
     QTableWidgetItem,
 )
 
-from cavendish_particle_tracks._calculate import angle, track_parameters
+from ._calculate import angle, track_parameters
 
 
 class DecayAnglesDialog(QDialog):

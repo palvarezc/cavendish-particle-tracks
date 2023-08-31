@@ -1,14 +1,91 @@
 [build-system]
-requires = ["setuptools>=42.0.0", "wheel", "setuptools_scm"]
+requires = [
+    "setuptools>=61.2",
+    "setuptools_scm",
+    "wheel",
+]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "cavendish-particle-tracks"
+description = "A Napari plugin to perform a simple particle tracking analysis for the Cavendish Laboratory's Undergraduate Part II Particle Tracks experiment."
+authors = [
+    {name = "Sam Cunliffe", email = "s.cunliffe@ucl.ac.uk"},
+    {name = "Paula Alvarez Cartelle", email = "palvarez@hep.phy.cam.ac.uk"},
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Framework :: napari",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "napari",
+    "numpy",
+    # magicgui
+    "qtpy",
+]
+dynamic = ["version"]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/samcunliffe/cavendish-particle-tracks"
+"Bug Tracker" = "https://github.com/samcunliffe/cavendish-particle-tracks/issues"
+Documentation = "https://github.com/samcunliffe/cavendish-particle-tracks#readme"
+"Source Code" = "https://github.com/samcunliffe/cavendish-particle-tracks"
+"User Support" = "https://github.com/samcunliffe/cavendish-particle-tracks/issues"
+
+[project.entry-points."napari.manifest"]
+cavendish-particle-tracks = "cavendish_particle_tracks:napari.yaml"
+
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "pydata-sphinx-theme",
+]
+testing = [
+    "tox",
+    "pytest", # https://docs.pytest.org/en/latest/contents.html
+    "pytest-cov", # https://pytest-cov.readthedocs.io/en/latest/
+    "pytest-mock",
+    "pytest-qt", # https://pytest-qt.readthedocs.io/en/latest/
+    "napari",
+    "pyqt5",
+]
+
+[tool.setuptools]
+include-package-data = true
+package-dir = {"" = "src"}
+# add your package requirements here
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
+[tool.setuptools.package-data]
+"*" = ["*.yaml"]
 
 [tool.setuptools_scm]
 write_to = "src/cavendish_particle_tracks/_version.py"
 
 [tool.black]
 line-length = 79
-target-version = ['py38', 'py39', 'py310']
+target-version = ['py38', 'py39', 'py310', 'py311']
 
 
 [tool.ruff]
@@ -56,3 +133,40 @@ exclude = [
 
 target-version = "py38"
 fix = true
+
+[tool.tox]
+legacy_tox_ini = """
+
+[tox]
+envlist = py{38,39,310,311}-{linux,macos,windows}
+isolated_build=true
+
+[gh-actions]
+python =
+    3.8: py38
+    3.9: py39
+    3.10: py310
+    3.11: py311
+
+[gh-actions:env]
+PLATFORM =
+    ubuntu-latest: linux
+    macos-latest: macos
+    windows-latest: windows
+
+[testenv]
+platform =
+    macos: darwin
+    linux: linux
+    windows: win32
+passenv =
+    CI
+    GITHUB_ACTIONS
+    DISPLAY
+    XAUTHORITY
+    NUMPY_EXPERIMENTAL_ARRAY_FUNCTION
+    PYVISTA_OFF_SCREEN
+extras =
+    testing
+commands = pytest -v --color=yes --cov=cavendish_particle_tracks --cov-report=xml
+"""
