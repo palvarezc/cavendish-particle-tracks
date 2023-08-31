@@ -53,6 +53,7 @@ class ParticleTracksWidget(QWidget):
         ang = QPushButton("Calculate decay angles")
         stsh = QPushButton("Stereoshift")
         self.mag = QPushButton("Magnification")
+        save = QPushButton("Save")
 
         # setup particle table
         self.table = self._set_up_table()
@@ -68,6 +69,7 @@ class ParticleTracksWidget(QWidget):
         ang.clicked.connect(self._on_click_decay_angles)
         stsh.clicked.connect(self._on_click_stereoshift)
         self.cal.toggled.connect(self._on_click_apply_magnification)
+        save.clicked.connect(self._on_click_save)
 
         self.mag.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
@@ -85,6 +87,7 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.cal)
         self.layout().addWidget(stsh)
         self.layout().addWidget(self.mag)
+        self.layout().addWidget(self.save)
 
         # Data analysis
         self.data: List[NewParticle] = []
