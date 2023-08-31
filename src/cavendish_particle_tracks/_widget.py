@@ -22,7 +22,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
+from datetime import datetime
 from ._analysis import (
     EXPECTED_PARTICLES,
     NewParticle,
@@ -84,7 +84,7 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.cal)
         self.layout().addWidget(stsh)
         self.layout().addWidget(self.mag)
-        self.layout().addWidget(self.save)
+        self.layout().addWidget(save)
 
         # Data analysis
         self.data: List[NewParticle] = []
@@ -339,3 +339,22 @@ class ParticleTracksWidget(QWidget):
                 self._get_table_column_index("decay_length_cm"),
                 QTableWidgetItem(str(self.data[i].decay_length_cm)),
             )
+
+    def _on_click_save(self) -> None:
+        """Save list of particles to cvs file"""
+
+        if not len(self.data):
+            print("Not data to be saved")
+            return
+
+        filename = str( datetime.now().strftime("%Y-%m-%d_%H-%M-%S") ) + '.cvs'
+    
+        with open(filename, 'w', encoding='UTF8', newline='') as f:
+            # write the header
+            f.write(",".join(self.data[0]._vars_to_save())+"\n")
+
+            # write the data
+            f.writelines([particle.to_cvs() for particle in self.data])
+
+        print("Saved data to ",filename)
+
