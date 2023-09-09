@@ -342,19 +342,19 @@ class ParticleTracksWidget(QWidget):
             )
 
     def _on_click_save(self) -> None:
-        """Save list of particles to cvs file"""
+        """Save list of particles to csv file"""
 
         if not len(self.data):
-            print("Not data to be saved")
+            print("No data to be saved")
             return
 
-        filename = str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + ".cvs"
+        filename = str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + ".csv"
 
         with open(filename, "w", encoding="UTF8", newline="") as f:
             # write the header
             f.write(",".join(self.data[0]._vars_to_save()) + "\n")
 
             # write the data
-            f.writelines([particle.to_cvs() for particle in self.data])
+            f.writelines([particle.to_csv() for particle in self.data])
 
         print("Saved data to ", filename)
