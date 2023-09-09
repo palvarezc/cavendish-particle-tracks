@@ -7,6 +7,7 @@ see: https://napari.org/stable/plugins/guides.html?#widgets
 Replace code below according to your needs.
 """
 
+from datetime import datetime
 from typing import List
 
 import napari
@@ -50,6 +51,7 @@ class ParticleTracksWidget(QWidget):
         ang = QPushButton("Calculate decay angles")
         stsh = QPushButton("Stereoshift")
         self.mag = QPushButton("Magnification")
+        save = QPushButton("Save")
 
         # setup particle table
         self.table = self._set_up_table()
@@ -65,6 +67,7 @@ class ParticleTracksWidget(QWidget):
         ang.clicked.connect(self._on_click_decay_angles)
         stsh.clicked.connect(self._on_click_stereoshift)
         self.cal.toggled.connect(self._on_click_apply_magnification)
+        save.clicked.connect(self._on_click_save)
 
         self.mag.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
@@ -82,6 +85,7 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.cal)
         self.layout().addWidget(stsh)
         self.layout().addWidget(self.mag)
+        self.layout().addWidget(save)
 
         # Data analysis
         self.data: List[NewParticle] = []
@@ -336,3 +340,21 @@ class ParticleTracksWidget(QWidget):
                 self._get_table_column_index("decay_length_cm"),
                 QTableWidgetItem(str(self.data[i].decay_length_cm)),
             )
+
+    def _on_click_save(self) -> None:
+        """Save list of particles to csv file"""
+
+        if not len(self.data):
+            print("No data to be saved")
+            return
+
+        filename = str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + ".csv"
+
+        with open(filename, "w", encoding="UTF8", newline="") as f:
+            # write the header
+            f.write(",".join(self.data[0]._vars_to_save()) + "\n")
+
+            # write the data
+            f.writelines([particle.to_csv() for particle in self.data])
+
+        print("Saved data to ", filename)
