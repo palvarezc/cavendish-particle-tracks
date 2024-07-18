@@ -55,7 +55,10 @@ cavendish-particle-tracks = "cavendish_particle_tracks:napari.yaml"
 [project.optional-dependencies]
 docs = [
     "sphinx",
+    "sphinx-pyproject", # (take project conf from pyproject.toml) https://sphinx-pyproject.readthedocs.io
     "pydata-sphinx-theme",
+    "myst-parser",
+    "pyqt5",
 ]
 testing = [
     "tox",
@@ -170,3 +173,9 @@ extras =
     testing
 commands = pytest -v --color=yes --cov=cavendish_particle_tracks --cov-report=xml
 """
+
+[tool.sphinx-pyproject]
+html_title = "Cavendish Particle Tracks Napari Plugin"
+html_theme = "pydata_sphinx_theme"
+
+extensions = ['sphinx.ext.todo', 'sphinx.ext.viewcode', 'sphinx.ext.autodoc', 'myst_parser']
