@@ -30,6 +30,11 @@ jobs:
       - name: Build HTML documentation with sphinx
         run: sphinx-build -W -b html docs docs/_build/html
 
+      - name: Copy logo over
+        run: |
+            mkdir docs/_build/html/docs
+            cp docs/ParticleCrocodile.png docs/_build/html/docs
+
       - name: Publish documentation on GitHub pages
         if: success() && github.event_name != 'pull_request'
         uses: JamesIves/github-pages-deploy-action@v4
