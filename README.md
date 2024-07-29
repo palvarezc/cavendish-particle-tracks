@@ -1,5 +1,7 @@
 # cavendish-particle-tracks
 
+<p align="center"><img src="./docs/ParticleCrocodile.png" width=300 /></p>
+
 [![License MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/samcunliffe/cavendish-particle-tracks/raw/main/LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)](https://python.org)
 [![ci](https://github.com/samcunliffe/cavendish-particle-tracks/workflows/ci/badge.svg)](https://github.com/samcunliffe/cavendish-particle-tracks/actions)
