@@ -148,9 +148,9 @@ class StereoshiftDialog(QDialog):
             name="Points_Stereoshift",
             text=text,
             size=20,
-            edge_width=7,
-            edge_width_is_relative=False,
-            edge_color=colors,
+            border_width=7,
+            border_width_is_relative=False,
+            border_color=colors,
             face_color=colors,
         )
 
