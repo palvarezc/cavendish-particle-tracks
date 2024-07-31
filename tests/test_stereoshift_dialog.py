@@ -11,6 +11,8 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH as CD
     [
         (
             [
+                np.array([0, 0]),
+                np.array([0, 0]),
                 np.array([0, 2]),
                 np.array([2, 0]),
                 np.array([0, 1]),
@@ -24,14 +26,30 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH as CD
         (
             [
                 np.array([0, 0]),
+                np.array([0, 0]),
+                np.array([0, 2]),
+                np.array([2, 0]),
+                np.array([0, 0]),
+                np.array([1, 0]),
+            ],
+            sqrt(8),
+            1.0,
+            1 / sqrt(8),
+            1 / sqrt(8) * CD,
+        ),
+        (
+            [
+                np.array([0, 1]),
+                np.array([1, 0]),
+                np.array([0, 0]),
                 np.array([2, 2]),
                 np.array([-1, 0]),
                 np.array([0, -1]),
             ],
-            sqrt(8),
-            sqrt(2),
-            0.5,
-            0.5 * CD,
+            sqrt(10),  # sqrt(8)
+            sqrt(0),  # sqrt(2)
+            0.0,  # 0.5
+            0.0 * CD,  # 0.5*CD
         ),
     ],
 )
@@ -54,15 +72,17 @@ def test_calculate_stereoshift_ui(make_napari_viewer, points, FS, PS, S, D):
     dlg = my_widget._on_click_stereoshift()
 
     # move points to parameterised positions
-    for i in range(4):
-        dlg.cal_layer.data[1 + i] = points[i]
+    for i in range(len(points)):
+        dlg.cal_layer.data[i] = points[i]
 
     # record points and calculate
     dlg._on_click_calculate()
 
     # Check recorded points
     for i in range(4):
-        assert dlg.textboxes[i].text() == str(points[i])
+        assert dlg.textboxes[i].text() == str(points[i + 2] - points[i % 2])
+
+    assert dlg.cbf1.currentIndex() == 0
 
     # Check calculated values
     assert dlg.tshift_fiducial.text() == str(FS)
