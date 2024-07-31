@@ -101,8 +101,8 @@ class DecayAnglesDialog(QDialog):
         shapes_layer.add(
             lines,
             shape_type=["line"] * 3,
-            edge_width=5,
-            edge_color=colors,
+            border_width=5,
+            border_color=colors,
             face_color=colors,
         )
 
