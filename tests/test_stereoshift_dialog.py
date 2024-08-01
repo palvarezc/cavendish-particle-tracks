@@ -3,11 +3,11 @@ from math import sqrt
 import numpy as np
 import pytest
 from cavendish_particle_tracks import ParticleTracksWidget
-from cavendish_particle_tracks._analysis import CHAMBER_DEPTH as CD
+from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
 
 
 @pytest.mark.parametrize(
-    "points, FS, PS, S, D",
+    "test_points, expected_fiducial_shift, expected_point_shift, expected_stereoshift, expected_depth",
     [
         (
             [
@@ -21,7 +21,7 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH as CD
             sqrt(8),
             sqrt(2),
             0.5,
-            0.5 * CD,
+            0.5 * CHAMBER_DEPTH,
         ),
         (
             [
@@ -35,7 +35,7 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH as CD
             sqrt(8),
             1.0,
             1 / sqrt(8),
-            1 / sqrt(8) * CD,
+            1 / sqrt(8) * CHAMBER_DEPTH,
         ),
         (
             [
@@ -49,11 +49,18 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH as CD
             sqrt(10),
             sqrt(0),
             0.0,
-            0.0 * CD,
+            0.0 * CHAMBER_DEPTH,
         ),
     ],
 )
-def test_calculate_stereoshift_ui(make_napari_viewer, points, FS, PS, S, D):
+def test_calculate_stereoshift_ui(
+    make_napari_viewer,
+    test_points,
+    expected_fiducial_shift,
+    expected_point_shift,
+    expected_stereoshift,
+    expected_depth,
+):
     """Test the expected behavior from the expected workflow:
 
     - Open stereoshift dialog when clicked
@@ -72,20 +79,22 @@ def test_calculate_stereoshift_ui(make_napari_viewer, points, FS, PS, S, D):
     dlg = my_widget._on_click_stereoshift()
 
     # move points to parameterised positions
-    for i in range(len(points)):
-        dlg.cal_layer.data[i] = points[i]
+    for i in range(len(test_points)):
+        dlg.cal_layer.data[i] = test_points[i]
 
     # record points and calculate
     dlg._on_click_calculate()
 
     # Check recorded points
     for i in range(4):
-        assert dlg.textboxes[i].text() == str(points[i + 2] - points[i % 2])
+        assert dlg.textboxes[i].text() == str(
+            test_points[i + 2] - test_points[i % 2]
+        )
 
     assert dlg.cbf1.currentIndex() == 0
 
     # Check calculated values
-    assert dlg.tshift_fiducial.text() == str(FS)
-    assert dlg.tshift_point.text() == str(PS)
-    assert dlg.tstereoshift.text() == str(S)
-    assert dlg.tdepth.text() == str(D)
+    assert dlg.tshift_fiducial.text() == str(expected_fiducial_shift)
+    assert dlg.tshift_point.text() == str(expected_point_shift)
+    assert dlg.tstereoshift.text() == str(expected_stereoshift)
+    assert dlg.tdepth.text() == str(expected_depth)
