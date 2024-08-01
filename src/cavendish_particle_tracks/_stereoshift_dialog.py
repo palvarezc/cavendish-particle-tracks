@@ -216,22 +216,6 @@ class StereoshiftDialog(QDialog):
             )
             self.textboxes[i].setText(str(self._fiducial_views[i].xy))
 
-        # # Calculate shift in reference point
-        # _ref1 = Fiducial(self.cal_layer.text.string.array[0])
-        # _ref2 = Fiducial(self.cal_layer.text.string.array[2])
-        # (_ref1.x, _ref1.y) = self.cal_layer.data[0]
-        # (_ref2.x, _ref2.y) = self.cal_layer.data[1]
-
-        # self.f(1).x = self.f(1).x - _ref1.x
-        # self.f(1).y = self.f(1).y - _ref1.y
-        # self.f(2).x = self.f(2).x - _ref2.x
-        # self.f(2).y = self.f(2).y - _ref2.y
-
-        # self.b(1).x = self.b(1).x - _ref1.x
-        # self.b(1).y = self.b(1).y - _ref1.y
-        # self.b(2).x = self.b(2).x - _ref2.x
-        # self.b(2).y = self.b(2).y - _ref2.y
-
         # Calculate stereoshift and depth
         self.shift_fiducial = length(self.f(1).xy, self.f(2).xy)
         self.shift_point = length(self.b(1).xy, self.b(2).xy)
