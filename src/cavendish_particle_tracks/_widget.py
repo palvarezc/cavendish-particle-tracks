@@ -177,7 +177,7 @@ class ParticleTracksWidget(QWidget):
             )
             return
         else:
-            napari.utils.notifactions.show_info(
+            napari.utils.notifications.show_info(
                 "Adding points to the table: ", selected_points
             )
 
@@ -237,7 +237,7 @@ class ParticleTracksWidget(QWidget):
             )
             return
         else:
-            napari.utils.notifactions.show_info(
+            napari.utils.notifications.show_info(
                 "Adding points to the table: ", selected_points
             )
 
