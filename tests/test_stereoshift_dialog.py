@@ -46,10 +46,10 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH as CD
                 np.array([-1, 0]),
                 np.array([0, -1]),
             ],
-            sqrt(10),  # sqrt(8)
-            sqrt(0),  # sqrt(2)
-            0.0,  # 0.5
-            0.0 * CD,  # 0.5*CD
+            sqrt(10),
+            sqrt(0),
+            0.0,
+            0.0 * CD,
         ),
     ],
 )
