@@ -167,18 +167,18 @@ class ParticleTracksWidget(QWidget):
 
         # Forcing only 3 points
         if len(selected_points) == 0:
-            napari.utils.notifications.show_warning(
+            napari.utils.notifications.show_error(
                 "You have not selected any points."
             )
             return
         elif len(selected_points) != 3:
             napari.utils.notifications.show_error(
-                "Select three points to calculate the decay length."
+                "Select three points to calculate the path radius."
             )
             return
         else:
             napari.utils.notifications.show_info(
-                "Adding points to the table: ", selected_points
+                f"Adding points to the table: {selected_points}"
             )
 
         # Assigns the points and radius to the selected row
@@ -227,7 +227,7 @@ class ParticleTracksWidget(QWidget):
 
         # Force selection of 2 points
         if len(selected_points) == 0:
-            napari.utils.notifications.show_warning(
+            napari.utils.notifications.show_error(
                 "You have not selected any points."
             )
             return
@@ -238,7 +238,7 @@ class ParticleTracksWidget(QWidget):
             return
         else:
             napari.utils.notifications.show_info(
-                "Adding points to the table: ", selected_points
+                f"Adding points to the table: {selected_points}"
             )
 
         # Forcing only 2 points
