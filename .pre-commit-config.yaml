@@ -1,11 +1,12 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.6.0
     hooks:
       - id: check-docstring-first
         description: Checks that code is placed after the docstring
-      - id: check-illegal-windows-names
-        description: Prevents the use of filenames that are incompatible with Windows
+      # TODO: uncomment the following when pre-commit-hooks v4.7.0 is released!
+      # - id: check-illegal-windows-names
+      #   description: Prevents the use of filenames that are incompatible with Windows
       - id: end-of-file-fixer
         description: Ensures files end in a newline.
       - id: trailing-whitespace
