@@ -420,10 +420,15 @@ document.write(`
         <span class="n">points_layers</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">layer</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">layers</span> <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">layer_name</span>
         <span class="p">]</span>
-        <span class="n">selected_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">points_layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">points_layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">selected_data</span><span class="p">]</span>
-        <span class="p">)</span>
-
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">selected_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">points_layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">points_layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">selected_data</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">selected_points</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">return</span> <span class="n">selected_points</span>
 
     <span class="k">def</span> <span class="nf">_get_selected_row</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
@@ -481,10 +486,20 @@ document.write(`
         <span class="n">selected_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_points</span><span class="p">()</span>
 
         <span class="c1"># Forcing only 3 points</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_points</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Select (only) three points to calculate the decay radius.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
+                <span class="s2">&quot;You have not selected any points.&quot;</span>
+            <span class="p">)</span>
             <span class="k">return</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Adding points to the table: &quot;</span><span class="p">,</span> <span class="n">selected_points</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_points</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
+                <span class="s2">&quot;Select three points to calculate the path radius.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Adding points to the table: </span><span class="si">{</span><span class="n">selected_points</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Assigns the points and radius to the selected row</span>
         <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
@@ -529,6 +544,22 @@ document.write(`
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">selected_points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_points</span><span class="p">()</span>
+
+        <span class="c1"># Force selection of 2 points</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
+                <span class="s2">&quot;You have not selected any points.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_points</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
+                <span class="s2">&quot;Select two points to calculate the decay length.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Adding points to the table: </span><span class="si">{</span><span class="n">selected_points</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Forcing only 2 points</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_points</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
