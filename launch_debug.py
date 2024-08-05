@@ -1,5 +1,6 @@
 # launch this file in debug mode in your desired IDE with breakpoints added where relevant
 # launch_napari.py
+
 from napari import Viewer, run
 
 viewer = Viewer()
