@@ -100,10 +100,15 @@ class ParticleTracksWidget(QWidget):
         points_layers = [
             layer for layer in self.viewer.layers if layer.name == layer_name
         ]
-        selected_points = np.array(
-            [points_layers[0].data[i] for i in points_layers[0].selected_data]
-        )
-
+        try:
+            selected_points = np.array(
+                [
+                    points_layers[0].data[i]
+                    for i in points_layers[0].selected_data
+                ]
+            )
+        except IndexError:
+            selected_points = []
         return selected_points
 
     def _get_selected_row(self) -> np.array:
@@ -162,10 +167,20 @@ class ParticleTracksWidget(QWidget):
         selected_points = self._get_selected_points()
 
         # Forcing only 3 points
-        if len(selected_points) != 3:
-            print("Select (only) three points to calculate the decay radius.")
+        if len(selected_points) == 0:
+            napari.utils.notifications.show_error(
+                "You have not selected any points."
+            )
             return
-        print("Adding points to the table: ", selected_points)
+        elif len(selected_points) != 3:
+            napari.utils.notifications.show_error(
+                "Select three points to calculate the path radius."
+            )
+            return
+        else:
+            napari.utils.notifications.show_info(
+                f"Adding points to the table: {selected_points}"
+            )
 
         # Assigns the points and radius to the selected row
         selected_row = self._get_selected_row()
@@ -210,6 +225,22 @@ class ParticleTracksWidget(QWidget):
         """
 
         selected_points = self._get_selected_points()
+
+        # Force selection of 2 points
+        if len(selected_points) == 0:
+            napari.utils.notifications.show_error(
+                "You have not selected any points."
+            )
+            return
+        elif len(selected_points) != 2:
+            napari.utils.notifications.show_error(
+                "Select two points to calculate the decay length."
+            )
+            return
+        else:
+            napari.utils.notifications.show_info(
+                f"Adding points to the table: {selected_points}"
+            )
 
         # Forcing only 2 points
         if len(selected_points) != 2:
