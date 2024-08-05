@@ -72,11 +72,9 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
     captured = capsys.readouterr()
 
     assert (
-        "Select (only) three points to calculate the decay radius."
+        "ERROR: Select three points to calculate the path radius."
         in captured.out
     )
-    # TODO: makes more sense to move this to the napari error window. See issue
-    # #27. Then this test needs to check for warnings or whatever.
 
 
 def test_add_new_particle_ui(make_napari_viewer, capsys):
@@ -151,8 +149,6 @@ def test_calculate_length_fails_with_wrong_number_of_points(
     captured = capsys.readouterr()
 
     assert (
-        "Select (only) two points to calculate the decay length."
+        "ERROR: Select two points to calculate the decay length."
         in captured.out
     )
-    # TODO: makes more sense to move this to the napari error window. See issue
-    # #27. Then this test needs to check for warnings or whatever.
