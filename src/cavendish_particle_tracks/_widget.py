@@ -26,6 +26,7 @@ from qtpy.QtWidgets import (
 
 from ._analysis import (
     EXPECTED_PARTICLES,
+    FIDUCIALS,
     NewParticle,
 )
 from ._calculate import length, radius
@@ -42,16 +43,20 @@ class ParticleTracksWidget(QWidget):
         self.viewer = napari_viewer
 
         # define QtWidgets
+        # why is this self. and the others added after?
         self.cb = QComboBox()
         self.cb.addItems(EXPECTED_PARTICLES)
         self.cb.setCurrentIndex(0)
         self.cb.currentIndexChanged.connect(self._on_click_new_particle)
-        rad = QPushButton("Calculate radius")
-        lgth = QPushButton("Calculate length")
-        ang = QPushButton("Calculate decay angles")
-        stsh = QPushButton("Stereoshift")
+        btn_radius = QPushButton("Calculate radius")
+        btn_length = QPushButton("Calculate length")
+        btn_decayangle = QPushButton("Calculate decay angles")
+        cmb_fiducial = QComboBox()
+        cmb_fiducial.addItems(FIDUCIALS)
+        cmb_fiducial.currentIndexChanged.connect(self._on_click_add_fiducial)
+        btn_stereoshift = QPushButton("Stereoshift")
+        btn_save = QPushButton("Save")
         self.mag = QPushButton("Magnification")
-        save = QPushButton("Save")
 
         # setup particle table
         self.table = self._set_up_table()
@@ -62,12 +67,13 @@ class ParticleTracksWidget(QWidget):
         self.cal.setEnabled(False)
 
         # connect callbacks
-        rad.clicked.connect(self._on_click_radius)
-        lgth.clicked.connect(self._on_click_length)
-        ang.clicked.connect(self._on_click_decay_angles)
-        stsh.clicked.connect(self._on_click_stereoshift)
+        # NOTE: This isn't consistent in the code structure. Connects for the combobox etc have been done above.
+        btn_radius.clicked.connect(self._on_click_radius)
+        btn_length.clicked.connect(self._on_click_length)
+        btn_decayangle.clicked.connect(self._on_click_decay_angles)
+        btn_stereoshift.clicked.connect(self._on_click_stereoshift)
         self.cal.toggled.connect(self._on_click_apply_magnification)
-        save.clicked.connect(self._on_click_save)
+        btn_save.clicked.connect(self._on_click_save)
 
         self.mag.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
@@ -78,14 +84,15 @@ class ParticleTracksWidget(QWidget):
         # layout
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.cb)
-        self.layout().addWidget(rad)
-        self.layout().addWidget(lgth)
-        self.layout().addWidget(ang)
+        self.layout().addWidget(btn_radius)
+        self.layout().addWidget(btn_length)
+        self.layout().addWidget(btn_decayangle)
         self.layout().addWidget(self.table)
         self.layout().addWidget(self.cal)
-        self.layout().addWidget(stsh)
+        self.layout().addWidget(btn_stereoshift)
         self.layout().addWidget(self.mag)
-        self.layout().addWidget(save)
+        self.layout().addWidget(cmb_fiducial)
+        self.layout().addWidget(btn_save)
 
         # Data analysis
         self.data: List[NewParticle] = []
@@ -389,3 +396,16 @@ class ParticleTracksWidget(QWidget):
             f.writelines([particle.to_csv() for particle in self.data])
 
         print("Saved data to ", filename)
+
+    def _on_click_add_fiducial(self) -> None:
+        """Adds a fiducial marker to the layer."""
+        # currently, this is implemented by adding the layer, then a point.
+        # ideally this should resemble the inbuilt tools, but let's get it working first.
+
+        # I want to look at setup_stereoshift_layer in _stereoshift_dialog.py
+        point = [
+            100,
+            100,
+        ]  # this should be done properly later, currently copying the old approach
+
+        print("This is a placeholder function.")

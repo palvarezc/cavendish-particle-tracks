@@ -20,6 +20,8 @@ FIDUCIAL_BACK = {
 }  # cm
 
 EXPECTED_PARTICLES = ["New particle", "Σ+", "Σ-", "Λ0"]
+FIDUCIALS = ["New Fiducial, A, A', B, B', C, C', D, D', E, F, F'"]
+# TODO: This needs to be updated to merge the marking of the fiducials here with the calculated values in the analysis.
 
 
 @dataclass
