@@ -15,18 +15,26 @@ from ._calculate import depth, length, stereoshift
 
 class StereoshiftDialog(QDialog):
     def __init__(self, parent=None):
+        # Call parent constructor
         super().__init__(parent)
 
+        # Declare instance variables + constants
         self.parent = parent
-
-        self.setWindowTitle("Stereoshift")
-
         FIDUCIAL_VIEWS = [
             "Back fiducial view1",
             "Back fiducial view2",
             "Point view1",
             "Point view2",
         ]
+        # Stereoshift related parameters
+        self.shift_fiducial = 0.0
+        self.shift_point = 0.0
+        self.point_stereoshift = 0.0
+        self.point_depth = -1.0
+        self.spoints = []
+
+        # region UI Setup
+        self.setWindowTitle("Stereoshift")
         self._fiducial_views = [
             Fiducial(view_name) for view_name in FIDUCIAL_VIEWS
         ]
@@ -110,16 +118,10 @@ class StereoshiftDialog(QDialog):
         self.layout().addWidget(self.tdepth, 12, 2)
         self.layout().addWidget(bap, 13, 0, 1, 3)
         self.layout().addWidget(self.buttonBox, 14, 0, 1, 3)
+        # endregion
 
-        # Setup points layer
+        # Setup points layer with stereoshift markers
         self.cal_layer = self._setup_stereoshift_layer()
-
-        # Stereoshift related parameters
-        self.shift_fiducial = 0.0
-        self.shift_point = 0.0
-        self.point_stereoshift = 0.0
-        self.point_depth = -1.0
-        self.spoints = []
 
     def _setup_stereoshift_layer(self):
         # add the points
