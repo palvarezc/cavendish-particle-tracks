@@ -402,10 +402,27 @@ class ParticleTracksWidget(QWidget):
         # currently, this is implemented by adding the layer, then a point.
         # ideally this should resemble the inbuilt tools, but let's get it working first.
 
-        # I want to look at setup_stereoshift_layer in _stereoshift_dialog.py
-        point = [
-            100,
-            100,
-        ]  # this should be done properly later, currently copying the old approach
-
+        point = [100, 100]
+        # this should be done properly later, currently copying the old approach
+        # get below to reference the currently selected fiducial in the combobox
+        name = "Example C'"
+        point_label = {
+            "string": name,
+            "size": 20,
+            "color": "green",
+            "translation": np.array([-30, 0]),
+        }
+        # see stereoshift_dialog
+        # create a points layer here if one doesn't exist.
+        # reuse code from other sections here to achieve that.
+        points_layer = self.parent.viewer.add_point(
+            point,
+            name="Fiducials",
+            # text=...
+            # size=20,
+            border_width=5,
+            # border_width_is_relative=True,
+            # border_color=colors,
+            # face_color=colors,
+        )
         print("This is a placeholder function.")

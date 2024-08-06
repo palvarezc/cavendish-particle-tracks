@@ -149,9 +149,6 @@ class StereoshiftDialog(QDialog):
             "translation": np.array([-30, 0]),
         }
 
-        # create a points layer where the face_color is set by the good_point feature
-        # and the edge_color is set via a color map (grayscale) on the confidence
-        # feature.
         points_layer = self.parent.viewer.add_points(
             points,
             name="Points_Stereoshift",
@@ -162,9 +159,6 @@ class StereoshiftDialog(QDialog):
             border_color=colors,
             face_color=colors,
         )
-
-        # set the edge_color mode to colormap
-        # points_layer.edge_color_mode = 'colormap'
 
         return points_layer
 
