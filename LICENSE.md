@@ -2,6 +2,7 @@
 # The MIT License (MIT)
 
 Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle
+              2024 Joseph Garvey
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
