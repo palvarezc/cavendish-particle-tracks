@@ -12,6 +12,7 @@ from typing import List
 
 import napari
 import numpy as np
+from dask_image.imread import imread
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
     QAbstractItemView,
@@ -42,6 +43,7 @@ class ParticleTracksWidget(QWidget):
         self.viewer = napari_viewer
 
         # define QtWidgets
+        self.load = QPushButton("Load data")
         self.cb = QComboBox()
         self.cb.addItems(EXPECTED_PARTICLES)
         self.cb.setCurrentIndex(0)
@@ -62,6 +64,7 @@ class ParticleTracksWidget(QWidget):
         self.cal.setEnabled(False)
 
         # connect callbacks
+        self.load.clicked.connect(self._on_click_load_data)
         rad.clicked.connect(self._on_click_radius)
         lgth.clicked.connect(self._on_click_length)
         ang.clicked.connect(self._on_click_decay_angles)
@@ -77,6 +80,7 @@ class ParticleTracksWidget(QWidget):
 
         # layout
         self.setLayout(QVBoxLayout())
+        self.layout().addWidget(self.load)
         self.layout().addWidget(self.cb)
         self.layout().addWidget(rad)
         self.layout().addWidget(lgth)
@@ -157,6 +161,15 @@ class ParticleTracksWidget(QWidget):
 
         print("Column ", columntext, " not in the table")
         return -1
+
+    def _on_click_load_data(self) -> None:
+        """When the 'Load data' button is clicked, the data is loaded as a stack."""
+
+        stack_view1 = imread("./tests/data/View1*.tiff")
+        stack_view2 = imread("./tests/data/View2*.tiff")
+        self.imview1 = self.viewer.add_image(stack_view1, name="View1")
+        self.imview2 = self.viewer.add_image(stack_view2, name="View2")
+        # TODO: investigate the multiscale otption.
 
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
