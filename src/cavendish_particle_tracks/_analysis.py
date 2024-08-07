@@ -19,6 +19,8 @@ FIDUCIAL_BACK = {
     "A": [-15.00, 8.68],
 }  # cm
 
+VIEW_NAMES = ["Load data", "View1", "View2", "View3"]
+
 EXPECTED_PARTICLES = ["New particle", "Σ+", "Σ-", "Λ0"]
 
 

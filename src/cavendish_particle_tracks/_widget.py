@@ -17,6 +17,7 @@ from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
+    QFileDialog,
     QPushButton,
     QRadioButton,
     QTableWidget,
@@ -27,6 +28,7 @@ from qtpy.QtWidgets import (
 
 from ._analysis import (
     EXPECTED_PARTICLES,
+    VIEW_NAMES,
     NewParticle,
 )
 from ._calculate import length, radius
@@ -43,7 +45,10 @@ class ParticleTracksWidget(QWidget):
         self.viewer = napari_viewer
 
         # define QtWidgets
-        self.load = QPushButton("Load data")
+        self.load = QComboBox()
+        self.load.addItems(VIEW_NAMES)
+        self.load.setCurrentIndex(0)
+        self.load.currentIndexChanged.connect(self._on_click_load_data)
         self.cb = QComboBox()
         self.cb.addItems(EXPECTED_PARTICLES)
         self.cb.setCurrentIndex(0)
@@ -64,7 +69,6 @@ class ParticleTracksWidget(QWidget):
         self.cal.setEnabled(False)
 
         # connect callbacks
-        self.load.clicked.connect(self._on_click_load_data)
         rad.clicked.connect(self._on_click_radius)
         lgth.clicked.connect(self._on_click_length)
         ang.clicked.connect(self._on_click_decay_angles)
@@ -161,15 +165,6 @@ class ParticleTracksWidget(QWidget):
 
         print("Column ", columntext, " not in the table")
         return -1
-
-    def _on_click_load_data(self) -> None:
-        """When the 'Load data' button is clicked, the data is loaded as a stack."""
-
-        stack_view1 = imread("./tests/data/View1*.tiff")
-        stack_view2 = imread("./tests/data/View2*.tiff")
-        self.imview1 = self.viewer.add_image(stack_view1, name="View1")
-        self.imview2 = self.viewer.add_image(stack_view2, name="View2")
-        # TODO: investigate the multiscale otption.
 
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
@@ -307,6 +302,28 @@ class ParticleTracksWidget(QWidget):
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         dlg.move(point)
         return dlg
+
+    def _on_click_load_data(self) -> None:
+        """When the 'Load data' button is clicked, a dialog opens to select the folder where the data is.
+        The data in the folder is loaded as a stack of images, and the stack is named according to the option selected.
+        """
+
+        if self.load.currentIndex() < 1:
+            return
+
+        folder_name = QFileDialog.getExistingDirectory(
+            self, "Open Folder", "./"
+        )
+        stack = imread(folder_name + "/*")
+        self.viewer.add_image(stack, name=self.load.currentText())
+
+        # stack_view1 = imread("./tests/data/View1*.tiff")
+        # stack_view2 = imread("./tests/data/View2*.tiff")
+        # self.imview1 = self.viewer.add_image(stack_view1, name="View1")
+        # self.imview2 = self.viewer.add_image(stack_view2, name="View2")
+        # TODO: investigate the multiscale otption.
+
+        self.load.setCurrentIndex(0)
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
