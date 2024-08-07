@@ -133,6 +133,7 @@ class ParticleTracksWidget(QWidget):
         out.setHorizontalHeaderLabels(self.columns)
         out.setSelectionBehavior(QAbstractItemView.SelectRows)
         out.setSelectionMode(QAbstractItemView.SingleSelection)
+        out.setEditTriggers(QAbstractItemView.NoEditTriggers)
         return out
 
     def _set_table_visible_vars(self, calibrated) -> None:
