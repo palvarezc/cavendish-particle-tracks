@@ -28,6 +28,7 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
+    "imagecodecs",
     "napari>=0.4.18, <0.5.0",
     "numpy",
     # magicgui
