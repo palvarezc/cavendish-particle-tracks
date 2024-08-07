@@ -22,3 +22,6 @@ We also use `pre-commit` to ensure uniform code style.
 
 Open PRs without a reviewer can be treated as a draft. When a reviewer is added this counts as ready for review.
 (When open source we'll use proper drafts.)
+
+
+[tox]: https://tox.readthedocs.io/en/latest/
