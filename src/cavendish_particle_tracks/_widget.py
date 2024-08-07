@@ -7,11 +7,13 @@ see: https://napari.org/stable/plugins/guides.html?#widgets
 Replace code below according to your needs.
 """
 
+import os
 from datetime import datetime
 from typing import List
 
 import napari
 import numpy as np
+import skimage as ski
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
     QAbstractItemView,
@@ -46,12 +48,17 @@ class ParticleTracksWidget(QWidget):
         self.cb.addItems(EXPECTED_PARTICLES)
         self.cb.setCurrentIndex(0)
         self.cb.currentIndexChanged.connect(self._on_click_new_particle)
-        rad = QPushButton("Calculate radius")
-        lgth = QPushButton("Calculate length")
-        ang = QPushButton("Calculate decay angles")
-        stsh = QPushButton("Stereoshift")
-        self.mag = QPushButton("Magnification")
-        save = QPushButton("Save")
+        btn_import = QPushButton("Import Dataset")
+        btn_radius = QPushButton("Calculate radius")
+        btn_lgth = QPushButton("Calculate length")
+        btn_decay_angles = QPushButton("Calculate decay angles")
+        btn_stereoshift = QPushButton("Stereoshift")
+        self.btn_magnification = QPushButton("Magnification")
+        btn_event_next = QPushButton("Next event")
+        btn_event_prev = QPushButton("Previous event")
+        btn_img_next = QPushButton("Next image")
+        btn_img_prev = QPushButton("Previous image")
+        btn_save = QPushButton("Save")
 
         # setup particle table
         self.table = self._set_up_table()
@@ -62,14 +69,19 @@ class ParticleTracksWidget(QWidget):
         self.cal.setEnabled(False)
 
         # connect callbacks
-        rad.clicked.connect(self._on_click_radius)
-        lgth.clicked.connect(self._on_click_length)
-        ang.clicked.connect(self._on_click_decay_angles)
-        stsh.clicked.connect(self._on_click_stereoshift)
+        btn_import.clicked.connect(self._on_click_import)
+        btn_radius.clicked.connect(self._on_click_radius)
+        btn_lgth.clicked.connect(self._on_click_length)
+        btn_decay_angles.clicked.connect(self._on_click_decay_angles)
+        btn_stereoshift.clicked.connect(self._on_click_stereoshift)
         self.cal.toggled.connect(self._on_click_apply_magnification)
-        save.clicked.connect(self._on_click_save)
+        btn_event_next.clicked.connect(self._on_click_event_next)
+        btn_event_prev.clicked.connect(self._on_click_event_prev)
+        btn_img_next.clicked.connect(self._on_click_img_next)
+        btn_img_prev.clicked.connect(self._on_click_img_prev)
+        btn_save.clicked.connect(self._on_click_save)
 
-        self.mag.clicked.connect(self._on_click_magnification)
+        self.btn_magnification.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
         # https://napari.org/stable/gallery/custom_mouse_functions.html
         # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
@@ -77,21 +89,37 @@ class ParticleTracksWidget(QWidget):
 
         # layout
         self.setLayout(QVBoxLayout())
+        self.layout().addWidget(btn_import)
         self.layout().addWidget(self.cb)
-        self.layout().addWidget(rad)
-        self.layout().addWidget(lgth)
-        self.layout().addWidget(ang)
+        self.layout().addWidget(btn_radius)
+        self.layout().addWidget(btn_lgth)
+        self.layout().addWidget(btn_decay_angles)
         self.layout().addWidget(self.table)
         self.layout().addWidget(self.cal)
-        self.layout().addWidget(stsh)
-        self.layout().addWidget(self.mag)
-        self.layout().addWidget(save)
+        self.layout().addWidget(btn_stereoshift)
+        self.layout().addWidget(self.btn_magnification)
+        self.layout().addWidget(btn_save)
+        self.layout().addWidget(btn_event_next)
+        self.layout().addWidget(btn_event_prev)
+        self.layout().addWidget(btn_img_next)
+        self.layout().addWidget(btn_img_prev)
+        self.layout().addWidget(btn_save)
 
         # Data analysis
         self.data: List[NewParticle] = []
         # might not need this eventually
         self.mag_a = -1.0
         self.mag_b = 0.0
+
+    def _on_click_import(self) -> None:
+        """This is a skeleton function to import a dataset into the widget."""
+        # possible approaches, using SKIMage, BioIO or just read the data folder?
+        # https://napari.org/dev/api/napari.Viewer.html#napari.Viewer.open
+        # https://github.com/bioio-devs/bioio?tab=readme-ov-file
+        # https://github.com/guiwitz/napari-serialcellpose/tree/main
+        # self.viewer.open()
+        # img = ski.io.imread(filename)
+        # self.viewer.add_image()
 
     def _get_selected_points(self, layer_name="Points") -> np.array:
         """Returns array of selected points in the viewer"""
@@ -372,6 +400,44 @@ class ParticleTracksWidget(QWidget):
                 self._get_table_column_index("decay_length_cm"),
                 QTableWidgetItem(str(self.data[i].decay_length_cm)),
             )
+
+    def _on_click_event_next(self) -> None:
+        """When the 'Next event' button is clicked, select the next row in the table"""
+
+    def _on_click_event_prev(self) -> None:
+        """When the 'Previous event' button is clicked, select the previous row in the table"""
+
+    def _on_click_img_next(self) -> None:
+        """When the 'Next image' button is clicked, switch to the next image in the stack"""
+        # Check if there are images in the stack
+        if len(self.image_stack) == 0:
+            return
+
+        # Increment the current image index
+        self.current_image_index += 1
+
+        # Wrap around to the first image if the index exceeds the stack size
+        if self.current_image_index >= len(self.image_stack):
+            self.current_image_index = 0
+
+        # Update the displayed image
+        self.display_image(self.image_stack[self.current_image_index])
+
+    def _on_click_img_prev(self) -> None:
+        """When the 'Next image' button is clicked, switch to the next image in the stack"""
+        # Check if there are images in the stack
+        if len(self.image_stack) == 0:
+            return
+
+        # Increment the current image index
+        self.current_image_index -= 1
+
+        # Wrap around to the first image if the index exceeds the stack size
+        if self.current_image_index >= len(self.image_stack):
+            self.current_image_index = 0
+
+        # Update the displayed image
+        self.display_image(self.image_stack[self.current_image_index])
 
     def _on_click_save(self) -> None:
         """Save list of particles to csv file"""

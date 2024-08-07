@@ -12,6 +12,7 @@ description = "A Napari plugin to perform a simple particle tracking analysis fo
 authors = [
     {name = "Sam Cunliffe", email = "s.cunliffe@ucl.ac.uk"},
     {name = "Paula Alvarez Cartelle", email = "palvarez@hep.phy.cam.ac.uk"},
+    {name = "Joe Garvey", email = "jmg237@cam.ac.uk"}
 ]
 license = {text = "MIT"}
 classifiers = [
@@ -35,6 +36,7 @@ dependencies = [
     "numpy",
     # magicgui
     "qtpy",
+    "skimage"
 ]
 dynamic = ["version"]
 
@@ -164,7 +166,7 @@ platform =
     windows: win32
 passenv =
     CI
-    GITHUB_ACTIONS
+    GITHUB_ACTIONSg
     DISPLAY
     XAUTHORITY
     NUMPY_EXPERIMENTAL_ARRAY_FUNCTION
