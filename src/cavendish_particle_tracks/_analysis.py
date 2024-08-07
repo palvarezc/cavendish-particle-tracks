@@ -21,7 +21,14 @@ FIDUCIAL_BACK = {
 
 VIEW_NAMES = ["Load data", "View1", "View2", "View3"]
 
-EXPECTED_PARTICLES = ["New particle", "Σ+", "Σ-", "Λ0"]
+EXPECTED_PARTICLES = [
+    "New particle",
+    "Σ⁺ ⇨ p + π⁰",
+    "Σ⁺ ⇨ n + π⁺",
+    "Σ⁻ ⇨ n + π⁻",
+    "Λ⁰ ⇨ p + π⁻",
+    "Λ⁰ ⇨ n + π⁰",
+]
 
 
 @dataclass
