@@ -8,6 +8,7 @@ description = "A Napari plugin to perform a simple particle tracking analysis fo
 authors = [
     { name = "Sam Cunliffe", email = "s.cunliffe@ucl.ac.uk" },
     { name = "Paula Alvarez Cartelle", email = "palvarez@hep.phy.cam.ac.uk" },
+    { name = "Joseph Garvey", email = "jmg237@cam.ac.uk" },
 ]
 license = { text = "MIT" }
 classifiers = [
