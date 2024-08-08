@@ -27,7 +27,9 @@ EXPECTED_PARTICLES = [
     "Λ⁰ ⇨ p + π⁻",
     "Λ⁰ ⇨ n + π⁰",
 ]
-FIDUCIALS = ["New Fiducial"] + FIDUCIAL_FRONT + FIDUCIAL_BACK
+FIDUCIALS = (
+    ["New Fiducial"] + list(FIDUCIAL_FRONT.keys()) + list(FIDUCIAL_BACK.keys())
+)
 # TODO: This needs to be updated to merge the marking of the fiducials here with the calculated values in the analysis.
 
 
