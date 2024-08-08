@@ -91,7 +91,7 @@ def test_calculate_stereoshift_ui(
             test_points[i + 2] - test_points[i % 2]
         )
 
-    assert dlg.cbf1.currentIndex() == 0
+    assert dlg.cmb_ref_fiducial.currentIndex() == 0
 
     # Check calculated values
     assert dlg.tshift_fiducial.text() == str(expected_fiducial_shift)
