@@ -2,7 +2,6 @@ from math import sqrt
 
 import numpy as np
 import pytest
-from cavendish_particle_tracks import ParticleTracksWidget
 from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
 
 
@@ -54,7 +53,7 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
     ],
 )
 def test_calculate_stereoshift_ui(
-    make_napari_viewer,
+    cpt_widget,
     test_points,
     expected_fiducial_shift,
     expected_point_shift,
@@ -68,15 +67,11 @@ def test_calculate_stereoshift_ui(
     - Calculate shift_fiducial, shift_point, stereoshift and depth.
     - The textboxes should be updated.
     """
-    viewer = make_napari_viewer()
-    viewer.add_image(np.random.random((100, 100)))
-    my_widget = ParticleTracksWidget(viewer)
-
     # need to click "new particle" to add a row to the table
-    my_widget.cb.setCurrentIndex(1)
-    my_widget._on_click_new_particle()
+    cpt_widget.cb.setCurrentIndex(1)
+    cpt_widget._on_click_new_particle()
 
-    dlg = my_widget._on_click_stereoshift()
+    dlg = cpt_widget._on_click_stereoshift()
 
     # move points to parameterised positions
     for i in range(len(test_points)):
