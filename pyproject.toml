@@ -67,7 +67,6 @@ testing = [
     "pytest-qt",   # https://pytest-qt.readthedocs.io/en/latest/
     "napari",
     "pyqt5",
-    "tifffile",    # https://github.com/cgohlke/tifffile
 ]
 
 [tool.setuptools]
