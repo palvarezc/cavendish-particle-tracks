@@ -26,11 +26,13 @@ from qtpy.QtWidgets import (
 
 from ._analysis import (
     EXPECTED_PARTICLES,
+    FIDUCIALS,
     NewParticle,
 )
 from ._calculate import length, radius
 from ._decay_angles_dialog import DecayAnglesDialog
 from ._magnification_dialog import MagnificationDialog
+from ._set_fiducial_dialog import Set_Fiducial_Dialog
 from ._stereoshift_dialog import StereoshiftDialog
 
 
@@ -42,16 +44,21 @@ class ParticleTracksWidget(QWidget):
         self.viewer = napari_viewer
 
         # define QtWidgets
+        # why is this self. and the others added after?
         self.cb = QComboBox()
         self.cb.addItems(EXPECTED_PARTICLES)
         self.cb.setCurrentIndex(0)
         self.cb.currentIndexChanged.connect(self._on_click_new_particle)
-        rad = QPushButton("Calculate radius")
-        lgth = QPushButton("Calculate length")
-        ang = QPushButton("Calculate decay angles")
-        stsh = QPushButton("Stereoshift")
+        btn_radius = QPushButton("Calculate radius")
+        btn_length = QPushButton("Calculate length")
+        btn_decayangle = QPushButton("Calculate decay angles")
+        cmb_fiducial = QComboBox()
+        cmb_fiducial.addItems(FIDUCIALS)
+        cmb_fiducial.currentIndexChanged.connect(self._on_click_add_fiducial)
+        btn_stereoshift = QPushButton("Stereoshift")
+        btn_testnew = QPushButton("test new reference")
+        btn_save = QPushButton("Save")
         self.mag = QPushButton("Magnification")
-        save = QPushButton("Save")
 
         # setup particle table
         self.table = self._set_up_table()
@@ -62,12 +69,14 @@ class ParticleTracksWidget(QWidget):
         self.cal.setEnabled(False)
 
         # connect callbacks
-        rad.clicked.connect(self._on_click_radius)
-        lgth.clicked.connect(self._on_click_length)
-        ang.clicked.connect(self._on_click_decay_angles)
-        stsh.clicked.connect(self._on_click_stereoshift)
+        # NOTE: This isn't consistent in the code structure. Connects for the combobox etc have been done above.
+        btn_radius.clicked.connect(self._on_click_radius)
+        btn_length.clicked.connect(self._on_click_length)
+        btn_decayangle.clicked.connect(self._on_click_decay_angles)
+        btn_stereoshift.clicked.connect(self._on_click_stereoshift)
         self.cal.toggled.connect(self._on_click_apply_magnification)
-        save.clicked.connect(self._on_click_save)
+        btn_save.clicked.connect(self._on_click_save)
+        btn_testnew.clicked.connect(self._on_click_newref)
 
         self.mag.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
@@ -78,14 +87,16 @@ class ParticleTracksWidget(QWidget):
         # layout
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.cb)
-        self.layout().addWidget(rad)
-        self.layout().addWidget(lgth)
-        self.layout().addWidget(ang)
+        self.layout().addWidget(btn_radius)
+        self.layout().addWidget(btn_length)
+        self.layout().addWidget(btn_decayangle)
         self.layout().addWidget(self.table)
         self.layout().addWidget(self.cal)
-        self.layout().addWidget(stsh)
+        self.layout().addWidget(btn_stereoshift)
         self.layout().addWidget(self.mag)
-        self.layout().addWidget(save)
+        self.layout().addWidget(cmb_fiducial)
+        self.layout().addWidget(btn_save)
+        self.layout().addWidget(btn_testnew)
 
         # Data analysis
         self.data: List[NewParticle] = []
@@ -296,6 +307,14 @@ class ParticleTracksWidget(QWidget):
         dlg.move(point)
         return dlg
 
+    def _on_click_newref(self) -> Set_Fiducial_Dialog:
+        """When the 'test new reference' button is clicked, open the set fiducial dialog."""
+        dlg = Set_Fiducial_Dialog(self)
+        dlg.show()
+        point = QPoint(self.pos().x() + self.width(), self.pos().y())
+        dlg.move(point)
+        return
+
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
         the table and select the first cell ready to recieve the first point.
@@ -390,3 +409,33 @@ class ParticleTracksWidget(QWidget):
             f.writelines([particle.to_csv() for particle in self.data])
 
         print("Saved data to ", filename)
+
+    def _on_click_add_fiducial(self) -> None:
+        """Adds a fiducial marker to the layer."""
+        # currently, this is implemented by adding the layer, then a point.
+        # ideally this should resemble the inbuilt tools, but let's get it working first.
+
+        point = [100, 100]
+        # this should be done properly later, currently copying the old approach
+        # get below to reference the currently selected fiducial in the combobox
+        name = "Example C'"
+        point_label = {
+            "string": name,
+            "size": 20,
+            "color": "green",
+            "translation": np.array([-30, 0]),
+        }
+        # see stereoshift_dialog
+        # create a points layer here if one doesn't exist.
+        # reuse code from other sections here to achieve that.
+        points_layer = self.parent.viewer.add_point(
+            point,
+            name="Fiducials",
+            # text=...
+            # size=20,
+            border_width=5,
+            # border_width_is_relative=True,
+            # border_color=colors,
+            # face_color=colors,
+        )
+        print("This is a placeholder function.")
