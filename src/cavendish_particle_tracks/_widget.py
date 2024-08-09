@@ -32,6 +32,7 @@ from ._analysis import (
 from ._calculate import length, radius
 from ._decay_angles_dialog import DecayAnglesDialog
 from ._magnification_dialog import MagnificationDialog
+from ._set_fiducial_dialog import Set_Fiducial_Dialog
 from ._stereoshift_dialog import StereoshiftDialog
 
 
@@ -55,6 +56,7 @@ class ParticleTracksWidget(QWidget):
         cmb_fiducial.addItems(FIDUCIALS)
         cmb_fiducial.currentIndexChanged.connect(self._on_click_add_fiducial)
         btn_stereoshift = QPushButton("Stereoshift")
+        btn_testnew = QPushButton("test new reference")
         btn_save = QPushButton("Save")
         self.mag = QPushButton("Magnification")
 
@@ -74,6 +76,7 @@ class ParticleTracksWidget(QWidget):
         btn_stereoshift.clicked.connect(self._on_click_stereoshift)
         self.cal.toggled.connect(self._on_click_apply_magnification)
         btn_save.clicked.connect(self._on_click_save)
+        btn_testnew.clicked.connect(self._on_click_newref)
 
         self.mag.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
@@ -93,6 +96,7 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.mag)
         self.layout().addWidget(cmb_fiducial)
         self.layout().addWidget(btn_save)
+        self.layout().addWidget(btn_testnew)
 
         # Data analysis
         self.data: List[NewParticle] = []
@@ -302,6 +306,14 @@ class ParticleTracksWidget(QWidget):
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         dlg.move(point)
         return dlg
+
+    def _on_click_newref(self) -> Set_Fiducial_Dialog:
+        """When the 'test new reference' button is clicked, open the set fiducial dialog."""
+        dlg = Set_Fiducial_Dialog(self)
+        dlg.show()
+        point = QPoint(self.pos().x() + self.width(), self.pos().y())
+        dlg.move(point)
+        return
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
