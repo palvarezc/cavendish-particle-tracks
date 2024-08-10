@@ -1,8 +1,57 @@
-from random import random
+from typing import Callable
 
+from random import random
 import numpy as np
 import pytest
+import time
+from qtpy.QtCore import QTimer, Qt
+from qtpy.QtWidgets import QDialog, QFileDialog, QApplication, QPushButton, QDialogButtonBox #QFileDialog
+
 from cavendish_particle_tracks import ParticleTracksWidget
+
+
+def get_dialog(dialog_trigger: Callable, dialog_action: Callable, time_out: int = 5, trigger_option: int = 1) -> QDialog:
+    """
+    Returns the current dialog (active modal widget). If there is no
+    dialog, it waits until one is created for a maximum of 5 seconds (by
+    default).
+
+    :param dialog_trigger: Callable that triggers the dialog creation.
+    :param time_out: Maximum time (seconds) to wait for the dialog creation.
+    """
+
+    dialog: QDialog = None
+    start_time = time.time()
+
+    # Helper function to catch the dialog instance and hide it
+    def dialog_creation():
+        # Wait for the dialog to be created or timeout
+        nonlocal dialog
+        while dialog is None and time.time() - start_time < time_out:
+            dialog = QApplication.activeModalWidget()
+
+        # Avoid errors when dialog is not created
+        if dialog is not None:
+            # Hide dialog to avoid interrupting the tests execution
+            # It has the same effect as close()
+            dialog_action(dialog)
+            # dialog.hide()
+
+    # Create a thread to get the dialog instance and call dialog_creation trigger
+    QTimer.singleShot(1, dialog_creation)  
+    dialog_trigger(trigger_option)
+
+    # Wait for the dialog to be created or timeout
+    while dialog is None and time.time() - start_time < time_out:
+        continue
+
+    assert isinstance(
+        dialog, QDialog
+    ), f"No dialog was created after {time_out} seconds. Dialog type: {type(dialog)}"
+
+    return dialog    
+
+
 
 
 def test_calculate_radius_ui(make_napari_viewer, capsys):
@@ -152,3 +201,63 @@ def test_calculate_length_fails_with_wrong_number_of_points(
         "ERROR: Select two points to calculate the decay length."
         in captured.out
     )
+
+
+
+
+
+@pytest.mark.parametrize(
+    "image_folder",
+    ["/Users/paula/Desktop/CPT_data/view1",
+    #  "/Users/paula/Work/ParticleTracks/cavendish-particle-tracks/data_view1"
+     ],
+)
+def test_load_data(make_napari_viewer, qtbot, image_folder):
+    """Test loading of images in a folder as stack associated to a certain view"""
+    viewer = make_napari_viewer()
+    widget = ParticleTracksWidget(viewer)
+
+    # click "load data" and select "View1"
+    # widget.load.setCurrentIndex(1)
+
+    def exec_dialog(dialog):
+        qtbot.addWidget(dialog)
+        dialog.setDirectory(image_folder)
+        # print("The dialog property is: ",dialog.DontUseNativeDialog)
+        # dialog.setOption(QFileDialog.DontUseNativeDialog)
+        # print("The dialog property is: ",dialog.DontUseNativeDialog)
+        # assert False, "I make it here"
+        # dialog.accept()
+        
+        buttonbox = dialog.findChild(QDialogButtonBox,"buttonBox")
+        # assert buttonbox, "No buttonbox found"
+        # if buttonbox: print("If found the buttonbox")
+
+        openbutton = buttonbox.children()[1]
+        # assert openbutton, "No openbutton found"
+        qtbot.mouseClick(openbutton, Qt.LeftButton, delay=1)
+
+        # # dialog.accept()
+        # buttons = dialog.findChild(QPushButton,"Open")
+        # qtbot.keyPress(buttons, Qt.Key_Enter)
+        # print("Dialog button children")
+        # dialog.hide()
+        # dialog.selectFile(image_folder)
+
+    get_dialog(widget.load.setCurrentIndex, exec_dialog, time_out = 5, trigger_option = 1)
+
+#     >>> import tifffile
+# >>> import tifffile as tf
+# >>> import tifffile
+# KeyboardInterrupt
+# >>> import numpy as np
+# >>> numpy.random.randint(0, 255, (256, 256, 3), 'uint8')
+# Traceback (most recent call last):
+#   File "<stdin>", line 1, in <module>
+# NameError: name 'numpy' is not defined
+# >>> data = np.random.randint(0, 255, (256, 256, 3), 'uint8')
+# >>> tf.imwrite('data_view1/data1.tiff', data, photometric='rgb')
+# >>> data = np.random.randint(0, 255, (256, 256, 3), 'uint8')
+# >>> tf.imwrite('data_view1/data2.tiff', data, photometric='rgb')
+# >>> 
+
