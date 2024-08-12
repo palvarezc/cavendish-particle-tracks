@@ -37,6 +37,16 @@ def length(a: Point, b: Point) -> float:
     return np.linalg.norm(pa - pb)
 
 
+def corrected_length(points, offsets) -> float:
+    """Calculates the distance between two points, correcting for the offset/movement of the plane between two images.
+    Points = Fiducial[]: The two points to calculate the distance between.
+    Offsets = Fiducial[]: The two points to correct the distance calculation. (A fiducial in the reference plane)
+    """
+    # TODO: Improve docstring here.
+    points -= offsets
+    return length([points[0], points[1]])
+
+
 def magnification(f1: Fiducial, f2: Fiducial, b1: Fiducial, b2: Fiducial):
     # (Delta t)/(Delta p) = a + b*z
     tf1 = np.array(FIDUCIAL_FRONT[f1.name])

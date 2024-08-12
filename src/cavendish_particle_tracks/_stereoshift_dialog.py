@@ -166,13 +166,13 @@ class StereoshiftDialog(QDialog):
         return points_layer
 
     def f(self, i) -> Fiducial:
-        """Returns the front fiducial item, except when it selects the back"""
+        """Returns the fiducial used for stereoshift"""
         if i not in [1, 2]:
             raise IndexError()
         return self._fiducial_views[i - 1]
 
     def b(self, i) -> Fiducial:
-        """Returns the back fiducial item"""
+        """Returns the point that is being measured"""
         if i not in [1, 2]:
             raise IndexError()
         return self._fiducial_views[i + 1]
@@ -232,6 +232,8 @@ class StereoshiftDialog(QDialog):
         self.point_stereoshift = stereoshift(
             *[view.xy for view in self._fiducial_views]
         )
+        # isn't this calcuation repeated?
+        # Is this even correct? f will
         self.point_depth = depth(
             self.f(1),
             self.f(2),

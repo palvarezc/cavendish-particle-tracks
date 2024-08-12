@@ -7,17 +7,25 @@ from qtpy.QtWidgets import (
     QGridLayout,
     QLabel,
     QPushButton,
+    QTableWidgetItem,
 )
 
 from ._analysis import FIDUCIAL_BACK, FIDUCIAL_FRONT, Fiducial
-from ._calculate import depth, length, magnification, stereoshift
+from ._calculate import (
+    corrected_length,
+    depth,
+    magnification,
+    stereoshift,
+)
 
 
 class Set_Fiducial_Dialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         # Call parent constructor
         super().__init__(parent)
         self.parent = parent
+
+        # region Stereoshift
         # ignoring ruff style here to make the array clearer
         # fmt:off
         self.points = [
@@ -26,6 +34,12 @@ class Set_Fiducial_Dialog(QDialog):
             [Fiducial("Back Fiducial View 1"),Fiducial("Back Fiducial View 2")]
         ]
         # fmt:on
+        self.shift_fiducial = 0.0
+        self.shift_point = 0.0
+        self.point_stereoshift = 0.0
+        self.point_depth = -1.0
+        self.spoints = []
+        # endregion
         self.layer_points = self._setup_points_layer()
 
         # region UI Setup
@@ -35,9 +49,9 @@ class Set_Fiducial_Dialog(QDialog):
         It actually makes zero difference to the calculation, but is left in as an
         exercise for students to think about and understand how stereoshift works. """
         lbl_ref_plane = QLabel("Measure shift relative to the: ")
-        cmb_set_ref_plane = QComboBox()
-        cmb_set_ref_plane.addItems(["front plane", "rear plane"])
-        cmb_set_ref_plane.currentIndexChanged.connect(
+        self.cmb_set_ref_plane = QComboBox()
+        self.cmb_set_ref_plane.addItems(["front plane", "rear plane"])
+        self.cmb_set_ref_plane.currentIndexChanged.connect(
             self._on_change_cmb_set_ref_plane
         )
         # Labels for the points' coordinates
@@ -45,7 +59,7 @@ class Set_Fiducial_Dialog(QDialog):
         lbl_front_view1 = QLabel("View 1")
         lbl_front_view2 = QLabel("View 2")
         lbl_point_view1 = QLabel("View 1")
-        lbl_point_view2 = QLabel("View 2")
+        lbl_point_view2 = QLabel("View 2")  # TODO Implement these
         lbl_back_view1 = QLabel("View 1")
         lbl_back_view2 = QLabel("View 2")
         # Textboxes for the output of point coordinates
@@ -54,7 +68,6 @@ class Set_Fiducial_Dialog(QDialog):
         self.label_stereoshift = QLabel(
             "Stereo shift (shift_p/shift_f = depth_p/depth_f)"
         )
-        # TODO: work out what these do
         # Textboxes for calculation results
         self.lbl_fiducial_shift = QLabel(self)
         self.lbl_point_shift = QLabel(self)
@@ -75,15 +88,17 @@ class Set_Fiducial_Dialog(QDialog):
         btn_calculate = QPushButton("Calculate")
         btn_calculate.clicked.connect(self._on_click_calculate)
         btn_save = QPushButton("Save to table")
-        # btn_save.clicked.connect(self._on_click_save_to_table) # TODO add this back in
+        btn_save.clicked.connect(
+            self._on_click_save_to_table
+        )  # TODO add this back in
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
-        # self.buttonBox.clicked.connect(self.cancel) # TODO add this back in
+        self.buttonBox.clicked.connect(self.cancel)  # TODO add this back in
         # Layout
         # surely there's a nicer way of doing this grid layout stuff.
         self.setLayout(QGridLayout())
         self.layout().addWidget(lbl_ref_plane, 0, 0, 1, 2)
         self.layout().addWidget(lbl_fiducial_coords, 1, 0, 1, 2)
-        self.layout().addWidget(cmb_set_ref_plane, 0, 2)
+        self.layout().addWidget(self.cmb_set_ref_plane, 0, 2)
         for i, widget in enumerate(
             [
                 lbl_front_view1,
@@ -126,11 +141,11 @@ class Set_Fiducial_Dialog(QDialog):
 
     def _on_change_cmb_set_ref_plane(self) -> None:
         # check how original code works and make sure I've copied the correct functionality.
-        if self.cmb_ref_plane() == 0:
+        if self.cmb_set_ref_plane.currentIndex == 0:
             self.label_stereoshift.setText(
                 "Stereo shift (shift_p/shift_f = depth_p/depth_f)"
             )
-        elif self.cmb_ref_plane() == 1:
+        elif self.cmb_set_ref_plane.currentIndex == 1:
             self.label_stereoshift.setText(
                 "Stereo shift (shift_p/shift_f = 1 - depth_p/depth_f)"
             )
@@ -187,15 +202,103 @@ class Set_Fiducial_Dialog(QDialog):
         """Caculate the stereoshift and populate the results table."""
 
         # Add points in the coords to corresponding text box
-        for i in range(len(self).points):
-            self.points[i].xy = (
-                self.layer_points.data[i + 2]
-                - self.cal_layer.data[i % 2]  # TODO What is this doing?
-                # There may be a better way of doing this by assigning point attributes.
-                # I can see this approach going wrong.
-                # Take a look at the napari example nD points with features
-            )
+        for i in range(len(self.points)):
+            self.points[i].xy = self.layer_points.data[i]
+            # There may be a better way of doing this by assigning point attributes.
+            # I can see this approach going wrong.
+            # Take a look at the napari example nD points with features
             self.textboxes[i].setText(str(self._fiducial_views[i].xy))
+        self.textboxes[i].setText(str(self._fiducial_views[i].xy))
+        # TODO clarify whether we still want the reference offset to be displayed to the user.
+        ref_plane_index = self.cmb_set_ref_plane.currentIndex * 2
+        # index =0 if front, 2 if rear
+        fiducial_plane__index = 2 - ref_plane_index
+        # whatever plane is not the reference plane, use the opposite plane.
+        # The index of the points plane is always 1.
+        # This could also be achieved in a more traditional/clearer way
+        # (ie one that doesn't need a comment to be obvious) using an if/switch statement
+        # But this keeps it a little more concise and is similar to the original code's use
+        # of + and % to get the correct data index.
+        # Would appreciate feedback on which style is preferred.
+        self.shift_fiducial = corrected_length(
+            self.points[fiducial_plane__index], self.points[ref_plane_index]
+        )
+        self.shift_point = corrected_length(
+            self.points[1], self.points[ref_plane_index]
+        )
+        # See comments in pull request.
+        self.point_stereoshift = self.shift_fiducial / self.shift_point
+        # This is called ratio in the GUI, should the front or backend be changed here?
+        # This next line is another example where the calculation is being done in
+        # calculate.py but results in duplicated function calls.
+        # I'll leave it as is for now, but it's another small thing to consider.
+        # TODO: Regardless of how we decide to refactor, could do
+        # with rewriting that function to take the list of points instead.
+        self.point_depth = depth(
+            self.points[fiducial_plane__index][0],
+            self.points[fiducial_plane__index][1],
+            self.points[1][0],
+            self.points[1][1],
+        )
+        self.spoints = self.cal_layer.data[1:]
+        # TODO this will need to be updated once magnification etc is added.
+
+        # Update the results table
+        self.lbl_fiducial_shift.setText(str(self.shift_fiducial))
+        self.lbl_point_shift.setText(str(self.shift_point))
+        self.lbl_stereoshift_ratio.setText(str(self.point_stereoshift))
+        self.lbl_point_depth.setText(str(self.point_depth))
+
+    def _on_click_save_to_table(self) -> None:
+        """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
+        # Propagate to particle
+        selected_row = self.parent._get_selected_row()
+        self.parent.data[selected_row].spoints = self.spoints
+        self.parent.data[selected_row].shift_fiducial = self.shift_fiducial
+        self.parent.data[selected_row].shift_point = self.shift_point
+        self.parent.data[selected_row].stereoshift = self.point_stereoshift
+        self.parent.data[selected_row].depth_cm = self.point_depth
+
+        # Propagate to parent table
+        for i in range(2):
+            self.parent.table.setItem(
+                selected_row,
+                self.parent._get_table_column_index("sf" + str(i + 1)),
+                QTableWidgetItem(str(self.spoints[i])),
+            )
+            self.parent.table.setItem(
+                selected_row,
+                self.parent._get_table_column_index("sp" + str(i + 1)),
+                QTableWidgetItem(str(self.spoints[i + 2])),
+            )
+        self.parent.table.setItem(
+            selected_row,
+            self.parent._get_table_column_index("shift_fiducial"),
+            QTableWidgetItem(str(self.shift_fiducial)),
+        )
+        self.parent.table.setItem(
+            selected_row,
+            self.parent._get_table_column_index("shift_point"),
+            QTableWidgetItem(str(self.shift_point)),
+        )
+        self.parent.table.setItem(
+            selected_row,
+            self.parent._get_table_column_index("stereoshift"),
+            QTableWidgetItem(str(self.point_stereoshift)),
+        )
+        self.parent.table.setItem(
+            selected_row,
+            self.parent._get_table_column_index("depth_cm"),
+            QTableWidgetItem(str(self.point_depth)),
+        )
+
+    def cancel(self) -> None:
+        """On cancel remove the points_Stereoshift layer"""
+        # TODO: this is a problem, the layer still exists... not sure how to remove it
+        # TODO: Rework this with the new layer handling.
+        self.parent.viewer.layers.select_previous()
+        self.parent.viewer.layers.remove(self.cal_layer)
+        return super().accept()
 
 
 """ 
