@@ -1,9 +1,11 @@
+import os
 import time
 from random import random
 from typing import Callable
 
 import numpy as np
 import pytest
+import tifffile as tf
 from cavendish_particle_tracks import ParticleTracksWidget
 from qtpy.QtCore import Qt, QTimer
 from qtpy.QtWidgets import (  # QFileDialog
@@ -211,11 +213,18 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 @pytest.mark.parametrize(
     "image_folder",
     [
-        "./tests/data",
+        "./test_data_view1",
     ],
 )
 def test_load_data(make_napari_viewer, qtbot, image_folder):
     """Test loading of images in a folder as stack associated to a certain view"""
+
+    os.mkdir(image_folder)
+    data = np.random.randint(0, 255, (256, 256, 3), "uint8")
+    tf.imwrite(image_folder + "/temp1.tif", data, photometric="rgb")
+    data = np.random.randint(0, 255, (256, 256, 3), "uint8")
+    tf.imwrite(image_folder + "/temp2.tif", data, photometric="rgb")
+
     viewer = make_napari_viewer()
     widget = ParticleTracksWidget(viewer)
 
@@ -226,7 +235,7 @@ def test_load_data(make_napari_viewer, qtbot, image_folder):
         openbutton = buttonbox.children()[1]
         qtbot.mouseClick(openbutton, Qt.LeftButton, delay=1)
 
-    # Open and retreive file dialog
+    # Open and retrieve file dialog
     get_dialog(
         widget.load.setCurrentIndex,
         set_directory_and_close,
@@ -234,4 +243,9 @@ def test_load_data(make_napari_viewer, qtbot, image_folder):
         trigger_option=1,
     )
 
-    print(viewer.layers)
+    assert viewer.layers[0].name == "View1", "View1 layer has not been created"
+    assert viewer.layers[0].ndim == 3, "Layer is not a stack"
+
+    os.remove(image_folder + "/temp1.tif")
+    os.remove(image_folder + "/temp2.tif")
+    os.rmdir(image_folder)
