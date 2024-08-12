@@ -1,7 +1,7 @@
 import importlib
 import sys
-import pytest
 
+import pytest
 
 
 def test_version_fallback(mocker):

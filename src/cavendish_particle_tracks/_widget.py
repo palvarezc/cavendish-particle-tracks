@@ -315,8 +315,10 @@ class ParticleTracksWidget(QWidget):
         try:
             self._test_file_dialog.setFileMode(QFileDialog.Directory)
             folder_name = self._test_file_dialog.getExistingDirectory(
-                self, "Open "+str(self.load.currentText()), "./", 
-                options=QFileDialog.DontUseNativeDialog
+                self,
+                "Open " + str(self.load.currentText()),
+                "./",
+                options=QFileDialog.DontUseNativeDialog,
             )
             stack = imread(folder_name + "/*")
             self.viewer.add_image(stack, name=self.load.currentText())
@@ -324,12 +326,7 @@ class ParticleTracksWidget(QWidget):
         finally:
             self._test_file_dialog = None
 
-        # stack_view1 = imread("./tests/data/View1*.tiff")
-        # stack_view2 = imread("./tests/data/View2*.tiff")
-        # self.imview1 = self.viewer.add_image(stack_view1, name="View1")
-        # self.imview2 = self.viewer.add_image(stack_view2, name="View2")
         # TODO: investigate the multiscale otption.
-
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
