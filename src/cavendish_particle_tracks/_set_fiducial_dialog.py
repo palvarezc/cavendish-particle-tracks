@@ -26,7 +26,7 @@ class Set_Fiducial_Dialog(QDialog):
             [Fiducial("Back Fiducial View 1"),Fiducial("Back Fiducial View 2")]
         ]
         # fmt:on
-        self.point_layer = self._setup_points_layer()
+        self.layer_points = self._setup_points_layer()
 
         # region UI Setup
         self.setWindowTitle("Measure Stereoshift and Magnification")
@@ -73,7 +73,7 @@ class Set_Fiducial_Dialog(QDialog):
             textbox.setMinimumWidth(200)
         # Control Buttons
         btn_calculate = QPushButton("Calculate")
-        # btn_calculate.clicked.connect(self._on_click_calculate) # TODO add this back in
+        btn_calculate.clicked.connect(self._on_click_calculate)
         btn_save = QPushButton("Save to table")
         # btn_save.clicked.connect(self._on_click_save_to_table) # TODO add this back in
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
@@ -125,7 +125,6 @@ class Set_Fiducial_Dialog(QDialog):
         # endregion
 
     def _on_change_cmb_set_ref_plane(self) -> None:
-        # TODO check if this index is correct, maybe just call the option by name.
         # check how original code works and make sure I've copied the correct functionality.
         if self.cmb_ref_plane() == 0:
             self.label_stereoshift.setText(
@@ -136,7 +135,7 @@ class Set_Fiducial_Dialog(QDialog):
                 "Stereo shift (shift_p/shift_f = 1 - depth_p/depth_f)"
             )
 
-        self.cal_layer.refresh()
+        self.layer_points.refresh()
 
     def _setup_points_layer(self) -> napari.layers.Points:
         # TODO: Is there a better way of typehinting without importing the entirety of Napari>
@@ -179,9 +178,24 @@ class Set_Fiducial_Dialog(QDialog):
             edge_width_is_relative=False,
             edge_color=colors,
             face_color=colors,
+            symbol="x",
         )
 
         return layer_points
+
+    def _on_click_calculate(self) -> None:
+        """Caculate the stereoshift and populate the results table."""
+
+        # Add points in the coords to corresponding text box
+        for i in range(len(self).points):
+            self.points[i].xy = (
+                self.layer_points.data[i + 2]
+                - self.cal_layer.data[i % 2]  # TODO What is this doing?
+                # There may be a better way of doing this by assigning point attributes.
+                # I can see this approach going wrong.
+                # Take a look at the napari example nD points with features
+            )
+            self.textboxes[i].setText(str(self._fiducial_views[i].xy))
 
 
 """ 
@@ -197,7 +211,7 @@ Then Fiducial is a class(FIDUCIAL VIEW PASSED IN as view_name)
 Fiducial has name, x, y
 xy accesses those properties.
 
-fiducial views is then a list of Fiducial objects, where 1, 2
+fiducial views is then a list of Fiducial and point objects, where 1, 2 -> CHANGE: Now just called points to avoid confusion since it contains both.
 are the 2 views of the same fiducial used for stereoshift calcualtion.
 
 stift_fiducial is the distance the fiducial has shifted between views.
@@ -219,6 +233,9 @@ Proposed overhaul
   without having seen an image of it. Alternatively, can put everything to do with a given UI element together as per -> https://www.pythonguis.com/tutorials/pyqt-layouts/
   would be useful to agree on a std for this.
   Arguably, the latter might be better since items such as lbl_ref_plane never need to be referenced again, so the declaration outside of the layout code is unnecessary.
+- For now, implement selecting first two points for stereoshift calculation, then implement the rest of the points.
+- Tbh the coordinate readouts can be got rid of as well since they're arbitrary anyways
+- Maybe replace this with a table once i get it working...
 
 Stereoshift function:
 l is the distance to the camera lens
@@ -246,4 +263,10 @@ nb how does this affect the dropdown where they select whatever markers used for
 testing results:
 - reference shift magnitude affects accuracy of stereoshift calculation, but which is better?
 - should we enforce front shift > rear shift > point shift?
+
+
+NAMES:
+cal_layer -> points_layer
+fiducial_views -> points
+
 """

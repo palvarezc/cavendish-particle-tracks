@@ -213,7 +213,16 @@ class StereoshiftDialog(QDialog):
                 self._fiducial_views[i].x,
                 self._fiducial_views[i].y,
             ) = (
-                self.cal_layer.data[i + 2] - self.cal_layer.data[i % 2]
+                self.cal_layer.data[i + 2]
+                - self.cal_layer.data[i % 2]
+                # The first two points are the reference fiducials.
+                # These points are ignored, hence the i+2.
+                # The coordinate is returned as the difference
+                # between the point or fiducial in that view
+                # and the reference fiducial in that view.
+                # This is why the script uses f, b and swaps them around,
+                # as the reference offset is done at this step, instead
+                # of in the analysis.
             )
             self.textboxes[i].setText(str(self._fiducial_views[i].xy))
 
