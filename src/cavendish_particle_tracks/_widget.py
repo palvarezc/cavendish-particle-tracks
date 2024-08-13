@@ -46,26 +46,29 @@ class ParticleTracksWidget(QWidget):
         self.cb.addItems(EXPECTED_PARTICLES)
         self.cb.setCurrentIndex(0)
         self.cb.currentIndexChanged.connect(self._on_click_new_particle)
-        rad = QPushButton("Calculate radius")
-        lgth = QPushButton("Calculate length")
-        ang = QPushButton("Calculate decay angles")
-        stsh = QPushButton("Stereoshift")
+        self.rad = QPushButton("Calculate radius")
+        self.lgth = QPushButton("Calculate length")
+        self.ang = QPushButton("Calculate decay angles")
+        self.stsh = QPushButton("Stereoshift")
         self.mag = QPushButton("Magnification")
         save = QPushButton("Save")
 
         # setup particle table
         self.table = self._set_up_table()
         self._set_table_visible_vars(False)
+        self.table.selectionModel().selectionChanged.connect(
+            self._on_row_selection_changed
+        )
 
         # Apply magnification disabled until the magnification parameters are computed
         self.cal = QRadioButton("Apply magnification")
         self.cal.setEnabled(False)
 
         # connect callbacks
-        rad.clicked.connect(self._on_click_radius)
-        lgth.clicked.connect(self._on_click_length)
-        ang.clicked.connect(self._on_click_decay_angles)
-        stsh.clicked.connect(self._on_click_stereoshift)
+        self.rad.clicked.connect(self._on_click_radius)
+        self.lgth.clicked.connect(self._on_click_length)
+        self.ang.clicked.connect(self._on_click_decay_angles)
+        self.stsh.clicked.connect(self._on_click_stereoshift)
         self.cal.toggled.connect(self._on_click_apply_magnification)
         save.clicked.connect(self._on_click_save)
 
@@ -78,14 +81,20 @@ class ParticleTracksWidget(QWidget):
         # layout
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.cb)
-        self.layout().addWidget(rad)
-        self.layout().addWidget(lgth)
-        self.layout().addWidget(ang)
+        self.layout().addWidget(self.rad)
+        self.layout().addWidget(self.lgth)
+        self.layout().addWidget(self.ang)
         self.layout().addWidget(self.table)
         self.layout().addWidget(self.cal)
-        self.layout().addWidget(stsh)
+        self.layout().addWidget(self.stsh)
         self.layout().addWidget(self.mag)
         self.layout().addWidget(save)
+
+        # disable all calculation buttons
+        self.rad.setEnabled(False)
+        self.lgth.setEnabled(False)
+        self.ang.setEnabled(False)
+        # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
         # Data analysis
         self.data: List[NewParticle] = []
@@ -134,6 +143,7 @@ class ParticleTracksWidget(QWidget):
         out.setSelectionBehavior(QAbstractItemView.SelectRows)
         out.setSelectionMode(QAbstractItemView.SingleSelection)
         out.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        out.setSelectionBehavior(QTableWidget.SelectRows)
         return out
 
     def _set_table_visible_vars(self, calibrated) -> None:
@@ -158,6 +168,24 @@ class ParticleTracksWidget(QWidget):
 
         print("Column ", columntext, " not in the table")
         return -1
+
+    def _on_row_selection_changed(self) -> None:
+        """Enable/disable calculation buttons depending on the row selection"""
+
+        selected_row = self._get_selected_row()
+        if self.data[selected_row].index < 4:
+            self.rad.setEnabled(True)
+            self.lgth.setEnabled(True)
+            self.ang.setEnabled(False)
+
+        elif self.data[selected_row].index == 4:
+            self.rad.setEnabled(False)
+            self.lgth.setEnabled(True)
+            self.ang.setEnabled(True)
+        else:
+            self.rad.setEnabled(False)
+            self.lgth.setEnabled(False)
+            self.ang.setEnabled(False)
 
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
@@ -306,6 +334,7 @@ class ParticleTracksWidget(QWidget):
         # add new particle to data
         np = NewParticle()
         np.Name = self.cb.currentText()
+        np.index = self.cb.currentIndex()
         np.magnification_a = self.mag_a
         np.magnification_b = self.mag_b
         self.data += [np]
@@ -313,6 +342,11 @@ class ParticleTracksWidget(QWidget):
         # add particle (== new row) to the table and select it
         self.table.insertRow(self.table.rowCount())
         self.table.selectRow(self.table.rowCount() - 1)
+        self.table.setItem(
+            self.table.rowCount() - 1,
+            self._get_table_column_index("index"),
+            QTableWidgetItem(np.index),
+        )
         self.table.setItem(
             self.table.rowCount() - 1,
             self._get_table_column_index("Name"),

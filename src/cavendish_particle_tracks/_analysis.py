@@ -49,6 +49,7 @@ class Fiducial:
 @dataclass
 class NewParticle:
     Name: str = ""
+    index: int = 0
     r1: list[float] = field(default_factory=list)
     r2: list[float] = field(default_factory=list)
     r3: list[float] = field(default_factory=list)
