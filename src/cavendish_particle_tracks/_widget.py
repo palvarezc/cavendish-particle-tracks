@@ -314,11 +314,15 @@ class ParticleTracksWidget(QWidget):
         self._test_file_dialog = QFileDialog(self)
         try:
             self._test_file_dialog.setFileMode(QFileDialog.Directory)
+
             folder_name = self._test_file_dialog.getExistingDirectory(
                 self,
-                "Open " + str(self.load.currentText()),
+                "Open folder for " + str(self.load.currentText()),
                 "./",
-                options=QFileDialog.DontUseNativeDialog,
+                QFileDialog.DontUseNativeDialog
+                | QFileDialog.ShowDirsOnly
+                | QFileDialog.DontResolveSymlinks
+                | QFileDialog.HideNameFilterDetails,
             )
             stack = imread(folder_name + "/*")
             self.viewer.add_image(stack, name=self.load.currentText())
