@@ -203,14 +203,17 @@ class Set_Fiducial_Dialog(QDialog):
 
         # Add points in the coords to corresponding text box
         for i in range(len(self.points)):
-            self.points[i].xy = self.layer_points.data[i]
+            for j in range(len(self.points[i])):
+                (self.points[i][j].x, self.points[i][j].y) = (
+                    self.layer_points.data[i * 2 + j]
+                )
+                self.textboxes[i].setText(str(self.points[i][j].xy))
+                self.textboxes[i].setText(str(self.points[i][j].xy))
             # There may be a better way of doing this by assigning point attributes.
             # I can see this approach going wrong.
             # Take a look at the napari example nD points with features
-            self.textboxes[i].setText(str(self._fiducial_views[i].xy))
-        self.textboxes[i].setText(str(self._fiducial_views[i].xy))
         # TODO clarify whether we still want the reference offset to be displayed to the user.
-        ref_plane_index = self.cmb_set_ref_plane.currentIndex * 2
+        ref_plane_index = self.cmb_set_ref_plane.currentIndex() * 2
         # index =0 if front, 2 if rear
         fiducial_plane__index = 2 - ref_plane_index
         # whatever plane is not the reference plane, use the opposite plane.
@@ -240,8 +243,13 @@ class Set_Fiducial_Dialog(QDialog):
             self.points[1][0],
             self.points[1][1],
         )
-        self.spoints = self.cal_layer.data[2:]
+        self.spoints = self.layer_points.data[2:]
         # TODO this will need to be updated once magnification etc is added.
+        # also needs a better name and for the function to be more clear
+        # also worth noting that this is used when saving to table.
+        # why not use the existing points list for this to avoid duplicating it?
+        # sure, the access is a little more complicated but it keeps the number
+        # of variables down.
 
         # Update the results table
         self.lbl_fiducial_shift.setText(str(self.shift_fiducial))
@@ -297,7 +305,7 @@ class Set_Fiducial_Dialog(QDialog):
         # TODO: this is a problem, the layer still exists... not sure how to remove it
         # TODO: Rework this with the new layer handling.
         self.parent.viewer.layers.select_previous()
-        self.parent.viewer.layers.remove(self.cal_layer)
+        self.parent.viewer.layers.remove(self.layer_points)
         return super().accept()
 
 
