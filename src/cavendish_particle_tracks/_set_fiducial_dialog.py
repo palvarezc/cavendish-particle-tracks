@@ -240,7 +240,7 @@ class Set_Fiducial_Dialog(QDialog):
             self.points[1][0],
             self.points[1][1],
         )
-        self.spoints = self.cal_layer.data[1:]
+        self.spoints = self.cal_layer.data[2:]
         # TODO this will need to be updated once magnification etc is added.
 
         # Update the results table
