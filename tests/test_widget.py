@@ -26,13 +26,15 @@ def get_dialog(
     default).
 
     :param dialog_trigger: Callable that triggers the dialog creation.
+    :param dialog_action: Callable that manipulates and closes/hides the dialog.
     :param time_out: Maximum time (seconds) to wait for the dialog creation.
+    :param trigger_option: Options to be passed to dialog_trigger.
     """
 
     dialog: QDialog = None
     start_time = time.time()
 
-    def dialog_creation():
+    def dialog_capture():
         """Nested function to catch the dialog instance and hide it"""
         # Wait for the dialog to be created or timeout
         nonlocal dialog
@@ -44,7 +46,7 @@ def get_dialog(
             dialog_action(dialog)
 
     # Create a thread to get the dialog instance and call dialog_creation trigger
-    QTimer.singleShot(1, dialog_creation)
+    QTimer.singleShot(1, dialog_capture)
     dialog_trigger(trigger_option)
 
     # Wait for the dialog to be created or timeout
@@ -189,14 +191,10 @@ def test_calculate_length_fails_with_wrong_number_of_points(
     )
 
 
-@pytest.mark.parametrize(
-    "image_folder",
-    [
-        "./test_data_view1",
-    ],
-)
-def test_load_data(cpt_widget, qtbot, image_folder):
+def test_load_data(cpt_widget, qtbot):
     """Test loading of images in a folder as stack associated to a certain view"""
+
+    image_folder = "./test_data_view1"
 
     os.mkdir(image_folder)
     data = np.random.randint(0, 255, (256, 256, 3), "uint8")
