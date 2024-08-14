@@ -1,12 +1,14 @@
 import napari
 import numpy as np
 from qtpy.QtWidgets import (
+    QAbstractItemView,
     QComboBox,
     QDialog,
     QDialogButtonBox,
     QGridLayout,
     QLabel,
     QPushButton,
+    QTableWidget,
     QTableWidgetItem,
 )
 
@@ -25,13 +27,14 @@ class Set_Fiducial_Dialog(QDialog):
         super().__init__(parent)
         self.parent = parent
 
-        # region Stereoshift
         # ignoring ruff style here to make the array clearer
         # fmt:off
         self.points = [
-            [Fiducial("Front Fiducial View 1"), Fiducial("Front Fiducial View 2")],
+            [Fiducial("Front Fiducial 1 View 1"), Fiducial("Front Fiducial 1 View 2")],
+            [Fiducial("Front Fiducial 2 View 1")]
             [Fiducial("Point View 1"), Fiducial("Point View 2")],
-            [Fiducial("Back Fiducial View 1"),Fiducial("Back Fiducial View 2")]
+            [Fiducial("Back Fiducial 1 View 1"),Fiducial("Back Fiducial 1 View 2")],
+            [Fiducial("Back Fiducial 2 View 1")]
         ]
         # fmt:on
         self.shift_fiducial = 0.0
@@ -65,6 +68,11 @@ class Set_Fiducial_Dialog(QDialog):
         lbl_back_view2 = QLabel("View 2")
         # Textboxes for the output of point coordinates
         self.coord_textboxes = [QLabel(self) for _ in range(6)]
+        # Comboboxes for selecting which fiducial the point corresponds to
+        self.cmb_front1 = self._setup_dropdown_fiducials_combobox()
+        self.cmb_front2 = self._setup_dropdown_fiducials_combobox()
+        self.cmb_back1 = self._setup_dropdown_fiducials_combobox(back=True)
+        self.cmb_back2 = self._setup_dropdown_fiducials_combobox(back=True)
         # Texbox with calculation formula
         self.label_stereoshift = QLabel(
             "Stereo shift (shift_p/shift_f = depth_p/depth_f)"
@@ -85,6 +93,11 @@ class Set_Fiducial_Dialog(QDialog):
             self.coord_textboxes + self.results
         ):  # possibly another way of implementing this without creaing an unnecessary list that isn't referenced again
             textbox.setMinimumWidth(200)
+        # Add magnification results table
+        # TODO again I'd like to change this once functionality complete
+        self.table = QTableWidget(1, 2)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table.setHorizontalHeaderLabels(["a", "b"])
         # Control Buttons
         btn_calculate = QPushButton("Calculate")
         btn_calculate.clicked.connect(self._on_click_calculate)
@@ -137,6 +150,16 @@ class Set_Fiducial_Dialog(QDialog):
         self.layout().addWidget(btn_save, 13, 0, 1, 3)
         self.layout().addWidget(self.buttonBox, 14, 0, 1, 3)
 
+    def _setup_dropdown_fiducials_combobox(self, back=False):
+        """Sets up a drop-down list of fiducials for the `back` or front (`back=False`)."""
+        combobox = QComboBox()
+        if back:
+            combobox.addItems(FIDUCIAL_BACK.keys())
+        else:
+            combobox.addItems(FIDUCIAL_FRONT.keys())
+        combobox.currentIndexChanged.connect(self._on_click_fiducial)
+        return combobox
+
     def _on_change_cmb_set_ref_plane(self) -> None:
         # check how original code works and make sure I've copied the correct functionality.
         if self.cmb_set_ref_plane.currentIndex == 0:
@@ -149,6 +172,10 @@ class Set_Fiducial_Dialog(QDialog):
             )
 
         self.layer_points.refresh()
+
+    # def _on_change_cmb_fiducial etc etc
+    # add the label to the point in the view
+    # replaces the old on_click_add button
 
     def _setup_points_layer(self) -> napari.layers.Points:
         # TODO: Is there a better way of typehinting without importing the entirety of Napari>
@@ -377,5 +404,47 @@ testing results:
 NAMES:
 cal_layer -> points_layer
 fiducial_views -> points
+
+TODO Writeup changes made to magnification for PR
+
+Comment copied from on_click_fiducial
+# This was intended to be linked to the combobox
+        # Would be cool if we could wait for a click here and add that as the selected fiducial, but no clue how to do that yet
+        # layers  = [
+        #     layer for layer in self.parent.viewer.layers if layer.name == "Points_Calibration"
+        # ]
+        # layer = layers[0]
+        # @layer.mouse_drag_callbacks.append
+        # def callback(layer, event):  # (0,0) is the center of the upper left pixel
+        #     print(self.parent.viewer.cursor.position)
+
+_______________________
+Magnification previous implementation pseudocode:
+
+When "add" is clicked for a fiducial -> add coords(fiducial index) is called
+Add_cords:
+-> retrieves point from layer
+-> enforces only one point selected
+-> updates UI
+-> returns coords
+
+When calculate clicked
+-> checks fiducials have been added, if not alerts the user
+-> calls magnification to calculate
+    -> Magnification(4 fiducials)
+    -> calcs mag from known point locations
+    -> returns a,b
+-> Updates UI
+
+When accept clicked
+-> call widget "propogate magnification"
+-> remove layer using select previous and remove by ref. # why do we need both?
+-> cal.setEnabled = true (sets up magnification to actually work)
+-> update button text on parent widget
+-> return super.accept() # what does this do?
+
+When cancel clicked
+-> remove layer
+-> call parent "reject" # what does this do?
 
 """
