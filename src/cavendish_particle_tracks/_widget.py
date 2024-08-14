@@ -311,27 +311,24 @@ class ParticleTracksWidget(QWidget):
         if self.load.currentIndex() < 1:
             return
 
-        self._test_file_dialog = QFileDialog(self)
-        try:
-            self._test_file_dialog.setFileMode(QFileDialog.Directory)
+        test_file_dialog = QFileDialog(self)
+        test_file_dialog.setFileMode(QFileDialog.Directory)
+        folder_name = test_file_dialog.getExistingDirectory(
+            self,
+            "Open folder for " + str(self.load.currentText()),
+            "./",
+            QFileDialog.DontUseNativeDialog
+            | QFileDialog.DontResolveSymlinks
+            | QFileDialog.ShowDirsOnly
+            | QFileDialog.HideNameFilterDetails,
+        )
 
-            folder_name = self._test_file_dialog.getExistingDirectory(
-                self,
-                "Open folder for " + str(self.load.currentText()),
-                "./",
-                QFileDialog.DontUseNativeDialog
-                | QFileDialog.ShowDirsOnly
-                | QFileDialog.DontResolveSymlinks
-                | QFileDialog.HideNameFilterDetails,
-            )
-            if folder_name not in {"", None}:
-                stack = imread(folder_name + "/*")
-                self.viewer.add_image(stack, name=self.load.currentText())
-                self.load.setCurrentIndex(0)
-        finally:
-            self._test_file_dialog = None
+        if folder_name not in {"", None}:
+            stack = imread(folder_name + "/*")
+            self.viewer.add_image(stack, name=self.load.currentText())
+            # TODO: investigate the multiscale otption.
 
-        # TODO: investigate the multiscale otption.
+        self.load.setCurrentIndex(0)
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
