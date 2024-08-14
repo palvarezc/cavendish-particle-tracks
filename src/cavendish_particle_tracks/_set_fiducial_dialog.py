@@ -76,10 +76,10 @@ class Set_Fiducial_Dialog(QDialog):
         # Textboxes for the output of point coordinates
         self.coord_textboxes = [QLabel(self) for _ in range(8)]
         # Comboboxes for selecting which fiducial the point corresponds to
-        self.cmb_front1 = self._setup_dropdown_fiducials_combobox()
-        self.cmb_front2 = self._setup_dropdown_fiducials_combobox()
-        self.cmb_back1 = self._setup_dropdown_fiducials_combobox(back=True)
-        self.cmb_back2 = self._setup_dropdown_fiducials_combobox(back=True)
+        cmb_front1 = self._setup_dropdown_fiducials_combobox()
+        cmb_front2 = self._setup_dropdown_fiducials_combobox()
+        cmb_back1 = self._setup_dropdown_fiducials_combobox(back=True)
+        cmb_back2 = self._setup_dropdown_fiducials_combobox(back=True)
         # Texbox with calculation formula
         self.label_stereoshift = QLabel(
             "Stereo shift (shift_p/shift_f = depth_p/depth_f)"
@@ -125,6 +125,7 @@ class Set_Fiducial_Dialog(QDialog):
         self.layout().addWidget(self.cmb_set_ref_plane, 0, 1)
         self.layout().addWidget(lbl_fiducial_coords, 1, 0)
         self.layout().addWidget(lbl_front1, 2, 0)
+        self.layout().addWidget(cmb_front1, 2, 1)
         for i, widget in enumerate(
             [
                 lbl_front1_view1,
@@ -133,11 +134,12 @@ class Set_Fiducial_Dialog(QDialog):
                 self.coord_textboxes[1],
             ]
         ):
-            self.layout().addWidget(widget, i // 2 + 2, i % 2 + 1)
+            self.layout().addWidget(widget, i // 2 + 2, i % 3 + 1)
         self.layout().addWidget(lbl_front2, 5, 0)
         self.layout().addWidget(lbl_front2_view1, 5, 1)
         self.layout().addWidget(self.coord_textboxes[2], 5, 2)
         self.layout().addWidget(lbl_back1, 6, 0)
+        self.layout().addWidget(cmb_front1, 6, 1)
         for i, widget in enumerate(  # this feels unncessarily complex
             [
                 lbl_back1_view1,
@@ -173,6 +175,7 @@ class Set_Fiducial_Dialog(QDialog):
         self.layout().addWidget(QLabel("Point depth (cm)"), 16, 0, -1, -1)
         self.layout().addWidget(self.lbl_point_depth, 16, 1)
         self.layout().addWidget(self.buttonBox, 17, 0, -1, -1)
+        self.layout().addWidget(self.table, 18, 0, -1, -1)
 
     def _setup_dropdown_fiducials_combobox(self, back=False):
         """Sets up a drop-down list of fiducials for the `back` or front (`back=False`)."""
@@ -333,6 +336,19 @@ class Set_Fiducial_Dialog(QDialog):
         self.lbl_point_shift.setText(str(self.shift_point))
         self.lbl_stereoshift_ratio.setText(str(self.point_stereoshift))
         self.lbl_point_depth.setText(str(self.point_depth))
+
+        # region Magnification ##################################
+        self.points[0][0].name = self.cmb_front1.currentText()
+        self.points[0][1].name = self.cmb_front2.currentText()
+        self.a, self.b = magnification(
+            self.points[0][0],  # F1 View 1
+            self.points[1][0],  # F2 View 1
+            self.points[3][0],  # B1 View 1
+            self.points[4][0],  # B2 View 1
+        )
+        # Update the magnification table
+        self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
+        self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
 
     def _on_click_save_to_table(self) -> None:
         """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
