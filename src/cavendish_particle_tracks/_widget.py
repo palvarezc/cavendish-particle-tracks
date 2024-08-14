@@ -330,9 +330,18 @@ class ParticleTracksWidget(QWidget):
             any(view in name.lower() for name in folder_subdirs)
             for view in VIEW_NAMES
         )
-        if not (three_subdirectories and subdir_names_contain_views):
+        same_image_count = all(
+            len(glob.glob(subdir + "/*"))
+            == len(glob.glob(folder_subdirs[0] + "/*"))
+            for subdir in folder_subdirs
+        )
+        if not (
+            three_subdirectories
+            and subdir_names_contain_views
+            and same_image_count
+        ):
             print(
-                "WARNING: The data folder must contain three subfolders, one for each view."
+                "WARNING: The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
             )
             # TODO: make this a QWarningBox?
             return

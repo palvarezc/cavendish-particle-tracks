@@ -1,4 +1,3 @@
-import os
 import time
 from random import random
 from typing import Callable
@@ -189,27 +188,30 @@ def test_calculate_length_fails_with_wrong_number_of_points(
     )
 
 
-def test_load_data(cpt_widget, qtbot):
+@pytest.mark.parametrize(
+    "data_subdirs, image_count, data_loaded",
+    [
+        (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True),
+        (["my_view1", "my_view2"], [2, 2], False),
+        (["my_view1", "my_view2", "my_view3"], [1, 2, 2], False),
+        (["my_view1", "my_view2", "no_view"], [2, 2, 2], False),
+    ],
+)
+def test_load_data(
+    cpt_widget, capsys, tmp_path, qtbot, data_subdirs, image_count, data_loaded
+):
     """Test loading of images in a folder as stack associated to a certain view"""
 
-    data_folder = "./test_data"
-    data_folder_subdirs = ["my_view1", "my_view2", "my_view3"]
-
-    os.mkdir(data_folder)
-    for subdir in data_folder_subdirs:
-        os.mkdir(data_folder + "/" + subdir)
-        data = np.random.randint(0, 255, (256, 256, 3), "uint8")
-        tf.imwrite(
-            data_folder + "/" + subdir + "/temp1.tif", data, photometric="rgb"
-        )
-        data = np.random.randint(0, 255, (256, 256, 3), "uint8")
-        tf.imwrite(
-            data_folder + "/" + subdir + "/temp2.tif", data, photometric="rgb"
-        )
+    for subdir, n in zip(data_subdirs, image_count):
+        p = tmp_path / subdir
+        p.mkdir()
+        for i in range(n):
+            data = np.random.randint(0, 255, (256, 256), "uint8")
+            tf.imwrite(p / f"temp{i}.tif", data)
 
     def set_directory_and_close(dialog):
         qtbot.addWidget(dialog)
-        dialog.setDirectory(data_folder)
+        dialog.setDirectory(str(tmp_path))
         buttonbox = dialog.findChild(QDialogButtonBox, "buttonBox")
         openbutton = buttonbox.children()[1]
         qtbot.mouseClick(openbutton, Qt.LeftButton, delay=1)
@@ -221,15 +223,16 @@ def test_load_data(cpt_widget, qtbot):
         time_out=5,
     )
 
-    assert len(cpt_widget.viewer.layers) == 3
-    for i in range(3):
+    if data_loaded:
+        assert len(cpt_widget.viewer.layers) == 3
+        for i in range(3):
+            assert (
+                cpt_widget.viewer.layers[i].name == "stack" + str(i + 1)
+                and cpt_widget.viewer.layers[i].ndim == 3
+            )
+    else:
+        captured = capsys.readouterr()
         assert (
-            cpt_widget.viewer.layers[i].name == "stack" + str(i + 1)
-            and cpt_widget.viewer.layers[i].ndim == 3
+            "WARNING: The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
+            in captured.out
         )
-
-    for subdir in data_folder_subdirs:
-        os.remove(data_folder + "/" + subdir + "/temp1.tif")
-        os.remove(data_folder + "/" + subdir + "/temp2.tif")
-        os.rmdir(data_folder + "/" + subdir)
-    os.rmdir(data_folder)
