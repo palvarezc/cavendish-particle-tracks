@@ -41,8 +41,6 @@ def get_dialog(
 
         # Avoid errors when dialog is not created
         if dialog is not None:
-            # Perform action dialog_action()
-            # dialog.hide() and dialog.close() do not seem to work
             dialog_action(dialog)
 
     # Create a thread to get the dialog instance and call dialog_creation trigger
