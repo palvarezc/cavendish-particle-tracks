@@ -32,8 +32,8 @@ def get_dialog(
     dialog: QDialog = None
     start_time = time.time()
 
-    # Helper function to catch the dialog instance and hide it
     def dialog_creation():
+        """Nested function to catch the dialog instance and hide it"""
         # Wait for the dialog to be created or timeout
         nonlocal dialog
         while dialog is None and time.time() - start_time < time_out:
