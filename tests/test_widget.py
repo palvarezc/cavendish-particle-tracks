@@ -213,8 +213,8 @@ def test_load_data(cpt_widget, qtbot, image_folder):
 
     # Open and retrieve file dialog
     get_dialog(
-        cpt_widget.load.setCurrentIndex,
-        set_directory_and_close,
+        dialog_trigger=cpt_widget.load.setCurrentIndex,
+        dialog_action=set_directory_and_close,
         time_out=5,
         trigger_option=1,
     )
