@@ -41,8 +41,9 @@ class Set_Fiducial_Dialog(QDialog):
         self.spoints = []
         # endregion
         self.layer_points = self._setup_points_layer()
+        self._setup_ui()
 
-        # region UI Setup
+    def _setup_ui(self) -> None:
         self.setWindowTitle("Measure Stereoshift and Magnification")
         """ This section is used to select whether the shift of the front
         or rear fiducial plane is subtracted from the shift of the other points.
@@ -63,7 +64,7 @@ class Set_Fiducial_Dialog(QDialog):
         lbl_back_view1 = QLabel("View 1")
         lbl_back_view2 = QLabel("View 2")
         # Textboxes for the output of point coordinates
-        self.textboxes = [QLabel(self) for _ in range(6)]
+        self.coord_textboxes = [QLabel(self) for _ in range(6)]
         # Texbox with calculation formula
         self.label_stereoshift = QLabel(
             "Stereo shift (shift_p/shift_f = depth_p/depth_f)"
@@ -81,18 +82,16 @@ class Set_Fiducial_Dialog(QDialog):
         ]
         # Set minimum width for textboxes
         for textbox in (
-            self.textboxes + self.results
+            self.coord_textboxes + self.results
         ):  # possibly another way of implementing this without creaing an unnecessary list that isn't referenced again
             textbox.setMinimumWidth(200)
         # Control Buttons
         btn_calculate = QPushButton("Calculate")
         btn_calculate.clicked.connect(self._on_click_calculate)
         btn_save = QPushButton("Save to table")
-        btn_save.clicked.connect(
-            self._on_click_save_to_table
-        )  # TODO add this back in
+        btn_save.clicked.connect(self._on_click_save_to_table)
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
-        self.buttonBox.clicked.connect(self.cancel)  # TODO add this back in
+        self.buttonBox.clicked.connect(self.cancel)
         # Layout
         # surely there's a nicer way of doing this grid layout stuff.
         self.setLayout(QGridLayout())
@@ -102,18 +101,18 @@ class Set_Fiducial_Dialog(QDialog):
         for i, widget in enumerate(
             [
                 lbl_front_view1,
-                self.textboxes[0],
+                self.coord_textboxes[0],
                 lbl_front_view2,
-                self.textboxes[1],
+                self.coord_textboxes[1],
             ]
         ):
             self.layout().addWidget(widget, i // 2 + 2, i % 2 + 1)
         for i, widget in enumerate(
             [
                 lbl_back_view1,
-                self.textboxes[2],
+                self.coord_textboxes[2],
                 lbl_back_view2,
-                self.textboxes[3],
+                self.coord_textboxes[3],
             ]
         ):
             self.layout().addWidget(widget, i // 2 + 5, i % 2 + 1)
@@ -137,7 +136,6 @@ class Set_Fiducial_Dialog(QDialog):
         self.layout().addWidget(self.lbl_point_depth, 12, 2)
         self.layout().addWidget(btn_save, 13, 0, 1, 3)
         self.layout().addWidget(self.buttonBox, 14, 0, 1, 3)
-        # endregion
 
     def _on_change_cmb_set_ref_plane(self) -> None:
         # check how original code works and make sure I've copied the correct functionality.
@@ -160,11 +158,11 @@ class Set_Fiducial_Dialog(QDialog):
         points = np.array(
             [
                 [100, 100],  # Front Fiducial View 1
-                [100, 400],  # Front Fiducial View 2
+                [101, 400],  # Front Fiducial View 2
                 [200, 100],  # Point View 1
-                [200, 400],  # Point View 2
-                [300, 100],  # Back Fiducial View 1
-                [300, 400],  # Back Fiducial View 2
+                [202, 399],  # Point View 2
+                [300, 103],  # Back Fiducial View 1
+                [299, 401],  # Back Fiducial View 2
                 # then expand this to include the magnification points and redo the array
             ]
         )
@@ -207,8 +205,8 @@ class Set_Fiducial_Dialog(QDialog):
                 (self.points[i][j].x, self.points[i][j].y) = (
                     self.layer_points.data[i * 2 + j]
                 )
-                self.textboxes[i].setText(str(self.points[i][j].xy))
-                self.textboxes[i].setText(str(self.points[i][j].xy))
+                self.coord_textboxes[i].setText(str(self.points[i][j].xy))
+                self.coord_textboxes[i].setText(str(self.points[i][j].xy))
             # There may be a better way of doing this by assigning point attributes.
             # I can see this approach going wrong.
             # Take a look at the napari example nD points with features
