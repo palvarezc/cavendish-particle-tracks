@@ -305,7 +305,7 @@ class ParticleTracksWidget(QWidget):
         return dlg
 
     def _on_click_load_data(self) -> None:
-        """When the 'Load data' button is clicked, a dialog opens to select the folder where the data is.
+        """When the 'Load data' menu is clicked, a dialog opens to select the folder where the data is.
         The data in the folder is loaded as a stack of images, and the stack is named according to the option selected.
         """
         if self.load.currentIndex() < 1:
