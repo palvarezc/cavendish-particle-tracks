@@ -31,7 +31,7 @@ class Set_Fiducial_Dialog(QDialog):
         # fmt:off
         self.points = [
             [Fiducial("Front Fiducial 1 View 1"), Fiducial("Front Fiducial 1 View 2")],
-            [Fiducial("Front Fiducial 2 View 1")]
+            [Fiducial("Front Fiducial 2 View 1")],
             [Fiducial("Point View 1"), Fiducial("Point View 2")],
             [Fiducial("Back Fiducial 1 View 1"),Fiducial("Back Fiducial 1 View 2")],
             [Fiducial("Back Fiducial 2 View 1")]
@@ -60,14 +60,21 @@ class Set_Fiducial_Dialog(QDialog):
         )
         # Labels for the points' coordinates
         lbl_fiducial_coords = QLabel("Fiducial coordinates")
-        lbl_front_view1 = QLabel("View 1")
-        lbl_front_view2 = QLabel("View 2")
+        lbl_front1 = QLabel("Front Fiducial 1")
+        lbl_front1_view1 = QLabel("View 1")
+        lbl_front1_view2 = QLabel("View 2")
+        lbl_front2 = QLabel("Front Fiducial 2")
+        lbl_front2_view1 = QLabel("View 1")
+        lbl_back1 = QLabel("Rear Fiducial 1")
+        lbl_back1_view1 = QLabel("View 1")
+        lbl_back1_view2 = QLabel("View 2")
+        lbl_back2 = QLabel("Rear Fiducial 2")
+        lbl_back2_view1 = QLabel("View 1")
+        lbl_point_coords = QLabel("Point coordinates")
         lbl_point_view1 = QLabel("View 1")
-        lbl_point_view2 = QLabel("View 2")  # TODO Implement these
-        lbl_back_view1 = QLabel("View 1")
-        lbl_back_view2 = QLabel("View 2")
+        lbl_point_view2 = QLabel("View 2")
         # Textboxes for the output of point coordinates
-        self.coord_textboxes = [QLabel(self) for _ in range(6)]
+        self.coord_textboxes = [QLabel(self) for _ in range(8)]
         # Comboboxes for selecting which fiducial the point corresponds to
         self.cmb_front1 = self._setup_dropdown_fiducials_combobox()
         self.cmb_front2 = self._setup_dropdown_fiducials_combobox()
@@ -101,54 +108,71 @@ class Set_Fiducial_Dialog(QDialog):
         # Control Buttons
         btn_calculate = QPushButton("Calculate")
         btn_calculate.clicked.connect(self._on_click_calculate)
-        btn_save = QPushButton("Save to table")
-        btn_save.clicked.connect(self._on_click_save_to_table)
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
+        self.buttonBox = QDialogButtonBox(
+            QDialogButtonBox.Save | QDialogButtonBox.Cancel
+        )
         self.buttonBox.clicked.connect(self.cancel)
+        self.buttonBox.accepted.connect(self._on_click_save_to_table)
         # Layout
         # surely there's a nicer way of doing this grid layout stuff.
+        # there is: nested layouts are possible https://doc.qt.io/qtforpython-6/overviews/qtwidgets-tutorials-widgets-nestedlayouts-example.html
+        # That said, is it really that much of an improvement?
+        # actually yes it is
+        # when you need to insert into grid style layouts
+        # the problem is you now need to update all the points after it
         self.setLayout(QGridLayout())
-        self.layout().addWidget(lbl_ref_plane, 0, 0, 1, 2)
-        self.layout().addWidget(lbl_fiducial_coords, 1, 0, 1, 2)
-        self.layout().addWidget(self.cmb_set_ref_plane, 0, 2)
+        self.layout().addWidget(lbl_ref_plane, 0, 0)
+        self.layout().addWidget(self.cmb_set_ref_plane, 0, 1)
+        self.layout().addWidget(lbl_fiducial_coords, 1, 0)
+        self.layout().addWidget(lbl_front1, 2, 0)
         for i, widget in enumerate(
             [
-                lbl_front_view1,
+                lbl_front1_view1,
                 self.coord_textboxes[0],
-                lbl_front_view2,
+                lbl_front1_view2,
                 self.coord_textboxes[1],
             ]
         ):
             self.layout().addWidget(widget, i // 2 + 2, i % 2 + 1)
-        for i, widget in enumerate(
+        self.layout().addWidget(lbl_front2, 5, 0)
+        self.layout().addWidget(lbl_front2_view1, 5, 1)
+        self.layout().addWidget(self.coord_textboxes[2], 5, 2)
+        self.layout().addWidget(lbl_back1, 6, 0)
+        for i, widget in enumerate(  # this feels unncessarily complex
             [
-                lbl_back_view1,
-                self.coord_textboxes[2],
-                lbl_back_view2,
-                self.coord_textboxes[3],
+                lbl_back1_view1,
+                self.coord_textboxes[5],
+                lbl_back1_view2,
+                self.coord_textboxes[6],
             ]
         ):
-            self.layout().addWidget(widget, i // 2 + 5, i % 2 + 1)
+            self.layout().addWidget(widget, i // 2 + 6, i % 2 + 1)
+        self.layout().addWidget(lbl_back2, 8, 0)
+        self.layout().addWidget(lbl_back2_view1, 8, 1)
+        self.layout().addWidget(self.coord_textboxes[7], 8, 1)
+        self.layout().addWidget(lbl_point_coords, 9, 0)
+        for i, widget in enumerate(  # this feels unncessarily complex
+            [
+                lbl_point_view1,
+                self.coord_textboxes[3],
+                lbl_point_view2,
+                self.coord_textboxes[4],
+            ]
+        ):
+            self.layout().addWidget(widget, i // 2 + 9, i % 2 + 1)
 
-        self.layout().addWidget(btn_calculate, 7, 0, 1, 3)
-        self.layout().addWidget(
-            self.label_stereoshift,
-            8,
-            0,
-            1,
-            3,
-        )
+        self.layout().addWidget(self.label_stereoshift, 11, 0, -1, -1)
+        self.layout().addWidget(btn_calculate, 12, 0, -1, -1)
         # update this once standard decided upon
-        self.layout().addWidget(QLabel("Fiducial shift"), 9, 1)
-        self.layout().addWidget(self.lbl_fiducial_shift, 9, 2)
-        self.layout().addWidget(QLabel("Point shift"), 10, 1)
-        self.layout().addWidget(self.lbl_point_shift, 10, 2)
-        self.layout().addWidget(QLabel("Ratio"), 11, 1)
-        self.layout().addWidget(self.lbl_stereoshift_ratio, 11, 2)
-        self.layout().addWidget(QLabel("Point depth (cm)"), 12, 1)
-        self.layout().addWidget(self.lbl_point_depth, 12, 2)
-        self.layout().addWidget(btn_save, 13, 0, 1, 3)
-        self.layout().addWidget(self.buttonBox, 14, 0, 1, 3)
+        self.layout().addWidget(QLabel("Fiducial shift"), 13, 0)
+        self.layout().addWidget(self.lbl_fiducial_shift, 13, 1, -1, -1)
+        self.layout().addWidget(QLabel("Point shift"), 14, 0)
+        self.layout().addWidget(self.lbl_point_shift, 14, 1, -1, -1)
+        self.layout().addWidget(QLabel("Ratio"), 15, 0, -1, -1)
+        self.layout().addWidget(self.lbl_stereoshift_ratio, 15, 1)
+        self.layout().addWidget(QLabel("Point depth (cm)"), 16, 0, -1, -1)
+        self.layout().addWidget(self.lbl_point_depth, 16, 1)
+        self.layout().addWidget(self.buttonBox, 17, 0, -1, -1)
 
     def _setup_dropdown_fiducials_combobox(self, back=False):
         """Sets up a drop-down list of fiducials for the `back` or front (`back=False`)."""
@@ -182,14 +206,16 @@ class Set_Fiducial_Dialog(QDialog):
         # I mean, I assume this import doesn't actually use any extra memory since Napari is imported anyway
         # whilst this plugin is running. But I don't know enough about how Python handles imports / memory usage to be sure.
         # add the points
-        points = np.array(
+        points = np.array(  # TODO points is a duplicate of the fiducial array, why bother keeping both?
             [
-                [100, 100],  # Front Fiducial View 1
-                [101, 400],  # Front Fiducial View 2
-                [200, 100],  # Point View 1
-                [202, 399],  # Point View 2
-                [300, 103],  # Back Fiducial View 1
-                [299, 401],  # Back Fiducial View 2
+                [100, 100],  # Front Fiducial 1 View 1
+                [101, 400],  # Front Fiducial 1 View 2
+                [200, 100],  # Front Fiducial 2 View 1
+                [202, 399],  # Point View 1
+                [300, 103],  # Point View 2
+                [299, 401],  # Back Fiducial 1 View 1
+                [400, 402],  # Back Fiducial 1 View 2
+                [500, 400],  # Back Fiducial 2 View 1
                 # then expand this to include the magnification points and redo the array
             ]
         )
@@ -197,10 +223,25 @@ class Set_Fiducial_Dialog(QDialog):
         # TODO implment the layer attributes stuff see if i can integrate it with the existing napari stuff
         labels = ["Reference (Front) view1", "Reference (Front) view2"]
         for i in self.points:
+            # What I've done here is a big no-no, as the list of fiducials here
+            # carries the same name as the points used to instantiate the layer.
+            # (ie. self.points = fiducials, points = the array above as the scope is limited to this function)
+            # This is kinda why I want to change this, but leaving it as functional but odd till
+            # we figure out how to get the points to instantiate in the middle of the viewport or
+            # decide otherwise.
             for j in i:
                 labels += [j.name]
 
-        colors = ["green", "green", "blue", "blue", "red", "red"]
+        colors = [
+            "green",
+            "green",
+            "yellow",
+            "blue",
+            "blue",
+            "red",
+            "red",
+            "orange",
+        ]
 
         text = {
             "string": labels,
@@ -224,8 +265,8 @@ class Set_Fiducial_Dialog(QDialog):
         return layer_points
 
     def _on_click_calculate(self) -> None:
-        """Caculate the stereoshift and populate the results table."""
-
+        """Calculate the stereoshift and populate the results table."""
+        # TODO need to add checks that the user hasn't deleted points or otherwise
         # Add points in the coords to corresponding text box
         for i in range(len(self.points)):
             for j in range(len(self.points[i])):
@@ -238,11 +279,16 @@ class Set_Fiducial_Dialog(QDialog):
             # I can see this approach going wrong.
             # Take a look at the napari example nD points with features
         # TODO clarify whether we still want the reference offset to be displayed to the user.
-        ref_plane_index = self.cmb_set_ref_plane.currentIndex() * 2
-        # index =0 if front, 2 if rear
-        fiducial_plane__index = 2 - ref_plane_index
+        ref_plane_index = self.cmb_set_ref_plane.currentIndex() * 3
+        # index =0 if front, 3 if rear
+        fiducial_plane__index = 3 - ref_plane_index
+        # = 3 if front, 0 if rear
         # whatever plane is not the reference plane, use the opposite plane.
-        # The index of the points plane is always 1.
+        points_plane_index = (
+            2  # this is here so that if the array structure is changed
+        )
+        # then we can update this so as to avoid breaking the rest of the code
+        # The index of the points plane is always 2
         # This could also be achieved in a more traditional/clearer way
         # (ie one that doesn't need a comment to be obvious) using an if/switch statement
         # But this keeps it a little more concise and is similar to the original code's use
@@ -252,7 +298,7 @@ class Set_Fiducial_Dialog(QDialog):
             self.points[fiducial_plane__index], self.points[ref_plane_index]
         )
         self.shift_point = corrected_length(
-            self.points[1], self.points[ref_plane_index]
+            self.points[points_plane_index], self.points[ref_plane_index]
         )
         # See comments in pull request.
         self.point_stereoshift = self.shift_fiducial / self.shift_point
@@ -265,8 +311,8 @@ class Set_Fiducial_Dialog(QDialog):
         self.point_depth = depth(
             self.points[fiducial_plane__index][0],
             self.points[fiducial_plane__index][1],
-            self.points[1][0],
-            self.points[1][1],
+            self.points[points_plane_index][0],
+            self.points[points_plane_index][1],
         )
         self.spoints = self.layer_points.data[2:]
         # TODO this will need to be updated once magnification etc is added.
@@ -332,6 +378,9 @@ class Set_Fiducial_Dialog(QDialog):
         self.parent.viewer.layers.select_previous()
         self.parent.viewer.layers.remove(self.layer_points)
         return super().accept()
+
+    def _on_click_fiducial(self) -> None:
+        print("This is a skeleton function")
 
 
 """ 
@@ -446,5 +495,16 @@ When accept clicked
 When cancel clicked
 -> remove layer
 -> call parent "reject" # what does this do?
+________________________
+New approach pseudo
+INIT:
+- Create fiducial array
+- initialise stereoshift calculation variables.
+- call setup points layer
+- call UI setup
+
+SETUP POINTS LAYER:
+- Initiliase arbitrary set of points
+
 
 """
