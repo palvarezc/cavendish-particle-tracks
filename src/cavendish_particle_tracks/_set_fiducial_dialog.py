@@ -6,10 +6,12 @@ from qtpy.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QGridLayout,
+    QVBoxLayout,
     QLabel,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
+    QHBoxLayout,
 )
 
 from ._analysis import FIDUCIAL_BACK, FIDUCIAL_FRONT, Fiducial
@@ -59,7 +61,6 @@ class Set_Fiducial_Dialog(QDialog):
             self._on_change_cmb_set_ref_plane
         )
         # Labels for the points' coordinates
-        lbl_fiducial_coords = QLabel("Fiducial coordinates")
         lbl_front1 = QLabel("Front Fiducial 1")
         lbl_front1_view1 = QLabel("View 1")
         lbl_front1_view2 = QLabel("View 2")
@@ -120,62 +121,65 @@ class Set_Fiducial_Dialog(QDialog):
         # actually yes it is
         # when you need to insert into grid style layouts
         # the problem is you now need to update all the points after it
-        self.setLayout(QGridLayout())
-        self.layout().addWidget(lbl_ref_plane, 0, 0)
-        self.layout().addWidget(self.cmb_set_ref_plane, 0, 1)
-        self.layout().addWidget(lbl_fiducial_coords, 1, 0)
-        self.layout().addWidget(lbl_front1, 2, 0)
-        self.layout().addWidget(cmb_front1, 2, 1)
-        for i, widget in enumerate(
-            [
-                lbl_front1_view1,
-                self.coord_textboxes[0],
-                lbl_front1_view2,
-                self.coord_textboxes[1],
-            ]
-        ):
-            self.layout().addWidget(widget, i // 2 + 2, i % 3 + 1)
-        self.layout().addWidget(lbl_front2, 5, 0)
-        self.layout().addWidget(lbl_front2_view1, 5, 1)
-        self.layout().addWidget(self.coord_textboxes[2], 5, 2)
-        self.layout().addWidget(lbl_back1, 6, 0)
-        self.layout().addWidget(cmb_front1, 6, 1)
-        for i, widget in enumerate(  # this feels unncessarily complex
-            [
-                lbl_back1_view1,
-                self.coord_textboxes[5],
-                lbl_back1_view2,
-                self.coord_textboxes[6],
-            ]
-        ):
-            self.layout().addWidget(widget, i // 2 + 6, i % 2 + 1)
-        self.layout().addWidget(lbl_back2, 8, 0)
-        self.layout().addWidget(lbl_back2_view1, 8, 1)
-        self.layout().addWidget(self.coord_textboxes[7], 8, 1)
-        self.layout().addWidget(lbl_point_coords, 9, 0)
-        for i, widget in enumerate(  # this feels unncessarily complex
-            [
-                lbl_point_view1,
-                self.coord_textboxes[3],
-                lbl_point_view2,
-                self.coord_textboxes[4],
-            ]
-        ):
-            self.layout().addWidget(widget, i // 2 + 9, i % 2 + 1)
+        layout_outer = QVBoxLayout()
 
-        self.layout().addWidget(self.label_stereoshift, 11, 0, -1, -1)
-        self.layout().addWidget(btn_calculate, 12, 0, -1, -1)
-        # update this once standard decided upon
-        self.layout().addWidget(QLabel("Fiducial shift"), 13, 0)
-        self.layout().addWidget(self.lbl_fiducial_shift, 13, 1, -1, -1)
-        self.layout().addWidget(QLabel("Point shift"), 14, 0)
-        self.layout().addWidget(self.lbl_point_shift, 14, 1, -1, -1)
-        self.layout().addWidget(QLabel("Ratio"), 15, 0, -1, -1)
-        self.layout().addWidget(self.lbl_stereoshift_ratio, 15, 1)
-        self.layout().addWidget(QLabel("Point depth (cm)"), 16, 0, -1, -1)
-        self.layout().addWidget(self.lbl_point_depth, 16, 1)
-        self.layout().addWidget(self.buttonBox, 17, 0, -1, -1)
-        self.layout().addWidget(self.table, 18, 0, -1, -1)
+        layout_refplane = QHBoxLayout()
+        layout_refplane.addWidget(lbl_ref_plane)
+        layout_refplane.addWidget(self.cmb_set_ref_plane)
+        layout_outer.addLayout(layout_refplane)
+
+        layout_fiducials = QGridLayout(margin=10)
+        layout_fiducials.addWidget(lbl_front1, 0, 0)
+        layout_fiducials.addWidget(cmb_front1, 0, 1)
+        layout_fiducials.addWidget(lbl_front1_view1, 0, 2)
+        layout_fiducials.addWidget(self.coord_textboxes[0], 0, 3)
+        layout_fiducials.addWidget(lbl_front1_view2, 0, 4)
+        layout_fiducials.addWidget(self.coord_textboxes[1], 0, 5)
+
+        layout_fiducials.addWidget(lbl_front2, 1, 0)
+        layout_fiducials.addWidget(cmb_front2, 1, 1)
+        layout_fiducials.addWidget(lbl_front2_view1, 1, 2)
+        layout_fiducials.addWidget(self.coord_textboxes[2], 1, 3)
+
+        layout_fiducials.addWidget(lbl_back1, 2, 0)
+        layout_fiducials.addWidget(cmb_back1, 2, 1)
+        layout_fiducials.addWidget(lbl_back1_view1, 2, 2)
+        layout_fiducials.addWidget(self.coord_textboxes[5], 2, 3)
+        layout_fiducials.addWidget(lbl_back1_view2, 2, 4)
+        layout_fiducials.addWidget(self.coord_textboxes[6], 2, 5)
+
+        layout_fiducials.addWidget(lbl_back2, 3, 0)
+        layout_fiducials.addWidget(cmb_back2, 3, 1)
+        layout_fiducials.addWidget(lbl_back2_view1, 3, 2)
+        layout_fiducials.addWidget(self.coord_textboxes[7], 3, 3)
+
+        layout_fiducials.addWidget(lbl_point_coords, 4, 0)
+        layout_fiducials.addWidget(lbl_point_view1, 4, 2)
+        layout_fiducials.addWidget(self.coord_textboxes[3], 4, 3)
+        layout_fiducials.addWidget(lbl_point_view2, 4, 4)
+        layout_fiducials.addWidget(self.coord_textboxes[4], 4, 5)
+        layout_outer.addLayout(layout_fiducials)
+
+        layout_stereoshift = QHBoxLayout()
+        layout_stereoshift.addWidget(self.label_stereoshift)
+        layout_stereoshift.addWidget(btn_calculate)
+        layout_outer.addLayout(layout_stereoshift)
+
+        layout_results = QGridLayout(margin=10)
+        layout_results.addWidget(QLabel("Fiducial shift"), 0, 0)
+        layout_results.addWidget(self.lbl_fiducial_shift, 0, 1)
+        layout_results.addWidget(QLabel("Point shift"), 1, 0)
+        layout_results.addWidget(self.lbl_point_shift, 1, 1)
+        layout_results.addWidget(QLabel("Ratio"), 2, 0)
+        layout_results.addWidget(self.lbl_stereoshift_ratio, 2, 1)
+        layout_results.addWidget(QLabel("Point depth (cm)"), 3, 0)
+        layout_results.addWidget(self.lbl_point_depth, 3, 1)
+        layout_outer.addLayout(layout_results)
+
+        layout_outer.addWidget(self.table)
+        layout_outer.addWidget(self.buttonBox)
+
+        self.setLayout(layout_outer)
 
     def _setup_dropdown_fiducials_combobox(self, back=False):
         """Sets up a drop-down list of fiducials for the `back` or front (`back=False`)."""
