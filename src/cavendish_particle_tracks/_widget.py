@@ -324,7 +324,7 @@ class ParticleTracksWidget(QWidget):
                 | QFileDialog.DontResolveSymlinks
                 | QFileDialog.HideNameFilterDetails,
             )
-            if folder_name:
+            if folder_name not in {"", None}:
                 stack = imread(folder_name + "/*")
                 self.viewer.add_image(stack, name=self.load.currentText())
                 self.load.setCurrentIndex(0)
