@@ -211,11 +211,13 @@ class Set_Fiducial_Dialog(QDialog):
                 [100, 100],  # Front Fiducial 1 View 1
                 [101, 400],  # Front Fiducial 1 View 2
                 [200, 100],  # Front Fiducial 2 View 1
+                [200, 102],  # Front Fiducial 2 View 2
                 [202, 399],  # Point View 1
                 [300, 103],  # Point View 2
                 [299, 401],  # Back Fiducial 1 View 1
                 [400, 402],  # Back Fiducial 1 View 2
                 [500, 400],  # Back Fiducial 2 View 1
+                [500, 402],  # BackFiducial 2 View 2
                 # then expand this to include the magnification points and redo the array
             ]
         )
@@ -236,10 +238,12 @@ class Set_Fiducial_Dialog(QDialog):
             "green",
             "green",
             "yellow",
+            "yellow",
             "blue",
             "blue",
             "red",
             "red",
+            "orange",
             "orange",
         ]
 
@@ -271,7 +275,9 @@ class Set_Fiducial_Dialog(QDialog):
         for i in range(len(self.points)):
             for j in range(len(self.points[i])):
                 (self.points[i][j].x, self.points[i][j].y) = (
-                    self.layer_points.data[i * 2 + j]
+                    self.layer_points.data[
+                        i * 2 + j
+                    ]  # TODO now this is broken
                 )
                 self.coord_textboxes[i].setText(str(self.points[i][j].xy))
                 self.coord_textboxes[i].setText(str(self.points[i][j].xy))
