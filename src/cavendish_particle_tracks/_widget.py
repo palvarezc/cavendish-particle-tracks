@@ -7,6 +7,7 @@ see: https://napari.org/stable/plugins/guides.html?#widgets
 Replace code below according to your needs.
 """
 
+import glob
 from datetime import datetime
 from typing import List
 
@@ -45,10 +46,7 @@ class ParticleTracksWidget(QWidget):
         self.viewer = napari_viewer
 
         # define QtWidgets
-        self.load = QComboBox()
-        self.load.addItems(VIEW_NAMES)
-        self.load.setCurrentIndex(0)
-        self.load.currentIndexChanged.connect(self._on_click_load_data)
+        self.load = QPushButton("Load data")
         self.cb = QComboBox()
         self.cb.addItems(EXPECTED_PARTICLES)
         self.cb.setCurrentIndex(0)
@@ -69,6 +67,7 @@ class ParticleTracksWidget(QWidget):
         self.cal.setEnabled(False)
 
         # connect callbacks
+        self.load.clicked.connect(self._on_click_load_data)
         rad.clicked.connect(self._on_click_radius)
         lgth.clicked.connect(self._on_click_length)
         ang.clicked.connect(self._on_click_decay_angles)
@@ -305,17 +304,16 @@ class ParticleTracksWidget(QWidget):
         return dlg
 
     def _on_click_load_data(self) -> None:
-        """When the 'Load data' menu is clicked, a dialog opens to select the folder where the data is.
-        The data in the folder is loaded as a stack of images, and the stack is named according to the option selected.
+        """When the 'Load data' button is clicked, a dialog opens to select the folder containing the data.
+        The folder should contain three subfolders named as variations of 'view1', 'view2' and 'view3', and each subfolder should contain the same number of images.
+        The images in each folder are loaded as a stack, and the stack is named according to the subfolder name.
         """
-        if self.load.currentIndex() < 1:
-            return
 
         test_file_dialog = QFileDialog(self)
         test_file_dialog.setFileMode(QFileDialog.Directory)
         folder_name = test_file_dialog.getExistingDirectory(
             self,
-            "Open folder for " + str(self.load.currentText()),
+            "Choose folder",
             "./",
             QFileDialog.DontUseNativeDialog
             | QFileDialog.DontResolveSymlinks
@@ -323,12 +321,28 @@ class ParticleTracksWidget(QWidget):
             | QFileDialog.HideNameFilterDetails,
         )
 
-        if folder_name not in {"", None}:
-            stack = imread(folder_name + "/*")
-            self.viewer.add_image(stack, name=self.load.currentText())
-            # TODO: investigate the multiscale otption.
+        if folder_name in {"", None}:
+            return
 
-        self.load.setCurrentIndex(0)
+        folder_subdirs = glob.glob(folder_name + "/*/")
+        three_subdirectories = len(folder_subdirs) == 3
+        subdir_names_contain_views = all(
+            any(view in name.lower() for name in folder_subdirs)
+            for view in VIEW_NAMES
+        )
+        if not (three_subdirectories and subdir_names_contain_views):
+            print(
+                "WARNING: The data folder must contain three subfolders, one for each view."
+            )
+            # TODO: make this a QWarningBox?
+            return
+
+        for subdir, stack_name in zip(
+            folder_subdirs, ["stack1", "stack2", "stack3"]
+        ):
+            stack = imread(subdir + "/*")
+            self.viewer.add_image(stack, name=stack_name)
+            # TODO: investigate the multiscale otption.
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to

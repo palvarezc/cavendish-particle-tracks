@@ -18,7 +18,6 @@ def get_dialog(
     dialog_trigger: Callable,
     dialog_action: Callable,
     time_out: int = 5,
-    trigger_option: int = 1,
 ) -> QDialog:
     """
     Returns the current dialog (active modal widget). If there is no
@@ -28,7 +27,6 @@ def get_dialog(
     :param dialog_trigger: Callable that triggers the dialog creation.
     :param dialog_action: Callable that manipulates and closes/hides the dialog.
     :param time_out: Maximum time (seconds) to wait for the dialog creation.
-    :param trigger_option: Options to be passed to dialog_trigger.
     """
 
     dialog: QDialog = None
@@ -47,7 +45,7 @@ def get_dialog(
 
     # Create a thread to get the dialog instance and call dialog_creation trigger
     QTimer.singleShot(1, dialog_capture)
-    dialog_trigger(trigger_option)
+    dialog_trigger()
 
     # Wait for the dialog to be created or timeout
     while dialog is None and time.time() - start_time < time_out:
@@ -194,34 +192,44 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 def test_load_data(cpt_widget, qtbot):
     """Test loading of images in a folder as stack associated to a certain view"""
 
-    image_folder = "./test_data_view1"
+    data_folder = "./test_data"
+    data_folder_subdirs = ["my_view1", "my_view2", "my_view3"]
 
-    os.mkdir(image_folder)
-    data = np.random.randint(0, 255, (256, 256, 3), "uint8")
-    tf.imwrite(image_folder + "/temp1.tif", data, photometric="rgb")
-    data = np.random.randint(0, 255, (256, 256, 3), "uint8")
-    tf.imwrite(image_folder + "/temp2.tif", data, photometric="rgb")
+    os.mkdir(data_folder)
+    for subdir in data_folder_subdirs:
+        os.mkdir(data_folder + "/" + subdir)
+        data = np.random.randint(0, 255, (256, 256, 3), "uint8")
+        tf.imwrite(
+            data_folder + "/" + subdir + "/temp1.tif", data, photometric="rgb"
+        )
+        data = np.random.randint(0, 255, (256, 256, 3), "uint8")
+        tf.imwrite(
+            data_folder + "/" + subdir + "/temp2.tif", data, photometric="rgb"
+        )
 
     def set_directory_and_close(dialog):
         qtbot.addWidget(dialog)
-        dialog.setDirectory(image_folder)
+        dialog.setDirectory(data_folder)
         buttonbox = dialog.findChild(QDialogButtonBox, "buttonBox")
         openbutton = buttonbox.children()[1]
         qtbot.mouseClick(openbutton, Qt.LeftButton, delay=1)
 
     # Open and retrieve file dialog
     get_dialog(
-        dialog_trigger=cpt_widget.load.setCurrentIndex,
+        dialog_trigger=cpt_widget._on_click_load_data,
         dialog_action=set_directory_and_close,
         time_out=5,
-        trigger_option=1,
     )
 
-    assert (
-        cpt_widget.viewer.layers[0].name == "View1"
-    ), "View1 layer has not been created"
-    assert cpt_widget.viewer.layers[0].ndim == 3, "Layer is not a stack"
+    assert len(cpt_widget.viewer.layers) == 3
+    for i in range(3):
+        assert (
+            cpt_widget.viewer.layers[i].name == "stack" + str(i + 1)
+            and cpt_widget.viewer.layers[i].ndim == 3
+        )
 
-    os.remove(image_folder + "/temp1.tif")
-    os.remove(image_folder + "/temp2.tif")
-    os.rmdir(image_folder)
+    for subdir in data_folder_subdirs:
+        os.remove(data_folder + "/" + subdir + "/temp1.tif")
+        os.remove(data_folder + "/" + subdir + "/temp2.tif")
+        os.rmdir(data_folder + "/" + subdir)
+    os.rmdir(data_folder)
