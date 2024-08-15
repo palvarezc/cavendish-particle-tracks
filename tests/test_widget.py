@@ -189,7 +189,7 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 
 
 @pytest.mark.parametrize(
-    "data_subdirs, image_count, data_loaded",
+    "data_subdirs, image_count, expect_data_loaded",
     [
         (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True),
         (["my_view1", "my_view2"], [2, 2], False),
@@ -198,7 +198,13 @@ def test_calculate_length_fails_with_wrong_number_of_points(
     ],
 )
 def test_load_data(
-    cpt_widget, capsys, tmp_path, qtbot, data_subdirs, image_count, data_loaded
+    cpt_widget,
+    capsys,
+    tmp_path,
+    qtbot,
+    data_subdirs,
+    image_count,
+    expect_data_loaded,
 ):
     """Test loading of images in a folder as stack associated to a certain view"""
 
@@ -223,7 +229,7 @@ def test_load_data(
         time_out=5,
     )
 
-    if data_loaded:
+    if expect_data_loaded:
         assert len(cpt_widget.viewer.layers) == 3
         for i in range(3):
             assert (
