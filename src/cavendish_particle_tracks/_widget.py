@@ -26,7 +26,6 @@ from qtpy.QtWidgets import (
 
 from ._analysis import (
     EXPECTED_PARTICLES,
-    FIDUCIALS,
     NewParticle,
 )
 from ._calculate import length, radius
@@ -52,9 +51,6 @@ class ParticleTracksWidget(QWidget):
         btn_radius = QPushButton("Calculate radius")
         btn_length = QPushButton("Calculate length")
         btn_decayangle = QPushButton("Calculate decay angles")
-        cmb_fiducial = QComboBox()
-        cmb_fiducial.addItems(FIDUCIALS)
-        cmb_fiducial.currentIndexChanged.connect(self._on_click_add_fiducial)
         btn_stereoshift = QPushButton("Stereoshift")
         btn_testnew = QPushButton("test new reference")
         btn_save = QPushButton("Save")
@@ -94,7 +90,6 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.cal)
         self.layout().addWidget(btn_stereoshift)
         self.layout().addWidget(self.mag)
-        self.layout().addWidget(cmb_fiducial)
         self.layout().addWidget(btn_save)
         self.layout().addWidget(btn_testnew)
 
@@ -409,33 +404,3 @@ class ParticleTracksWidget(QWidget):
             f.writelines([particle.to_csv() for particle in self.data])
 
         print("Saved data to ", filename)
-
-    def _on_click_add_fiducial(self) -> None:
-        """Adds a fiducial marker to the layer."""
-        # currently, this is implemented by adding the layer, then a point.
-        # ideally this should resemble the inbuilt tools, but let's get it working first.
-
-        point = [100, 100]
-        # this should be done properly later, currently copying the old approach
-        # get below to reference the currently selected fiducial in the combobox
-        name = "Example C'"
-        point_label = {
-            "string": name,
-            "size": 20,
-            "color": "green",
-            "translation": np.array([-30, 0]),
-        }
-        # see stereoshift_dialog
-        # create a points layer here if one doesn't exist.
-        # reuse code from other sections here to achieve that.
-        points_layer = self.parent.viewer.add_point(
-            point,
-            name="Fiducials",
-            # text=...
-            # size=20,
-            border_width=5,
-            # border_width_is_relative=True,
-            # border_color=colors,
-            # face_color=colors,
-        )
-        print("This is a placeholder function.")

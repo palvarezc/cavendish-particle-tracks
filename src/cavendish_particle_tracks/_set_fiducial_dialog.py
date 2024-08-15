@@ -19,7 +19,6 @@ from ._calculate import (
     corrected_length,
     depth,
     magnification,
-    stereoshift,
 )
 
 
@@ -436,7 +435,7 @@ We need better names for things.
 
 Proposed overhaul
 - got rid of FIDUCIAL_VIEWS, as the const is never referenced again, making it a redundant declaration
-  instead, it's declared in the list of objects used by the rest of the program 
+  instead, it's declared in the list of objects used by the rest of the program
   small, pedantic change, but it makes the intent more obvious and reducing the number of lines of code
 - declarations were all done in the same place to make the layout code more obvious
 - think i changed a load of other things and lost track whoops
