@@ -31,6 +31,16 @@ class MagnificationDialog(QDialog):
         self.b2 = Fiducial()
 
         # region UI Setup
+        self.ui_setup()
+        self.cal_layer = self.parent.viewer.add_points(
+            name="Points_Calibration"
+        )
+
+        @self.cal_layer.mouse_drag_callbacks.append
+        def _on_click_layer(layer, event):
+            print("This has worked!")
+
+    def ui_setup(self):
         self.setWindowTitle("Magnification")
         # Drop-down selection of Fiducials
         self.cmb_front1 = self._setup_dropdown_fiducials_combobox()
@@ -108,9 +118,6 @@ class MagnificationDialog(QDialog):
         )
         self.layout().addWidget(self.table, 8, 0, 1, 3)
         self.layout().addWidget(self.buttonBox, 9, 0, 1, 3)
-        self.cal_layer = self.parent.viewer.add_points(
-            name="Points_Calibration"
-        )
         # endregion
 
     def _setup_dropdown_fiducials_combobox(self, back=False):

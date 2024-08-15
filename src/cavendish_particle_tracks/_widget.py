@@ -38,66 +38,72 @@ from ._stereoshift_dialog import StereoshiftDialog
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
 
-    def __init__(self, napari_viewer: napari.viewer.Viewer):
+    def __init__(self, napari_viewer: napari.Viewer):
         super().__init__()
         self.viewer = napari_viewer
 
-        # define QtWidgets
-        # why is this self. and the others added after?
-        self.cb = QComboBox()
-        self.cb.addItems(EXPECTED_PARTICLES)
-        self.cb.setCurrentIndex(0)
-        self.cb.currentIndexChanged.connect(self._on_click_new_particle)
-        btn_radius = QPushButton("Calculate radius")
-        btn_length = QPushButton("Calculate length")
-        btn_decayangle = QPushButton("Calculate decay angles")
-        btn_stereoshift = QPushButton("Stereoshift")
-        btn_testnew = QPushButton("test new reference")
-        btn_save = QPushButton("Save")
-        self.mag = QPushButton("Magnification")
+        def setup_ui(self):
+            # define QtWidgets
+            # why is this self. and the others added after?
+            self.cb = QComboBox()
+            self.cb.addItems(EXPECTED_PARTICLES)
+            self.cb.setCurrentIndex(0)
+            self.cb.currentIndexChanged.connect(self._on_click_new_particle)
+            btn_radius = QPushButton("Calculate radius")
+            btn_length = QPushButton("Calculate length")
+            btn_decayangle = QPushButton("Calculate decay angles")
+            btn_stereoshift = QPushButton("Stereoshift")
+            btn_testnew = QPushButton("test new reference")
+            btn_save = QPushButton("Save")
+            self.mag = QPushButton("Magnification")
 
-        # setup particle table
-        self.table = self._set_up_table()
-        self._set_table_visible_vars(False)
+            # setup particle table
+            self.table = self._set_up_table()
+            self._set_table_visible_vars(False)
 
-        # Apply magnification disabled until the magnification parameters are computed
-        self.cal = QRadioButton("Apply magnification")
-        self.cal.setEnabled(False)
+            # Apply magnification disabled until the magnification parameters are computed
+            self.cal = QRadioButton("Apply magnification")
+            self.cal.setEnabled(False)
 
-        # connect callbacks
-        # NOTE: This isn't consistent in the code structure. Connects for the combobox etc have been done above.
-        btn_radius.clicked.connect(self._on_click_radius)
-        btn_length.clicked.connect(self._on_click_length)
-        btn_decayangle.clicked.connect(self._on_click_decay_angles)
-        btn_stereoshift.clicked.connect(self._on_click_stereoshift)
-        self.cal.toggled.connect(self._on_click_apply_magnification)
-        btn_save.clicked.connect(self._on_click_save)
-        btn_testnew.clicked.connect(self._on_click_newref)
+            # connect callbacks
+            # NOTE: This isn't consistent in the code structure. Connects for the combobox etc have been done above.
+            btn_radius.clicked.connect(self._on_click_radius)
+            btn_length.clicked.connect(self._on_click_length)
+            btn_decayangle.clicked.connect(self._on_click_decay_angles)
+            btn_stereoshift.clicked.connect(self._on_click_stereoshift)
+            self.cal.toggled.connect(self._on_click_apply_magnification)
+            btn_save.clicked.connect(self._on_click_save)
+            btn_testnew.clicked.connect(self._on_click_newref)
 
-        self.mag.clicked.connect(self._on_click_magnification)
-        # TODO: find which of thsese works
-        # https://napari.org/stable/gallery/custom_mouse_functions.html
-        # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
-        # self.viewer.events.mouse_press(self._on_mouse_click)
+            self.mag.clicked.connect(self._on_click_magnification)
+            # TODO: find which of thsese works
+            # https://napari.org/stable/gallery/custom_mouse_functions.html
+            # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
+            # self.viewer.events.mouse_press(self._on_mouse_click)
 
-        # layout
-        self.setLayout(QVBoxLayout())
-        self.layout().addWidget(self.cb)
-        self.layout().addWidget(btn_radius)
-        self.layout().addWidget(btn_length)
-        self.layout().addWidget(btn_decayangle)
-        self.layout().addWidget(self.table)
-        self.layout().addWidget(self.cal)
-        self.layout().addWidget(btn_stereoshift)
-        self.layout().addWidget(self.mag)
-        self.layout().addWidget(btn_save)
-        self.layout().addWidget(btn_testnew)
+            # layout
+            self.setLayout(QVBoxLayout())
+            self.layout().addWidget(self.cb)
+            self.layout().addWidget(btn_radius)
+            self.layout().addWidget(btn_length)
+            self.layout().addWidget(btn_decayangle)
+            self.layout().addWidget(self.table)
+            self.layout().addWidget(self.cal)
+            self.layout().addWidget(btn_stereoshift)
+            self.layout().addWidget(self.mag)
+            self.layout().addWidget(btn_save)
+            self.layout().addWidget(btn_testnew)
 
+        setup_ui(self)
         # Data analysis
         self.data: List[NewParticle] = []
         # might not need this eventually
         self.mag_a = -1.0
         self.mag_b = 0.0
+
+        @self.viewer.mouse_drag_callbacks.append
+        def _on_mouse_click(viewer, event):
+            print("Mouse click")
 
     def _get_selected_points(self, layer_name="Points") -> np.array:
         """Returns array of selected points in the viewer"""
