@@ -325,15 +325,18 @@ document.write(`
 <span class="sd">Replace code below according to your needs.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">napari</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">dask_image.imread</span> <span class="kn">import</span> <span class="n">imread</span>
 <span class="kn">from</span> <span class="nn">qtpy.QtCore</span> <span class="kn">import</span> <span class="n">QPoint</span>
 <span class="kn">from</span> <span class="nn">qtpy.QtWidgets</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">QAbstractItemView</span><span class="p">,</span>
     <span class="n">QComboBox</span><span class="p">,</span>
+    <span class="n">QFileDialog</span><span class="p">,</span>
     <span class="n">QPushButton</span><span class="p">,</span>
     <span class="n">QRadioButton</span><span class="p">,</span>
     <span class="n">QTableWidget</span><span class="p">,</span>
@@ -344,6 +347,7 @@ document.write(`
 
 <span class="kn">from</span> <span class="nn">._analysis</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">EXPECTED_PARTICLES</span><span class="p">,</span>
+    <span class="n">VIEW_NAMES</span><span class="p">,</span>
     <span class="n">NewParticle</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">._calculate</span> <span class="kn">import</span> <span class="n">length</span><span class="p">,</span> <span class="n">radius</span>
@@ -362,6 +366,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span> <span class="o">=</span> <span class="n">napari_viewer</span>
 
         <span class="c1"># define QtWidgets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Load data&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cb</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">EXPECTED_PARTICLES</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -382,6 +387,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">cal</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># connect callbacks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_load_data</span><span class="p">)</span>
         <span class="n">rad</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_radius</span><span class="p">)</span>
         <span class="n">lgth</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_length</span><span class="p">)</span>
         <span class="n">ang</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_decay_angles</span><span class="p">)</span>
@@ -397,6 +403,7 @@ document.write(`
 
         <span class="c1"># layout</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QVBoxLayout</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">rad</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">lgth</span><span class="p">)</span>
@@ -615,6 +622,56 @@ document.write(`
         <span class="n">point</span> <span class="o">=</span> <span class="n">QPoint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">())</span>
         <span class="n">dlg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dlg</span>
+
+    <span class="k">def</span> <span class="nf">_on_click_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;When the &#39;Load data&#39; button is clicked, a dialog opens to select the folder containing the data.</span>
+<span class="sd">        The folder should contain three subfolders named as variations of &#39;view1&#39;, &#39;view2&#39; and &#39;view3&#39;, and each subfolder should contain the same number of images.</span>
+<span class="sd">        The images in each folder are loaded as a stack, and the stack is named according to the subfolder name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">test_file_dialog</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">test_file_dialog</span><span class="o">.</span><span class="n">setFileMode</span><span class="p">(</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">Directory</span><span class="p">)</span>
+        <span class="n">folder_name</span> <span class="o">=</span> <span class="n">test_file_dialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="s2">&quot;Choose folder&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;./&quot;</span><span class="p">,</span>
+            <span class="n">QFileDialog</span><span class="o">.</span><span class="n">DontUseNativeDialog</span>
+            <span class="o">|</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">DontResolveSymlinks</span>
+            <span class="o">|</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">ShowDirsOnly</span>
+            <span class="o">|</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">HideNameFilterDetails</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">folder_name</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">}:</span>
+            <span class="k">return</span>
+
+        <span class="n">folder_subdirs</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">folder_name</span> <span class="o">+</span> <span class="s2">&quot;/*/&quot;</span><span class="p">)</span>
+        <span class="n">three_subdirectories</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">folder_subdirs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+        <span class="n">subdir_names_contain_views</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="nb">any</span><span class="p">(</span><span class="n">view</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">folder_subdirs</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">VIEW_NAMES</span>
+        <span class="p">)</span>
+        <span class="n">same_image_count</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">subdir</span> <span class="o">+</span> <span class="s2">&quot;/*&quot;</span><span class="p">))</span>
+            <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">folder_subdirs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/*&quot;</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">folder_subdirs</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="n">three_subdirectories</span>
+            <span class="ow">and</span> <span class="n">subdir_names_contain_views</span>
+            <span class="ow">and</span> <span class="n">same_image_count</span>
+        <span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;WARNING: The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images.&quot;</span>
+            <span class="p">)</span>
+            <span class="c1"># TODO: make this a QWarningBox?</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">subdir</span><span class="p">,</span> <span class="n">stack_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">folder_subdirs</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;stack1&quot;</span><span class="p">,</span> <span class="s2">&quot;stack2&quot;</span><span class="p">,</span> <span class="s2">&quot;stack3&quot;</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="n">stack</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="n">subdir</span> <span class="o">+</span> <span class="s2">&quot;/*&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">stack_name</span><span class="p">)</span>
+            <span class="c1"># TODO: investigate the multiscale otption.</span>
 
     <span class="k">def</span> <span class="nf">_on_click_new_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When the &#39;New particle&#39; button is clicked, append a new blank row to</span>
