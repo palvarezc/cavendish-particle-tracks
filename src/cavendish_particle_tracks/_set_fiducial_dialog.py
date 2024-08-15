@@ -6,12 +6,12 @@ from qtpy.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QGridLayout,
-    QVBoxLayout,
+    QHBoxLayout,
     QLabel,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
-    QHBoxLayout,
+    QVBoxLayout,
 )
 
 from ._analysis import FIDUCIAL_BACK, FIDUCIAL_FRONT, Fiducial
@@ -100,7 +100,7 @@ class Set_Fiducial_Dialog(QDialog):
         for textbox in (
             self.coord_textboxes + self.results
         ):  # possibly another way of implementing this without creaing an unnecessary list that isn't referenced again
-            textbox.setMinimumWidth(200)
+            textbox.setMinimumWidth(50)
         # Add magnification results table
         # TODO again I'd like to change this once functionality complete
         self.table = QTableWidget(1, 2)
@@ -409,7 +409,7 @@ class Set_Fiducial_Dialog(QDialog):
         print("This is a skeleton function")
 
 
-""" 
+"""
 In the original class  FIDUCIAL_VIEWS = [
             "Back fiducial view1",
             "Back fiducial view2",
@@ -427,8 +427,8 @@ are the 2 views of the same fiducial used for stereoshift calcualtion.
 
 stift_fiducial is the distance the fiducial has shifted between views.
 shift_point is the distance the point has shifted between views.
-point_stereoshift?
-point_depth?
+point_stereoshift = ratio between point shifts
+point_depth = depth of the point
 spoints?
 
 This gets really confusing, really quickly.
@@ -447,6 +447,7 @@ Proposed overhaul
 - For now, implement selecting first two points for stereoshift calculation, then implement the rest of the points.
 - Tbh the coordinate readouts can be got rid of as well since they're arbitrary anyways
 - Maybe replace this with a table once i get it working...
+- Calculation structure was redundant.z
 
 Stereoshift function:
 l is the distance to the camera lens
