@@ -7,15 +7,18 @@ see: https://napari.org/stable/plugins/guides.html?#widgets
 Replace code below according to your needs.
 """
 
+import glob
 from datetime import datetime
 from typing import List
 
 import napari
 import numpy as np
+from dask_image.imread import imread
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
+    QFileDialog,
     QPushButton,
     QRadioButton,
     QTableWidget,
@@ -26,6 +29,7 @@ from qtpy.QtWidgets import (
 
 from ._analysis import (
     EXPECTED_PARTICLES,
+    VIEW_NAMES,
     NewParticle,
 )
 from ._calculate import length, radius
@@ -42,6 +46,7 @@ class ParticleTracksWidget(QWidget):
         self.viewer = napari_viewer
 
         # define QtWidgets
+        self.load = QPushButton("Load data")
         self.cb = QComboBox()
         self.cb.addItems(EXPECTED_PARTICLES)
         self.cb.setCurrentIndex(0)
@@ -62,6 +67,7 @@ class ParticleTracksWidget(QWidget):
         self.cal.setEnabled(False)
 
         # connect callbacks
+        self.load.clicked.connect(self._on_click_load_data)
         rad.clicked.connect(self._on_click_radius)
         lgth.clicked.connect(self._on_click_length)
         ang.clicked.connect(self._on_click_decay_angles)
@@ -77,6 +83,7 @@ class ParticleTracksWidget(QWidget):
 
         # layout
         self.setLayout(QVBoxLayout())
+        self.layout().addWidget(self.load)
         self.layout().addWidget(self.cb)
         self.layout().addWidget(rad)
         self.layout().addWidget(lgth)
@@ -295,6 +302,56 @@ class ParticleTracksWidget(QWidget):
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         dlg.move(point)
         return dlg
+
+    def _on_click_load_data(self) -> None:
+        """When the 'Load data' button is clicked, a dialog opens to select the folder containing the data.
+        The folder should contain three subfolders named as variations of 'view1', 'view2' and 'view3', and each subfolder should contain the same number of images.
+        The images in each folder are loaded as a stack, and the stack is named according to the subfolder name.
+        """
+
+        test_file_dialog = QFileDialog(self)
+        test_file_dialog.setFileMode(QFileDialog.Directory)
+        folder_name = test_file_dialog.getExistingDirectory(
+            self,
+            "Choose folder",
+            "./",
+            QFileDialog.DontUseNativeDialog
+            | QFileDialog.DontResolveSymlinks
+            | QFileDialog.ShowDirsOnly
+            | QFileDialog.HideNameFilterDetails,
+        )
+
+        if folder_name in {"", None}:
+            return
+
+        folder_subdirs = glob.glob(folder_name + "/*/")
+        three_subdirectories = len(folder_subdirs) == 3
+        subdir_names_contain_views = all(
+            any(view in name.lower() for name in folder_subdirs)
+            for view in VIEW_NAMES
+        )
+        same_image_count = all(
+            len(glob.glob(subdir + "/*"))
+            == len(glob.glob(folder_subdirs[0] + "/*"))
+            for subdir in folder_subdirs
+        )
+        if not (
+            three_subdirectories
+            and subdir_names_contain_views
+            and same_image_count
+        ):
+            print(
+                "WARNING: The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
+            )
+            # TODO: make this a QWarningBox?
+            return
+
+        for subdir, stack_name in zip(
+            folder_subdirs, ["stack1", "stack2", "stack3"]
+        ):
+            stack = imread(subdir + "/*")
+            self.viewer.add_image(stack, name=stack_name)
+            # TODO: investigate the multiscale otption.
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
