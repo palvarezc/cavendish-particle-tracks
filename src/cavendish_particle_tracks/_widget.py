@@ -19,6 +19,7 @@ from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QFileDialog,
+    QMessageBox,
     QPushButton,
     QRadioButton,
     QTableWidget,
@@ -52,6 +53,7 @@ class ParticleTracksWidget(QWidget):
         self.cb.setCurrentIndex(0)
         self.cb.currentIndexChanged.connect(self._on_click_new_particle)
         rad = QPushButton("Calculate radius")
+        delete_particle = QPushButton("Delete particle")
         lgth = QPushButton("Calculate length")
         ang = QPushButton("Calculate decay angles")
         stsh = QPushButton("Stereoshift")
@@ -68,6 +70,7 @@ class ParticleTracksWidget(QWidget):
 
         # connect callbacks
         self.load.clicked.connect(self._on_click_load_data)
+        delete_particle.clicked.connect(self._on_click_delete_particle)
         rad.clicked.connect(self._on_click_radius)
         lgth.clicked.connect(self._on_click_length)
         ang.clicked.connect(self._on_click_decay_angles)
@@ -85,6 +88,7 @@ class ParticleTracksWidget(QWidget):
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.load)
         self.layout().addWidget(self.cb)
+        self.layout().addWidget(delete_particle)
         self.layout().addWidget(rad)
         self.layout().addWidget(lgth)
         self.layout().addWidget(ang)
@@ -386,6 +390,22 @@ class ParticleTracksWidget(QWidget):
 
         # # napari notifications
         # napari.utils.notifications.show_info("I created a new particle")
+
+    def _on_click_delete_particle(self) -> None:
+        """Delete particle from table and data"""
+
+        selected_row = self._get_selected_row()
+
+        msgBox = QMessageBox()
+        msgBox.setText("Deleting selected particle")
+        msgBox.setInformativeText("Do you want to continue?")
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        msgBox.setDefaultButton(QMessageBox.Cancel)
+        ret = msgBox.exec()
+
+        if ret == QMessageBox.Yes:
+            del self.data[selected_row]
+            self.table.removeRow(selected_row)
 
     def _on_click_magnification(self) -> None:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""

@@ -131,6 +131,30 @@ def test_add_new_particle_ui(cpt_widget, capsys):
     assert len(cpt_widget.data) == 1
 
 
+def test_delete_particle_ui(cpt_widget):
+    """Tests the removal of a particle from the table"""
+    cpt_widget.cb.setCurrentIndex(1)
+    cpt_widget._on_click_new_particle()
+
+    assert cpt_widget.table.rowCount() == 1
+    assert len(cpt_widget.data) == 1
+
+    def close_dialog(dialog):
+        buttonbox = dialog.findChild(QDialogButtonBox)
+        yesbutton = buttonbox.children()[1]
+        yesbutton.click()
+
+    # Open and retrieve file dialog
+    get_dialog(
+        dialog_trigger=cpt_widget._on_click_delete_particle,
+        dialog_action=close_dialog,
+        time_out=5,
+    )
+
+    assert cpt_widget.table.rowCount() == 0
+    assert len(cpt_widget.data) == 0
+
+
 def test_calculate_length_ui(cpt_widget, capsys):
     # add a random image to the napari viewer
     cpt_widget.viewer.add_image(np.random.random((100, 100)))
