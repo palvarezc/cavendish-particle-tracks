@@ -337,6 +337,7 @@ document.write(`
     <span class="n">QAbstractItemView</span><span class="p">,</span>
     <span class="n">QComboBox</span><span class="p">,</span>
     <span class="n">QFileDialog</span><span class="p">,</span>
+    <span class="n">QMessageBox</span><span class="p">,</span>
     <span class="n">QPushButton</span><span class="p">,</span>
     <span class="n">QRadioButton</span><span class="p">,</span>
     <span class="n">QTableWidget</span><span class="p">,</span>
@@ -372,6 +373,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_new_particle</span><span class="p">)</span>
         <span class="n">rad</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Calculate radius&quot;</span><span class="p">)</span>
+        <span class="n">delete_particle</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Delete particle&quot;</span><span class="p">)</span>
         <span class="n">lgth</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Calculate length&quot;</span><span class="p">)</span>
         <span class="n">ang</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Calculate decay angles&quot;</span><span class="p">)</span>
         <span class="n">stsh</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Stereoshift&quot;</span><span class="p">)</span>
@@ -388,6 +390,7 @@ document.write(`
 
         <span class="c1"># connect callbacks</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_load_data</span><span class="p">)</span>
+        <span class="n">delete_particle</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_delete_particle</span><span class="p">)</span>
         <span class="n">rad</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_radius</span><span class="p">)</span>
         <span class="n">lgth</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_length</span><span class="p">)</span>
         <span class="n">ang</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_decay_angles</span><span class="p">)</span>
@@ -405,6 +408,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">QVBoxLayout</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">delete_particle</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">rad</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">lgth</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span>
@@ -706,6 +710,22 @@ document.write(`
 
         <span class="c1"># # napari notifications</span>
         <span class="c1"># napari.utils.notifications.show_info(&quot;I created a new particle&quot;)</span>
+
+    <span class="k">def</span> <span class="nf">_on_click_delete_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete particle from table and data&quot;&quot;&quot;</span>
+
+        <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
+
+        <span class="n">msgBox</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">()</span>
+        <span class="n">msgBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Deleting selected particle&quot;</span><span class="p">)</span>
+        <span class="n">msgBox</span><span class="o">.</span><span class="n">setInformativeText</span><span class="p">(</span><span class="s2">&quot;Do you want to continue?&quot;</span><span class="p">)</span>
+        <span class="n">msgBox</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span> <span class="o">|</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
+        <span class="n">msgBox</span><span class="o">.</span><span class="n">setDefaultButton</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">msgBox</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="n">selected_row</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_click_magnification</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When the &#39;Calculate magnification&#39; button is clicked, open the magnification dialog&quot;&quot;&quot;</span>
