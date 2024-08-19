@@ -19,7 +19,7 @@ def test_version_fallback(mocker):
 
 @pytest.mark.parametrize(
     "image_filename",
-    ["tests/data/View2_97430086.tiff", "tests/data/View1_97430086-2.tiff"],
+    ["tests/data/View_1.tiff", "tests/data/View_2.tiff"],
 )
 def test_smoke_open_test_image(make_napari_viewer, image_filename):
     """Test that we can open the test images in napari"""
