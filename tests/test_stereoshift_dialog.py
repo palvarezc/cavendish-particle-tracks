@@ -69,7 +69,6 @@ def test_calculate_stereoshift_ui(
     """
     # need to click "new particle" to add a row to the table
     cpt_widget.cb.setCurrentIndex(1)
-    cpt_widget._on_click_new_particle()
 
     dlg = cpt_widget._on_click_stereoshift()
 
