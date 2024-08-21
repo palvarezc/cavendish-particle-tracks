@@ -243,7 +243,7 @@ class StereoshiftDialog(QDialog):
 
         # Propagate to particle
         try:
-            selected_row = self._get_selected_row()
+            selected_row = self.parent._get_selected_row()
         except IndexError:
             show_error("There are no particles in the table.")
         else:
