@@ -10,6 +10,7 @@ from qtpy.QtWidgets import (
 )
 
 from ._calculate import angle, track_parameters
+from ._widget import ParticleTracksWidget
 
 # from ._widget import ParticleTracksWidget
 
@@ -18,7 +19,7 @@ class DecayAnglesDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.parent = parent
+        self.parent: ParticleTracksWidget = parent
 
         self.setWindowTitle("Decay Angles")
 

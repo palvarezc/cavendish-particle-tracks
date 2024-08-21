@@ -57,7 +57,7 @@ from cavendish_particle_tracks._stereoshift_dialog import StereoshiftDialog
     ],
 )
 def test_calculate_stereoshift_ui(
-    cpt_widget,
+    cpt_widget: ParticleTracksWidget,
     test_points,
     expected_fiducial_shift,
     expected_point_shift,
