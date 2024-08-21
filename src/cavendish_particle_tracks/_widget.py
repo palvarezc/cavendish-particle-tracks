@@ -182,21 +182,23 @@ class ParticleTracksWidget(QWidget):
 
     def _on_row_selection_changed(self) -> None:
         """Enable/disable calculation buttons depending on the row selection"""
-
-        selected_row = self._get_selected_row()
-        if self.data[selected_row].index < 4:
-            self.rad.setEnabled(True)
-            self.lgth.setEnabled(True)
-            self.ang.setEnabled(False)
-
-        elif self.data[selected_row].index == 4:
-            self.rad.setEnabled(False)
-            self.lgth.setEnabled(True)
-            self.ang.setEnabled(True)
-        else:
-            self.rad.setEnabled(False)
-            self.lgth.setEnabled(False)
-            self.ang.setEnabled(False)
+        try:
+            selected_row = self._get_selected_row()
+            if self.data[selected_row].index < 4:
+                self.rad.setEnabled(True)
+                self.lgth.setEnabled(True)
+                self.ang.setEnabled(False)
+                return
+            elif self.data[selected_row].index == 4:
+                self.rad.setEnabled(False)
+                self.lgth.setEnabled(True)
+                self.ang.setEnabled(True)
+                return
+        except IndexError:
+            print("The table is empty.")
+        self.rad.setEnabled(False)
+        self.lgth.setEnabled(False)
+        self.ang.setEnabled(False)
 
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
@@ -220,43 +222,48 @@ class ParticleTracksWidget(QWidget):
             napari.utils.notifications.show_info(
                 f"Adding points to the table: {selected_points}"
             )
+        try:
+            selected_row = self._get_selected_row()
+        except IndexError:
+            napari.utils.notifications.show_error(
+                "There are no particles in the table."
+            )
+        else:
+            # Assigns the points and radius to the selected row
+            for i in range(3):
+                point = selected_points[i]
+                self.table.setItem(
+                    selected_row,
+                    self._get_table_column_index("r" + str(i + 1)),
+                    QTableWidgetItem(str(point)),
+                )
 
-        # Assigns the points and radius to the selected row
-        selected_row = self._get_selected_row()
-        for i in range(3):
-            point = selected_points[i]
+            self.data[selected_row].rpoints = selected_points
+
+            print("calculating radius!")
+            rad = radius(*selected_points)
+
             self.table.setItem(
                 selected_row,
-                self._get_table_column_index("r" + str(i + 1)),
-                QTableWidgetItem(str(point)),
+                self._get_table_column_index("radius_px"),
+                QTableWidgetItem(str(rad)),
             )
 
-        self.data[selected_row].rpoints = selected_points
+            self.data[selected_row].radius_px = rad
 
-        print("calculating radius!")
-        rad = radius(*selected_points)
+            ## Add the calibrated radius to the table
+            self.data[selected_row].radius_cm = (
+                self.data[selected_row].magnification
+                * self.data[selected_row].radius_px
+            )
+            self.table.setItem(
+                selected_row,
+                self._get_table_column_index("radius_cm"),
+                QTableWidgetItem(str(self.data[selected_row].radius_cm)),
+            )
 
-        self.table.setItem(
-            selected_row,
-            self._get_table_column_index("radius_px"),
-            QTableWidgetItem(str(rad)),
-        )
-
-        self.data[selected_row].radius_px = rad
-
-        ## Add the calibrated radius to the table
-        self.data[selected_row].radius_cm = (
-            self.data[selected_row].magnification
-            * self.data[selected_row].radius_px
-        )
-        self.table.setItem(
-            selected_row,
-            self._get_table_column_index("radius_cm"),
-            QTableWidgetItem(str(self.data[selected_row].radius_cm)),
-        )
-
-        print("Modified particle ", selected_row)
-        print(self.data[selected_row])
+            print("Modified particle ", selected_row)
+            print(self.data[selected_row])
 
     def _on_click_length(self) -> None:
         """When the 'Calculate length' button is clicked, calculate the decay length
@@ -287,38 +294,44 @@ class ParticleTracksWidget(QWidget):
             return
 
         # Assigns the points and radius to the selected row
-        selected_row = self._get_selected_row()
-        for i in range(2):
-            point = selected_points[i]
+        try:
+            selected_row = self._get_selected_row()
+        except IndexError:
+            napari.utils.notifications.show_error(
+                "There are no particles in the table."
+            )
+        else:
+            for i in range(2):
+                point = selected_points[i]
+                self.table.setItem(
+                    selected_row,
+                    self._get_table_column_index("d" + str(i + 1)),
+                    QTableWidgetItem(str(point)),
+                )
+            self.data[selected_row].dpoints = selected_points
+
+            print("calculating decay length!")
+            declen = length(*selected_points)
             self.table.setItem(
                 selected_row,
-                self._get_table_column_index("d" + str(i + 1)),
-                QTableWidgetItem(str(point)),
+                self._get_table_column_index("decay_length_px"),
+                QTableWidgetItem(str(declen)),
             )
-        self.data[selected_row].dpoints = selected_points
+            self.data[selected_row].decay_length_px = declen
 
-        print("calculating decay length!")
-        declen = length(*selected_points)
-        self.table.setItem(
-            selected_row,
-            self._get_table_column_index("decay_length_px"),
-            QTableWidgetItem(str(declen)),
-        )
-        self.data[selected_row].decay_length_px = declen
+            ## Add the calibrated decay length to the table
+            self.data[selected_row].decay_length_cm = (
+                self.data[selected_row].magnification
+                * self.data[selected_row].decay_length_px
+            )
+            self.table.setItem(
+                selected_row,
+                self._get_table_column_index("decay_length_cm"),
+                QTableWidgetItem(str(self.data[selected_row].decay_length_cm)),
+            )
 
-        ## Add the calibrated decay length to the table
-        self.data[selected_row].decay_length_cm = (
-            self.data[selected_row].magnification
-            * self.data[selected_row].decay_length_px
-        )
-        self.table.setItem(
-            selected_row,
-            self._get_table_column_index("decay_length_cm"),
-            QTableWidgetItem(str(self.data[selected_row].decay_length_cm)),
-        )
-
-        print("Modified particle ", selected_row)
-        print(self.data[selected_row])
+            print("Modified particle ", selected_row)
+            print(self.data[selected_row])
 
     def _on_click_decay_angles(self) -> None:
         """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
@@ -427,19 +440,23 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_delete_particle(self) -> None:
         """Delete particle from table and data"""
+        try:
+            selected_row = self._get_selected_row()
+        except IndexError:
+            napari.utils.notifications.show_error(
+                "There are no particles in the table."
+            )
+        else:
+            msgBox = QMessageBox()
+            msgBox.setText("Deleting selected particle")
+            msgBox.setInformativeText("Do you want to continue?")
+            msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+            msgBox.setDefaultButton(QMessageBox.Cancel)
+            ret = msgBox.exec()
 
-        selected_row = self._get_selected_row()
-
-        msgBox = QMessageBox()
-        msgBox.setText("Deleting selected particle")
-        msgBox.setInformativeText("Do you want to continue?")
-        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-        msgBox.setDefaultButton(QMessageBox.Cancel)
-        ret = msgBox.exec()
-
-        if ret == QMessageBox.Yes:
-            del self.data[selected_row]
-            self.table.removeRow(selected_row)
+            if ret == QMessageBox.Yes:
+                del self.data[selected_row]
+                self.table.removeRow(selected_row)
 
     def _on_click_magnification(self) -> None:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""

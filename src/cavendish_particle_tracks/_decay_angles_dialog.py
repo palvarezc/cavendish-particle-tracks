@@ -1,4 +1,5 @@
 import numpy as np
+from napari.utils.notifications import show_error
 from qtpy.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -134,33 +135,38 @@ class DecayAnglesDialog(QDialog):
         """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
 
         # Propagate to particle
-        selected_row = self.parent._get_selected_row()
-        # self.parent.data[selected_row].spoints = self.alines
-        self.parent.data[selected_row].phi_proton = self.phi_proton
-        self.parent.data[selected_row].phi_pion = self.phi_pion
+        try:
+            selected_row = self._get_selected_row()
+        except IndexError:
+            show_error("There are no particles in the table.")
+        else:
+            selected_row = self.parent._get_selected_row()
+            # self.parent.data[selected_row].spoints = self.alines
+            self.parent.data[selected_row].phi_proton = self.phi_proton
+            self.parent.data[selected_row].phi_pion = self.phi_pion
 
-        # Propagate to parent table
-        # for i in range(2):
-        #     self.parent.table.setItem(
-        #         selected_row,
-        #         self.parent._get_table_column_index("sf" + str(i + 1)),
-        #         QTableWidgetItem(str(self.spoints[i])),
-        #     )
-        #     self.parent.table.setItem(
-        #         selected_row,
-        #         self.parent._get_table_column_index("sp" + str(i + 1)),
-        #         QTableWidgetItem(str(self.spoints[i + 2])),
-        #     )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("phi_proton"),
-            QTableWidgetItem(str(self.phi_proton)),
-        )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("phi_pion"),
-            QTableWidgetItem(str(self.phi_pion)),
-        )
+            # Propagate to parent table
+            # for i in range(2):
+            #     self.parent.table.setItem(
+            #         selected_row,
+            #         self.parent._get_table_column_index("sf" + str(i + 1)),
+            #         QTableWidgetItem(str(self.spoints[i])),
+            #     )
+            #     self.parent.table.setItem(
+            #         selected_row,
+            #         self.parent._get_table_column_index("sp" + str(i + 1)),
+            #         QTableWidgetItem(str(self.spoints[i + 2])),
+            #     )
+            self.parent.table.setItem(
+                selected_row,
+                self.parent._get_table_column_index("phi_proton"),
+                QTableWidgetItem(str(self.phi_proton)),
+            )
+            self.parent.table.setItem(
+                selected_row,
+                self.parent._get_table_column_index("phi_pion"),
+                QTableWidgetItem(str(self.phi_pion)),
+            )
 
     def cancel(self) -> None:
         """On cancel remove the points_Stereoshift layer"""

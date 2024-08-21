@@ -1,4 +1,5 @@
 import numpy as np
+from napari.utils.notifications import show_error
 from qtpy.QtWidgets import (
     QComboBox,
     QDialog,
@@ -241,12 +242,16 @@ class StereoshiftDialog(QDialog):
         """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
 
         # Propagate to particle
-        selected_row = self.parent._get_selected_row()
-        self.parent.data[selected_row].spoints = self.spoints
-        self.parent.data[selected_row].shift_fiducial = self.shift_fiducial
-        self.parent.data[selected_row].shift_point = self.shift_point
-        self.parent.data[selected_row].stereoshift = self.point_stereoshift
-        self.parent.data[selected_row].depth_cm = self.point_depth
+        try:
+            selected_row = self._get_selected_row()
+        except IndexError:
+            show_error("There are no particles in the table.")
+        else:
+            self.parent.data[selected_row].spoints = self.spoints
+            self.parent.data[selected_row].shift_fiducial = self.shift_fiducial
+            self.parent.data[selected_row].shift_point = self.shift_point
+            self.parent.data[selected_row].stereoshift = self.point_stereoshift
+            self.parent.data[selected_row].depth_cm = self.point_depth
 
         # Propagate to parent table
         for i in range(2):
