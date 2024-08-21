@@ -14,10 +14,13 @@ repos:
         exclude: ^\.napari-hub/.*
       - id: check-yaml # checks for correct yaml syntax for github actions ex.
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.272
+    rev: v0.6.1
     hooks:
       - id: ruff
         description: Linter. Fixes style and syntax problems.
+        args: [--fix]
+      - id: ruff-format
+        description: Formatter. Fixes style and syntax problems.
   - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
