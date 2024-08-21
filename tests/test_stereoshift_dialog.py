@@ -4,7 +4,8 @@ import numpy as np
 import pytest
 
 from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
-from cavendish_particle_tracks._stereoshift_dialog import StereoshiftDialog
+
+# from cavendish_particle_tracks._stereoshift_dialog import StereoshiftDialog
 
 # from cavendish_particle_tracks._widget import ParticleTracksWidget
 
@@ -74,7 +75,7 @@ def test_calculate_stereoshift_ui(
     # need to click "new particle" to add a row to the table
     cpt_widget.cb.setCurrentIndex(1)
 
-    dlg: StereoshiftDialog = cpt_widget._on_click_stereoshift()
+    dlg = cpt_widget._on_click_stereoshift()
 
     # move points to parameterised positions
     for i in range(len(test_points)):
