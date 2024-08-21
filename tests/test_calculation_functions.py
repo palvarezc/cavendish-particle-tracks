@@ -2,6 +2,7 @@ from math import sqrt
 
 import numpy as np
 import pytest
+
 from cavendish_particle_tracks._analysis import Fiducial
 from cavendish_particle_tracks._calculate import CHAMBER_DEPTH as CD
 from cavendish_particle_tracks._calculate import FIDUCIAL_BACK as FB
