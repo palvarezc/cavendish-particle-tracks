@@ -11,6 +11,8 @@ from qtpy.QtWidgets import (
 
 from ._calculate import angle, track_parameters
 
+# from ._widget import ParticleTracksWidget
+
 
 class DecayAnglesDialog(QDialog):
     def __init__(self, parent=None):
@@ -136,11 +138,10 @@ class DecayAnglesDialog(QDialog):
 
         # Propagate to particle
         try:
-            selected_row = self._get_selected_row()
+            selected_row = self.parent._get_selected_row()
         except IndexError:
             show_error("There are no particles in the table.")
         else:
-            selected_row = self.parent._get_selected_row()
             # self.parent.data[selected_row].spoints = self.alines
             self.parent.data[selected_row].phi_proton = self.phi_proton
             self.parent.data[selected_row].phi_pion = self.phi_pion
