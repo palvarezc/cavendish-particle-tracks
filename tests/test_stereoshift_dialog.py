@@ -58,7 +58,7 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
     ],
 )
 def test_calculate_stereoshift_ui(
-    cpt_widget: ParticleTracksWidget,
+    cpt_widget,
     test_points,
     expected_fiducial_shift,
     expected_point_shift,
