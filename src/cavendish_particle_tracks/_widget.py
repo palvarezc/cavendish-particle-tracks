@@ -74,7 +74,7 @@ class ParticleTracksWidget(QWidget):
 
             # connect callbacks
             # NOTE: This isn't consistent in the code structure. Connects for the combobox etc have been done above.
-            self.btn_load.clicked.connect(self._on_click_load)
+            self.btn_load.clicked.connect(self._on_click_load_data)
             btn_delete_particle.clicked.connect(self._on_click_delete_particle)
             btn_radius.clicked.connect(self._on_click_radius)
             btn_length.clicked.connect(self._on_click_length)
@@ -92,7 +92,7 @@ class ParticleTracksWidget(QWidget):
 
             # layout
             self.setLayout(QVBoxLayout())
-            self.layout().addWidget(self.load)
+            self.layout().addWidget(self.btn_load)
             self.layout().addWidget(self.cb)
             self.layout().addWidget(btn_delete_particle)
             self.layout().addWidget(btn_radius)
@@ -111,10 +111,6 @@ class ParticleTracksWidget(QWidget):
         # might not need this eventually
         self.mag_a = -1.0
         self.mag_b = 0.0
-
-        @self.viewer.mouse_drag_callbacks.append
-        def _on_mouse_click(viewer, event):
-            print("Mouse click")
 
     def _get_selected_points(self, layer_name="Points") -> np.array:
         """Returns array of selected points in the viewer"""
@@ -411,6 +407,7 @@ class ParticleTracksWidget(QWidget):
         # # napari notifications
         # napari.utils.notifications.show_info("I created a new particle")
 
+    def _on_click_delete_particle(self) -> None:
         """Delete particle from table and data"""
 
         selected_row = self._get_selected_row()

@@ -9,8 +9,8 @@ from qtpy.QtWidgets import (
     QTableWidgetItem,
 )
 
-from ._analysis import FIDUCIAL_BACK, FIDUCIAL_FRONT, Fiducial
-from ._calculate import depth, length, magnification, stereoshift
+from ._analysis import Fiducial
+from ._calculate import depth, length, stereoshift
 
 
 class StereoshiftDialog(QDialog):
