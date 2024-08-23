@@ -16,7 +16,7 @@ from qtpy.QtWidgets import (
 
 from ._analysis import FIDUCIAL_BACK, FIDUCIAL_FRONT, Fiducial
 from ._calculate import (
-    corrected_length,
+    corrected_shift,
     depth,
     magnification,
 )
@@ -306,10 +306,10 @@ class Set_Fiducial_Dialog(QDialog):
         # But this keeps it a little more concise and is similar to the original code's use
         # of + and % to get the correct data index.
         # Would appreciate feedback on which style is preferred.
-        self.shift_fiducial = corrected_length(
+        self.shift_fiducial = corrected_shift(
             self.points[fiducial_plane__index], self.points[ref_plane_index]
         )
-        self.shift_point = corrected_length(
+        self.shift_point = corrected_shift(
             self.points[points_plane_index], self.points[ref_plane_index]
         )
         # See comments in pull request.

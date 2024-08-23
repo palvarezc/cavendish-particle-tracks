@@ -37,7 +37,7 @@ def length(a: Point, b: Point) -> float:
     return np.linalg.norm(pa - pb)
 
 
-def corrected_length(points: list[Fiducial], offsets: list[Fiducial]) -> float:
+def corrected_shift(points: list[Fiducial], offsets: list[Fiducial]) -> float:
     """Calculates the distance between two points, correcting for the offset/movement of the plane between two images.
     Points = Fiducial[]: The two points to calculate the distance between.
     Offsets = Fiducial[]: The two points to correct the distance calculation. (A fiducial in the reference plane)

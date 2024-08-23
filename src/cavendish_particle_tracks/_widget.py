@@ -19,6 +19,7 @@ from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QFileDialog,
+    QMessageBox,
     QPushButton,
     QRadioButton,
     QTableWidget,
@@ -29,6 +30,7 @@ from qtpy.QtWidgets import (
 
 from ._analysis import (
     EXPECTED_PARTICLES,
+    VIEW_NAMES,
     NewParticle,
 )
 from ._calculate import length, radius
@@ -408,6 +410,21 @@ class ParticleTracksWidget(QWidget):
 
         # # napari notifications
         # napari.utils.notifications.show_info("I created a new particle")
+
+        """Delete particle from table and data"""
+
+        selected_row = self._get_selected_row()
+
+        msgBox = QMessageBox()
+        msgBox.setText("Deleting selected particle")
+        msgBox.setInformativeText("Do you want to continue?")
+        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        msgBox.setDefaultButton(QMessageBox.Cancel)
+        ret = msgBox.exec()
+
+        if ret == QMessageBox.Yes:
+            del self.data[selected_row]
+            self.table.removeRow(selected_row)
 
     def _on_click_magnification(self) -> None:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
