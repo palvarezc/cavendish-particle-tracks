@@ -241,7 +241,7 @@ class StereoshiftDialog(QDialog):
             self.b(2),
             reverse=self.cmb_ref_fiducial.currentIndex(),
         )
-        self.spoints = self.cal_layer.data[1:]
+        self.spoints = self.cal_layer.data[2:]
 
         # Populate the table
         self.tshift_fiducial.setText(str(self.shift_fiducial))

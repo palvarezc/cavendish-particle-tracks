@@ -33,6 +33,7 @@ dependencies = [
     "numpy",
     # magicgui
     "qtpy",
+    "dask-image",
 ]
 dynamic = ["version"]
 

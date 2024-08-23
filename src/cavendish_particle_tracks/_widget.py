@@ -45,10 +45,12 @@ class ParticleTracksWidget(QWidget):
         def setup_ui(self):
             # define QtWidgets
             # why is this self. and the others added after?
+            self.btn_load = QPushButton("Load data")
             self.cb = QComboBox()
             self.cb.addItems(EXPECTED_PARTICLES)
             self.cb.setCurrentIndex(0)
             self.cb.currentIndexChanged.connect(self._on_click_new_particle)
+            btn_delete_particle = QPushButton("Delete particle")
             btn_radius = QPushButton("Calculate radius")
             btn_length = QPushButton("Calculate length")
             btn_decayangle = QPushButton("Calculate decay angles")
@@ -67,6 +69,8 @@ class ParticleTracksWidget(QWidget):
 
             # connect callbacks
             # NOTE: This isn't consistent in the code structure. Connects for the combobox etc have been done above.
+            self.btn_load.clicked.connect(self._on_click_load)
+            btn_delete_particle.clicked.connect(self._on_click_delete_particle)
             btn_radius.clicked.connect(self._on_click_radius)
             btn_length.clicked.connect(self._on_click_length)
             btn_decayangle.clicked.connect(self._on_click_decay_angles)
@@ -83,7 +87,9 @@ class ParticleTracksWidget(QWidget):
 
             # layout
             self.setLayout(QVBoxLayout())
+            self.layout().addWidget(self.load)
             self.layout().addWidget(self.cb)
+            self.layout().addWidget(btn_delete_particle)
             self.layout().addWidget(btn_radius)
             self.layout().addWidget(btn_length)
             self.layout().addWidget(btn_decayangle)
@@ -307,6 +313,56 @@ class ParticleTracksWidget(QWidget):
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         dlg.move(point)
         return dlg
+
+    def _on_click_load_data(self) -> None:
+        """When the 'Load data' button is clicked, a dialog opens to select the folder containing the data.
+        The folder should contain three subfolders named as variations of 'view1', 'view2' and 'view3', and each subfolder should contain the same number of images.
+        The images in each folder are loaded as a stack, and the stack is named according to the subfolder name.
+        """
+
+        test_file_dialog = QFileDialog(self)
+        test_file_dialog.setFileMode(QFileDialog.Directory)
+        folder_name = test_file_dialog.getExistingDirectory(
+            self,
+            "Choose folder",
+            "./",
+            QFileDialog.DontUseNativeDialog
+            | QFileDialog.DontResolveSymlinks
+            | QFileDialog.ShowDirsOnly
+            | QFileDialog.HideNameFilterDetails,
+        )
+
+        if folder_name in {"", None}:
+            return
+
+        folder_subdirs = glob.glob(folder_name + "/*/")
+        three_subdirectories = len(folder_subdirs) == 3
+        subdir_names_contain_views = all(
+            any(view in name.lower() for name in folder_subdirs)
+            for view in VIEW_NAMES
+        )
+        same_image_count = all(
+            len(glob.glob(subdir + "/*"))
+            == len(glob.glob(folder_subdirs[0] + "/*"))
+            for subdir in folder_subdirs
+        )
+        if not (
+            three_subdirectories
+            and subdir_names_contain_views
+            and same_image_count
+        ):
+            print(
+                "WARNING: The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
+            )
+            # TODO: make this a QWarningBox?
+            return
+
+        for subdir, stack_name in zip(
+            folder_subdirs, ["stack1", "stack2", "stack3"]
+        ):
+            stack = imread(subdir + "/*")
+            self.viewer.add_image(stack, name=stack_name)
+            # TODO: investigate the multiscale otption.
 
     def _on_click_newref(self) -> Set_Fiducial_Dialog:
         """When the 'test new reference' button is clicked, open the set fiducial dialog."""
