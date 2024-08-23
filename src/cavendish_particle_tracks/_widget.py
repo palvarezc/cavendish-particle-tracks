@@ -7,15 +7,18 @@ see: https://napari.org/stable/plugins/guides.html?#widgets
 Replace code below according to your needs.
 """
 
+import glob
 from datetime import datetime
 from typing import List
 
 import napari
 import numpy as np
+from dask_image.imread import imread
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
+    QFileDialog,
     QPushButton,
     QRadioButton,
     QTableWidget,
