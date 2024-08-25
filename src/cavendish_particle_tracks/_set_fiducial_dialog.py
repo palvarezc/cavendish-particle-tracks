@@ -1,6 +1,10 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ._widget import ParticleTracksWidget
+
 import numpy as np
 from napari.layers import Points, Shapes
-from napari import Viewer
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
@@ -24,7 +28,7 @@ from ._calculate import (
 
 
 class Set_Fiducial_Dialog(QDialog):
-    def __init__(self, parent: Viewer):
+    def __init__(self, parent: "ParticleTracksWidget"):
         # Call parent constructor
         super().__init__(parent)
         self.parent = parent
@@ -52,7 +56,7 @@ class Set_Fiducial_Dialog(QDialog):
         self._setup_ui()
         self.sync_layer_with_data()
         self.layer_shapes = self._setup_shapes_layer()
-        self.parent.layers.selection.active = self.layer_fiducials
+        self.parent.viewer.layers.selection.active = self.layer_fiducials
 
         @self.layer_points.events.data.connect
         def _on_change_layer_points(event):
