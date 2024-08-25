@@ -1,5 +1,6 @@
 import numpy as np
-from napari.layers import Points
+from napari.layers import Points, Shapes
+from napari import Viewer
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
@@ -23,7 +24,7 @@ from ._calculate import (
 
 
 class Set_Fiducial_Dialog(QDialog):
-    def __init__(self, parent):
+    def __init__(self, parent: Viewer):
         # Call parent constructor
         super().__init__(parent)
         self.parent = parent
@@ -46,9 +47,33 @@ class Set_Fiducial_Dialog(QDialog):
         self.point_depth = -1.0
         self.spoints = []
         # endregion
-        self.layer_fiducials = self._setup_fiducial_layer()
-        self.layer_points = self._setup_points_layer()
+        self.layer_fiducials: Points = self._setup_fiducial_layer()
+        self.layer_points: Points = self._setup_points_layer()
         self._setup_ui()
+        self.sync_layer_with_data()
+        self.layer_shapes = self._setup_shapes_layer()
+        self.parent.layers.selection.active = self.layer_fiducials
+
+        @self.layer_points.events.data.connect
+        def _on_change_layer_points(event):
+            self.points[0][0].x, self.points[0][0].y = self.layer_points.data[
+                0
+            ]
+            self.layer_shapes.data[0][0][0] = self.points[0][0].x
+            self.layer_shapes.data[0][0][1] = self.points[0][0].y
+            self.layer_shapes.refresh()
+            # update for more points as needed
+
+        @self.layer_fiducials.events.data.connect
+        def _on_change_layer_points(event):
+            for i in range(len(self.fiducials)):
+                for j in range(len(self.fiducials[i])):
+                    (self.fiducials[i][j].x, self.fiducials[i][j].y) = (
+                        self.layer_fiducials.data[i * 2 + j]
+                    )
+            self.layer_shapes.data[0][0][0] = self.fiducials[0][0].x
+            self.layer_shapes.data[0][0][1] = self.fiducials[0][0].y
+            self.layer_shapes.refresh()
 
     def _setup_ui(self) -> None:
         self.setWindowTitle("Measure Stereoshift and Magnification")
@@ -253,7 +278,7 @@ class Set_Fiducial_Dialog(QDialog):
             "red",
         ]
 
-        symbols = ["x", "x", "cross", "cross", "disc", "disc"]
+        symbols = ["x", "x", "cross", "cross", "disc", "disc"]  # TODO fix
 
         text = {
             "string": fiducial_labels,
@@ -273,7 +298,6 @@ class Set_Fiducial_Dialog(QDialog):
             face_color=colors,
             # symbol=symbols,
         )
-
         return layer_fiducials
 
     # TODO since this is mostly the same as setup fiducial layer, this code can be cleaned up as a parent and two child methods
@@ -317,27 +341,46 @@ class Set_Fiducial_Dialog(QDialog):
         )
         return layer_fiducials
 
+    # there may be another way of doing this that is less computationally intensive, but I've found that this works.
+    # the shapes layer is used to connect together points between views
+    # a vector layer could also be used, but it uses n-dim projections to assign the vectors
+    # whereas shapes just uses start,end point, which is a lot easier to code as i can just pull the coords
+    # from the points layer on updates
+    def _setup_shapes_layer(self) -> Shapes:
+        self.shapes = []
+        for fiducial in self.fiducials[::2]:
+            # is there a better way to write this to combine the two arrays?
+            # this one needs to skip every 2nd element since those don't have an item in the 2nd view
+            self.shapes.append(
+                np.array(
+                    [
+                        [fiducial[0].x, fiducial[0].y],
+                        [fiducial[1].x, fiducial[1].y],
+                    ]
+                )
+            )  # on update should copy data to point then update, ideally we should merge the two but hey...
+            # that's for the next patch...
+        for point in self.points:
+            self.shapes.append(
+                np.array([[point[0].x, point[0].y], [point[1].x, point[1].y]])
+            )
+        layer_shapes = self.parent.viewer.add_shapes(
+            self.shapes,
+            shape_type="line",
+            edge_color="yellow",
+            edge_width=5,
+        )
+        layer_shapes.editable = False
+        return layer_shapes
+
     def _on_click_calculate(self) -> None:
         """Calculate the stereoshift and populate the results table."""
         # TODO need to add checks that the user hasn't deleted points or otherwise
         # Add points in the coords to corresponding text box
-        for i in range(len(self.fiducials)):
-            for j in range(len(self.fiducials[i])):
-                (self.fiducials[i][j].x, self.fiducials[i][j].y) = (
-                    self.layer_fiducials.data[i * 2 + j]
-                )
-                self.fiducial_textboxes[i].setText(
-                    str(self.fiducials[i][j].xy)
-                )
-        for i in range(len(self.points)):
-            for j in range(len(self.points[i])):
-                (self.points[i][j].x, self.points[i][j].y) = (
-                    self.layer_points.data[i * 2 + j]
-                )
-                self.point_textboxes[i].setText(str(self.points[i][j].xy))
-            # There may be a better way of doing this by assigning point attributes.
-            # I can see this approach going wrong.
-            # Take a look at the napari example nD points with features
+        self.sync_layer_with_data()
+        # There may be a better way of doing this by assigning point attributes.
+        # I can see this approach going wrong.
+        # Take a look at the napari example nD points with features
         # TODO clarify whether we still want the reference offset to be displayed to the user.
         ref_plane_index = self.cmb_set_ref_plane.currentIndex() * 2
         # index =0 if front, 2 if rear
@@ -397,6 +440,22 @@ class Set_Fiducial_Dialog(QDialog):
         # Update the magnification table
         self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
         self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
+
+    def sync_layer_with_data(self):
+        for i in range(len(self.fiducials)):
+            for j in range(len(self.fiducials[i])):
+                (self.fiducials[i][j].x, self.fiducials[i][j].y) = (
+                    self.layer_fiducials.data[i * 2 + j]
+                )
+                self.fiducial_textboxes[i].setText(
+                    str(self.fiducials[i][j].xy)
+                )
+        for i in range(len(self.points)):
+            for j in range(len(self.points[i])):
+                (self.points[i][j].x, self.points[i][j].y) = (
+                    self.layer_points.data[i * 2 + j]
+                )
+                self.point_textboxes[i].setText(str(self.points[i][j].xy))
 
     def _on_click_save_to_table(self) -> None:
         """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
