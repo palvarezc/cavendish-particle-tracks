@@ -22,11 +22,16 @@ A Napari plugin to perform a simple particle tracking analysis for the Cavendish
 
 ## Installation
 
-Firstly, you'll need to [install napari](https://napari.org/stable/tutorials/fundamentals/installation.html).
+Firstly, you'll need to [install napari](https://napari.org/stable/tutorials/fundamentals/installation.html) following their latest instructions.
 
 Then you can install this plugin with:
 
-    pip install git+https://github.com/samcunliffe/cavendish-particle-tracks.git
+    python -m pip install git+https://github.com/palvarezc/cavendish-particle-tracks.git
+
+
+> [!NOTE]
+> On macOS we've found it easier to install napari through `conda-forge` (the napari docs give instructions for this under the **'From conda-forge using conda'** tab.)
+> The Cavendish Particle tracks plugin can still be installed via `pip`, from inside your `conda` environment.
 
 
 ## Getting started
