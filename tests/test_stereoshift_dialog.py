@@ -2,6 +2,7 @@ from math import sqrt
 
 import numpy as np
 import pytest
+
 from cavendish_particle_tracks import ParticleTracksWidget
 from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
 

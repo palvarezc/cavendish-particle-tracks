@@ -2,6 +2,7 @@ from random import random
 
 import numpy as np
 import pytest
+
 from cavendish_particle_tracks import ParticleTracksWidget
 
 
