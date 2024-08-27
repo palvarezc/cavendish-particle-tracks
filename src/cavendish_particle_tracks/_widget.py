@@ -102,9 +102,7 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(save)
 
         # disable all calculation buttons
-        self.rad.setEnabled(False)
-        self.lgth.setEnabled(False)
-        self.ang.setEnabled(False)
+        self.disable_all_buttons()
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
         # Data analysis
@@ -196,6 +194,9 @@ class ParticleTracksWidget(QWidget):
                 return
         except IndexError:
             print("The table is empty.")
+        self.disable_all_buttons()
+
+    def disable_all_buttons(self) -> None:
         self.rad.setEnabled(False)
         self.lgth.setEnabled(False)
         self.ang.setEnabled(False)
