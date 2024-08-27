@@ -7,11 +7,10 @@ from typing import Callable
 import numpy as np
 import pytest
 import tifffile as tf
+from cavendish_particle_tracks import ParticleTracksWidget
 from pytestqt.qtbot import QtBot
 from qtpy.QtCore import Qt, QTimer
 from qtpy.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
-
-from cavendish_particle_tracks import ParticleTracksWidget
 
 
 def get_dialog(
