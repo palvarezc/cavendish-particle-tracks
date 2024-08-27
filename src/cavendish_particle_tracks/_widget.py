@@ -320,9 +320,10 @@ class ParticleTracksWidget(QWidget):
         The folder should contain three subfolders named as variations of 'view1', 'view2' and 'view3', and each subfolder should contain the same number of images.
         The images in each folder are loaded as a stack, and the stack is named according to the subfolder name.
         """
-
+        # setup UI
         test_file_dialog = QFileDialog(self)
         test_file_dialog.setFileMode(QFileDialog.Directory)
+        # retrieve image folder
         folder_name = test_file_dialog.getExistingDirectory(
             self,
             "Choose folder",
@@ -337,25 +338,34 @@ class ParticleTracksWidget(QWidget):
             return
 
         folder_subdirs = glob.glob(folder_name + "/*/")
+        # Checks whether the image folder contains a subdirectory for each view.
         three_subdirectories = len(folder_subdirs) == 3
+        # Checks that these subdirectories correspond to event views.
         subdir_names_contain_views = all(
             any(view in name.lower() for name in folder_subdirs)
             for view in VIEW_NAMES
         )
+        # Checks that each subdirectory contains the same number of images.
         same_image_count = all(
             len(glob.glob(subdir + "/*"))
             == len(glob.glob(folder_subdirs[0] + "/*"))
             for subdir in folder_subdirs
         )
+        # If all checks are passed, load the images where the event number is a
+        # new spatial dimension (stack) and the views are layers.
         if not (
             three_subdirectories
             and subdir_names_contain_views
             and same_image_count
         ):
-            print(
-                "WARNING: The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
+            self.msg = QMessageBox()
+            self.msg.setIcon(QMessageBox.Warning)
+            self.msg.setWindowTitle("Data folder structure error")
+            self.msg.setStandardButtons(QMessageBox.Ok)
+            self.msg.setText(
+                "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
             )
-            # TODO: make this a QWarningBox?
+            self.msg.show()
             return
 
         for subdir, stack_name in zip(
