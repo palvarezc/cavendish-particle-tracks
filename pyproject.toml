@@ -91,6 +91,10 @@ target-version = ['py38', 'py39', 'py310', 'py311']
 
 [tool.ruff]
 line-length = 79
+target-version = "py38"
+fix = true
+
+[tool.ruff.lint]
 select = [
     "E",
     "F",
@@ -135,8 +139,6 @@ exclude = [
     "*_vendor*",
 ]
 
-target-version = "py38"
-fix = true
 
 [tool.tox]
 legacy_tox_ini = """
