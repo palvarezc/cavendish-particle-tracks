@@ -2,7 +2,12 @@ from math import sqrt
 
 import numpy as np
 import pytest
+
 from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
+
+# from cavendish_particle_tracks._stereoshift_dialog import StereoshiftDialog
+
+# from cavendish_particle_tracks._widget import ParticleTracksWidget
 
 
 @pytest.mark.parametrize(
@@ -69,7 +74,6 @@ def test_calculate_stereoshift_ui(
     """
     # need to click "new particle" to add a row to the table
     cpt_widget.cb.setCurrentIndex(1)
-    cpt_widget._on_click_new_particle()
 
     dlg = cpt_widget._on_click_stereoshift()
 
@@ -93,3 +97,12 @@ def test_calculate_stereoshift_ui(
     assert dlg.tshift_point.text() == str(expected_point_shift)
     assert dlg.tstereoshift.text() == str(expected_stereoshift)
     assert dlg.tdepth.text() == str(expected_depth)
+
+    # check save to table
+    dlg._on_click_save_to_table()
+    assert cpt_widget.data[0].spoints.all() == dlg.spoints.all()
+    assert cpt_widget.data[0].shift_fiducial == dlg.shift_fiducial
+    assert cpt_widget.data[0].shift_point == dlg.shift_point
+    assert cpt_widget.data[0].stereoshift == dlg.point_stereoshift
+    # these names should be more consistent between different parts of the program
+    assert cpt_widget.data[0].depth_cm == dlg.point_depth
