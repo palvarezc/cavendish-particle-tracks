@@ -45,7 +45,6 @@ class ParticleTracksWidget(QWidget):
     def __init__(self, napari_viewer: napari.viewer.Viewer):
         super().__init__()
         self.viewer = napari_viewer
-
         # define QtWidgets
         self.load = QPushButton("Load data")
         self.cb = QComboBox()
@@ -350,14 +349,14 @@ class ParticleTracksWidget(QWidget):
             and subdir_names_contain_views
             and same_image_count
         ):
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Warning)
-            msg.setWindowTitle("Data folder structure error")
-            msg.setStandardButtons(QMessageBox.Ok)
-            msg.setText(
+            self.msg = QMessageBox()
+            self.msg.setIcon(QMessageBox.Warning)
+            self.msg.setWindowTitle("Data folder structure error")
+            self.msg.setStandardButtons(QMessageBox.Ok)
+            self.msg.setText(
                 "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
             )
-            msg.show()
+            self.msg.show()
             return
 
         for subdir, stack_name in zip(

@@ -263,17 +263,19 @@ def test_load_data(
             )
     else:
 
-        def capture_msgbox():
-            for widget in QApplication.topLevelWidgets():
-                if isinstance(widget, QMessageBox):
-                    return widget
-            return None
+        # def capture_msgbox():
+        #    for widget in QApplication.topLevelWidgets():
+        #        # top level, all widgets didn't work, active popup didn't
+        #        if isinstance(widget, QMessageBox):
+        #            return widget
+        #    return None
 
-        qtbot.waitUntil(capture_msgbox, timeout=1000)
-        msgbox = capture_msgbox()
+        # qtbot.waitUntil(capture_msgbox, timeout=1000)
+        # msgbox = capture_msgbox()
+        msgbox = cpt_widget.msg
         # msgbox = QApplication.activeWindow()
-        assert msgbox is QMessageBox
-        assert msgbox.icon() == QMessageBox.warning
+        assert isinstance(msgbox, QMessageBox)
+        assert msgbox.icon() == QMessageBox.Warning
         assert msgbox.windowTitle() == "Data folder structure error"
         assert msgbox.text() == (
             "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
