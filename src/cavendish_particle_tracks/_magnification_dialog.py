@@ -36,9 +36,21 @@ class MagnificationDialog(QDialog):
             name="Points_Calibration"
         )
 
-        @self.cal_layer.mouse_drag_callbacks.append
-        def _on_click_layer(layer, event):
-            print("This has worked!")
+        @self.cal_layer.events.data.connect
+        def calc_magnification(self) -> None:
+            """Calculate magnification and populate table."""
+
+            # Need something like this but a bit better
+            if not (
+                self.f1.name and self.f2.name and self.b1.name and self.b2.name
+            ):  # TODO implement notifications once this has been updated in UX PR
+                print("Select fiducials to calcuate the magnification")
+                return
+
+            self.a, self.b = magnification(self.f1, self.f2, self.b1, self.b2)
+
+            self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
+            self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
 
     def ui_setup(self):
         self.setWindowTitle("Magnification")
@@ -180,21 +192,6 @@ class MagnificationDialog(QDialog):
         textbox.setText(str(selected_points[0]))
 
         return selected_points[0]
-
-    def _on_click_magnification(self) -> None:
-        """When 'Calculate magnification' button is clicked, calculate magnification and populate table"""
-
-        # Need something like this but a bit better
-        if not (
-            self.f1.name and self.f2.name and self.b1.name and self.b2.name
-        ):
-            print("Select fiducials to calcuate the magnification")
-            return
-
-        self.a, self.b = magnification(self.f1, self.f2, self.b1, self.b2)
-
-        self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
-        self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
 
     def accept(self) -> None:
         """On accept propagate the calibration information to the main window and remove the points_Calibration layer"""
