@@ -676,6 +676,7 @@ document.write(`
             <span class="n">stack</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="n">subdir</span> <span class="o">+</span> <span class="s2">&quot;/*&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">stack_name</span><span class="p">)</span>
             <span class="c1"># TODO: investigate the multiscale otption.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">axis_labels</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Event&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_click_new_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When the &#39;New particle&#39; button is clicked, append a new blank row to</span>
