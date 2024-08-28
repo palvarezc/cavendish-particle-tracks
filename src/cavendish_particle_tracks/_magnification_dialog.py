@@ -215,28 +215,28 @@ class MagnificationDialog(QDialog):
         return super().reject()
 
 
-"""
-Magnification previous implementation pseudocode:
-When "add" is clicked for a fiducial -> add coords(fiducial index) is called
-Add_cords:
--> retrieves point from layer
--> enforces only one point selected
--> updates UI
--> returns coords
-When calculate clicked
--> checks fiducials have been added, if not alerts the user
--> calls magnification to calculate
-    -> Magnification(4 fiducials)
-    -> calcs mag from known point locations
-    -> returns a,b
--> Updates UI
-When accept clicked
--> call widget "propogate magnification"
--> remove layer using select previous and remove by ref. # why do we need both?
--> cal.setEnabled = true (sets up magnification to actually work)
--> update button text on parent widget
--> return super.accept() # what does this do?
-When cancel clicked
--> remove layer
--> call parent "reject" # what does this do?
-"""
+# Magnification previous implementation pseudocode:
+# When "add" is clicked for a fiducial -> add coords(fiducial index) is called
+# Add_cords:
+# -> retrieves point from layer
+# -> enforces only one point selected
+# -> updates UI
+# -> returns coords
+# When calculate clicked
+# -> checks fiducials have been added, if not alerts the user
+# -> calls magnification to calculate
+#    -> Magnification(4 fiducials)
+#    -> calcs mag from known point locations
+#    -> returns a,b
+# -> Updates UI
+# When accept clicked
+# -> call widget "propogate magnification"
+# -> remove layer using select previous and remove by ref. # why do we need both?
+# -> cal.setEnabled = true (sets up magnification to actually work)
+# -> update button text on parent widget
+# -> return super.accept() # what does this do?
+# When cancel clicked
+# -> remove layer
+# -> call parent "reject" # what does this do?
+# """
+#
