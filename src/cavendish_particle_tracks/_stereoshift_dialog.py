@@ -55,9 +55,6 @@ class StereoshiftDialog(QDialog):
         for textbox in self.textboxes + self.results:
             textbox.setMinimumWidth(200)
 
-        bss = QPushButton("Calculate")
-        bss.clicked.connect(self._on_click_calculate)
-
         bap = QPushButton("Save to table")
         bap.clicked.connect(self._on_click_save_to_table)
 
@@ -90,8 +87,6 @@ class StereoshiftDialog(QDialog):
         ):
             self.layout().addWidget(widget, i // 2 + 5, i % 2 + 1)
 
-        self.layout().addWidget(bss, 7, 0, 1, 3)
-
         self.layout().addWidget(
             self.label_stereoshift,
             8,
@@ -120,6 +115,41 @@ class StereoshiftDialog(QDialog):
         self.point_stereoshift = 0.0
         self.point_depth = -1.0
         self.spoints = []
+
+        @self.cal_layer.events.data.connect
+        def _calculate() -> None:
+            """When 'Calculate' button is clicked, calculate stereoshift and populate table"""
+
+            # Add points coords to corresponding text box
+            for i in range(len(self._fiducial_views)):
+                (
+                    self._fiducial_views[i].x,
+                    self._fiducial_views[i].y,
+                ) = (
+                    self.cal_layer.data[i + 2] - self.cal_layer.data[i % 2]
+                )
+                self.textboxes[i].setText(str(self._fiducial_views[i].xy))
+
+            # Calculate stereoshift and depth
+            self.shift_fiducial = length(self.f(1).xy, self.f(2).xy)
+            self.shift_point = length(self.b(1).xy, self.b(2).xy)
+            self.point_stereoshift = stereoshift(
+                *[view.xy for view in self._fiducial_views]
+            )
+            self.point_depth = depth(
+                self.f(1),
+                self.f(2),
+                self.b(1),
+                self.b(2),
+                reverse=self.cbf1.currentIndex(),
+            )
+            self.spoints = self.cal_layer.data[2:]
+
+            # Populate the table
+            self.tshift_fiducial.setText(str(self.shift_fiducial))
+            self.tshift_point.setText(str(self.shift_point))
+            self.tstereoshift.setText(str(self.point_stereoshift))
+            self.tdepth.setText(str(self.point_depth))
 
     def _setup_stereoshift_layer(self):
         # add the points
@@ -202,40 +232,6 @@ class StereoshiftDialog(QDialog):
             )
 
         self.cal_layer.refresh()
-
-    def _on_click_calculate(self) -> None:
-        """When 'Calculate' button is clicked, calculate stereoshift and populate table"""
-
-        # Add points coords to corresponding text box
-        for i in range(len(self._fiducial_views)):
-            (
-                self._fiducial_views[i].x,
-                self._fiducial_views[i].y,
-            ) = (
-                self.cal_layer.data[i + 2] - self.cal_layer.data[i % 2]
-            )
-            self.textboxes[i].setText(str(self._fiducial_views[i].xy))
-
-        # Calculate stereoshift and depth
-        self.shift_fiducial = length(self.f(1).xy, self.f(2).xy)
-        self.shift_point = length(self.b(1).xy, self.b(2).xy)
-        self.point_stereoshift = stereoshift(
-            *[view.xy for view in self._fiducial_views]
-        )
-        self.point_depth = depth(
-            self.f(1),
-            self.f(2),
-            self.b(1),
-            self.b(2),
-            reverse=self.cbf1.currentIndex(),
-        )
-        self.spoints = self.cal_layer.data[2:]
-
-        # Populate the table
-        self.tshift_fiducial.setText(str(self.shift_fiducial))
-        self.tshift_point.setText(str(self.shift_point))
-        self.tstereoshift.setText(str(self.point_stereoshift))
-        self.tdepth.setText(str(self.point_depth))
 
     def _on_click_save_to_table(self) -> None:
         """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
