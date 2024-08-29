@@ -124,11 +124,10 @@ class StereoshiftDialog(QDialog):
         self.shift_point = 0.0
         self.point_stereoshift = 0.0
         self.point_depth = -1.0
-        self.spoints = []
+        self.spoints = []  # type: ignore
 
     def _setup_stereoshift_layer(self):
         # retrieve current camera position
-        self.parent: ParticleTracksWidget
         camera_center = self.parent.camera_center
         # add the points
         points = np.array(
