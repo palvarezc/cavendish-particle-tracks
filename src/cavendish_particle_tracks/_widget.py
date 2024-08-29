@@ -104,6 +104,11 @@ class ParticleTracksWidget(QWidget):
         self.mag_a = -1.0
         self.mag_b = 0.0
 
+    @property
+    def camera_center(self):
+        # update for 4d implementation as appropriate.
+        return (self.viewer.camera.center[1], self.viewer.camera.center[2])
+
     def _get_selected_points(self, layer_name="Points") -> np.array:
         """Returns array of selected points in the viewer"""
 

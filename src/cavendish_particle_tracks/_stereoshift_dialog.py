@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 import numpy as np
 from qtpy.QtWidgets import (
     QComboBox,
@@ -12,9 +14,12 @@ from qtpy.QtWidgets import (
 from ._analysis import Fiducial
 from ._calculate import depth, length, stereoshift
 
+if TYPE_CHECKING:
+    from ._widget import ParticleTracksWidget
+
 
 class StereoshiftDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent: "ParticleTracksWidget"):
         super().__init__(parent)
 
         self.parent = parent
@@ -122,15 +127,30 @@ class StereoshiftDialog(QDialog):
         self.spoints = []
 
     def _setup_stereoshift_layer(self):
+        # retrieve current camera position
+        self.parent: ParticleTracksWidget
+        camera_center = self.parent.camera_center
         # add the points
         points = np.array(
             [
-                [100, 100],
-                [100, 150],
-                [200, 300],
-                [333, 111],
-                [400, 350],
-                [500, 150],
+                [
+                    camera_center[0] + 100,
+                    camera_center[1] - 200,
+                ],
+                [camera_center[0] + 100, camera_center[1]],
+                [
+                    camera_center[0] + 100,
+                    camera_center[1] + 200,
+                ],
+                [camera_center[0] - 100, camera_center[1]],
+                [
+                    camera_center[0] - 100,
+                    camera_center[1] + 200,
+                ],
+                [
+                    camera_center[0] - 100,
+                    camera_center[1] + 200,
+                ],
             ]
         )
 

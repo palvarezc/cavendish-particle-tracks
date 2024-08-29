@@ -80,9 +80,27 @@ class DecayAnglesDialog(QDialog):
     def _setup_decayangles_layer(self):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
 
-        lambda_line = np.array([[100, 100], [200, 300]])
-        proton_line = np.array([[200, 300], [300, 400]])
-        pion_line = np.array([[200, 300], [210, 400]])
+        origin_x = self.parent.viewer.camera.center[1]
+        origin_y = self.parent.viewer.camera.center[2]
+
+        lambda_line = np.array(
+            [
+                [origin_x + -100, origin_y + -100],
+                [origin_x + 100, origin_y + 200],
+            ]
+        )
+        proton_line = np.array(
+            [
+                [origin_x + 100, origin_y + 200],
+                [origin_x + 200, origin_y + 300],
+            ]
+        )
+        pion_line = np.array(
+            [
+                [origin_x + 100, origin_y + 200],
+                [origin_x + 110, origin_y + 300],
+            ]
+        )
 
         lines = [lambda_line, proton_line, pion_line]
 
