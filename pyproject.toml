@@ -89,7 +89,13 @@ write_to = "src/cavendish_particle_tracks/_version.py"
 line-length = 79
 target-version = ['py38', 'py39', 'py310', 'py311']
 
-[tool.lint]
+
+[tool.ruff]
+line-length = 79
+target-version = "py38"
+fix = true
+
+[tool.ruff.lint]
 select = [
     "E",
     "F",
@@ -135,10 +141,6 @@ exclude = [
     "*_vendor*",
 ]
 
-[tool.ruff]
-line-length = 79
-target-version = "py38"
-fix = true
 
 [tool.tox]
 legacy_tox_ini = """

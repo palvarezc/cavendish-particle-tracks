@@ -398,6 +398,7 @@ class ParticleTracksWidget(QWidget):
             stack = imread(subdir + "/*")
             self.viewer.add_image(stack, name=stack_name)
             # TODO: investigate the multiscale otption.
+        self.viewer.dims.axis_labels = ("Event", "Y", "X")
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
