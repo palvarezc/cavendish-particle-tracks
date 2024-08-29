@@ -111,7 +111,6 @@ select = [
     "PIE", # flake8-pie
     "SIM", # flake8-simplify
 ]
-
 ignore = [
     "E501",   # line too long. let black handle this
     "UP006",
