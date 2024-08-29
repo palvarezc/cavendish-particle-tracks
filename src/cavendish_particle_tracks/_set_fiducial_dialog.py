@@ -57,27 +57,44 @@ class Set_Fiducial_Dialog(QDialog):
         self.sync_layer_with_data()
         self.layer_shapes = self._setup_shapes_layer()
         self.parent.viewer.layers.selection.active = self.layer_fiducials
+        self.layer_fiducials.mode = "select"
+        self.layer_points.mode = "select"
 
+        # in order to be more optimised, only update the one moved, not all by using the event handler
+        # what if multiple are moved how would that work?
+        # let's code it so that it is inefficient but works and test more optimised methods later.
+        # i have a feeling that by the time we get to 1500 images this will become a problem
+        # both of these methods should also ideally be encapsulated in a single case.
         @self.layer_points.events.data.connect
         def _on_change_layer_points(event):
-            self.points[0][0].x, self.points[0][0].y = self.layer_points.data[
-                0
-            ]
-            self.layer_shapes.data[0][0][0] = self.points[0][0].x
-            self.layer_shapes.data[0][0][1] = self.points[0][0].y
+            self.layer_shapes.editable = True
+            self.sync_layer_with_data()
+            point_range = range(len(self.layer_shapes.data) - 2)
+            for i in point_range:
+                self.layer_shapes.data[i + 2][0][0] = self.points[i][0].x
+                # 1st shape, 1st point, x = x of point 1, view 1
+                self.layer_shapes.data[i + 2][0][1] = self.points[i][0].y
+                self.layer_shapes.data[i + 2][1][0] = self.points[i][1].x
+                # 1 shape, 2nd point, x = x of point 1, view 2
+                self.layer_shapes.data[i + 2][1][1] = self.points[i][1].y
             self.layer_shapes.refresh()
+            self.layer_shapes.editable = False
             # update for more points as needed
 
         @self.layer_fiducials.events.data.connect
         def _on_change_layer_points(event):
-            for i in range(len(self.fiducials)):
-                for j in range(len(self.fiducials[i])):
-                    (self.fiducials[i][j].x, self.fiducials[i][j].y) = (
-                        self.layer_fiducials.data[i * 2 + j]
-                    )
-            self.layer_shapes.data[0][0][0] = self.fiducials[0][0].x
-            self.layer_shapes.data[0][0][1] = self.fiducials[0][0].y
+            self.layer_shapes.editable = True
+            self.sync_layer_with_data()
+            point_range = range(len(self.layer_shapes.data) - 2)
+            for i in point_range:
+                self.layer_shapes.data[i][0][0] = self.fiducials[i][0].x
+                # 1st shape, 1st point, x = x of point 1, view 1
+                self.layer_shapes.data[i][1][0] = self.fiducials[i][1].x
+                self.layer_shapes.data[i][0][1] = self.fiducials[i][0].y
+                # 1 shape, 2nd point, x = x of point 1, view 2
+                self.layer_shapes.data[i][1][1] = self.fiducials[i][1].y
             self.layer_shapes.refresh()
+            self.layer_shapes.editable = False
 
     def _setup_ui(self) -> None:
         self.setWindowTitle("Measure Stereoshift and Magnification")

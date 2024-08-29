@@ -3,8 +3,9 @@
 This file just reads the settings via the `sphinx-pyproject` package.
 """
 
-from cavendish_particle_tracks import __version__ as cpt_version
 from sphinx_pyproject import SphinxConfig
+
+from cavendish_particle_tracks import __version__ as cpt_version
 
 config = SphinxConfig(
     "../pyproject.toml",

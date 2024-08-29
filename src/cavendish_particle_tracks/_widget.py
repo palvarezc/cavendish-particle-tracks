@@ -13,6 +13,7 @@ from typing import List
 
 import napari
 import numpy as np
+import dask.array as da
 from dask_image.imread import imread
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
@@ -47,70 +48,77 @@ class ParticleTracksWidget(QWidget):
         super().__init__()
         self.viewer = napari_viewer
 
-        def setup_ui(self):
-            # define QtWidgets
-            # why is this self. and the others added after?
-            self.btn_load = QPushButton("Load data")
-            self.cb = QComboBox()
-            self.cb.addItems(EXPECTED_PARTICLES)
-            self.cb.setCurrentIndex(0)
-            self.cb.currentIndexChanged.connect(self._on_click_new_particle)
-            btn_delete_particle = QPushButton("Delete particle")
-            btn_radius = QPushButton("Calculate radius")
-            btn_length = QPushButton("Calculate length")
-            btn_decayangle = QPushButton("Calculate decay angles")
-            btn_stereoshift = QPushButton("Stereoshift")
-            btn_testnew = QPushButton("test new reference")
-            btn_save = QPushButton("Save")
-            self.mag = QPushButton("Magnification")
+        # define QtWidgets
+        # why is this self. and the others added after?
+        self.btn_load = QPushButton("Load data")
+        self.cb = QComboBox()
+        self.cb.addItems(EXPECTED_PARTICLES)
+        self.cb.setCurrentIndex(0)
+        self.cb.currentIndexChanged.connect(self._on_click_new_particle)
+        self.btn_delete_particle = QPushButton("Delete particle")
+        self.btn_radius = QPushButton("Calculate radius")
+        self.btn_length = QPushButton("Calculate length")
+        self.btn_decayangle = QPushButton("Calculate decay angles")
+        self.btn_stereoshift = QPushButton("Stereoshift")
+        self.btn_testnew = QPushButton("test new reference")
+        self.btn_save = QPushButton("Save")
+        self.mag = QPushButton("Magnification")
+        # setup particle table
+        self.table = self._set_up_table()
+        self._set_table_visible_vars(False)
+        self.table.selectionModel().selectionChanged.connect(
+            self._on_row_selection_changed
+        )
+        # Apply magnification disabled until the magnification parameters are computed
+        self.cal = QRadioButton("Apply magnification")
+        self.cal.setEnabled(False)
+        # connect callbacks
+        # NOTE: This isn't consistent in the code structure. Connects for the combobox etc have been done above.
+        self.btn_load.clicked.connect(self._on_click_load_data)
+        self.btn_delete_particle.clicked.connect(
+            self._on_click_delete_particle
+        )
+        self.btn_radius.clicked.connect(self._on_click_radius)
+        self.btn_length.clicked.connect(self._on_click_length)
+        self.btn_decayangle.clicked.connect(self._on_click_decay_angles)
+        self.btn_stereoshift.clicked.connect(self._on_click_stereoshift)
+        self.cal.toggled.connect(self._on_click_apply_magnification)
+        self.btn_save.clicked.connect(self._on_click_save)
+        self.btn_testnew.clicked.connect(self._on_click_newref)
+        self.mag.clicked.connect(self._on_click_magnification)
+        # TODO: find which of thsese works
+        # https://napari.org/stable/gallery/custom_mouse_functions.html
+        # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
+        # self.viewer.events.mouse_press(self._on_mouse_click)
+        # layout
+        self.setLayout(QVBoxLayout())
+        self.layout().addWidget(self.btn_load)
+        self.layout().addWidget(self.cb)
+        self.layout().addWidget(self.btn_delete_particle)
+        self.layout().addWidget(self.btn_radius)
+        self.layout().addWidget(self.btn_length)
+        self.layout().addWidget(self.btn_decayangle)
+        self.layout().addWidget(self.table)
+        self.layout().addWidget(self.cal)
+        self.layout().addWidget(self.btn_stereoshift)
+        self.layout().addWidget(self.mag)
+        self.layout().addWidget(self.btn_save)
+        self.layout().addWidget(self.btn_testnew)
 
-            # setup particle table
-            self.table = self._set_up_table()
-            self._set_table_visible_vars(False)
+        # disable all calculation buttons
+        self.disable_all_buttons()
+        # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
-            # Apply magnification disabled until the magnification parameters are computed
-            self.cal = QRadioButton("Apply magnification")
-            self.cal.setEnabled(False)
-
-            # connect callbacks
-            # NOTE: This isn't consistent in the code structure. Connects for the combobox etc have been done above.
-            self.btn_load.clicked.connect(self._on_click_load_data)
-            btn_delete_particle.clicked.connect(self._on_click_delete_particle)
-            btn_radius.clicked.connect(self._on_click_radius)
-            btn_length.clicked.connect(self._on_click_length)
-            btn_decayangle.clicked.connect(self._on_click_decay_angles)
-            btn_stereoshift.clicked.connect(self._on_click_stereoshift)
-            self.cal.toggled.connect(self._on_click_apply_magnification)
-            btn_save.clicked.connect(self._on_click_save)
-            btn_testnew.clicked.connect(self._on_click_newref)
-
-            self.mag.clicked.connect(self._on_click_magnification)
-            # TODO: find which of thsese works
-            # https://napari.org/stable/gallery/custom_mouse_functions.html
-            # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
-            # self.viewer.events.mouse_press(self._on_mouse_click)
-
-            # layout
-            self.setLayout(QVBoxLayout())
-            self.layout().addWidget(self.btn_load)
-            self.layout().addWidget(self.cb)
-            self.layout().addWidget(btn_delete_particle)
-            self.layout().addWidget(btn_radius)
-            self.layout().addWidget(btn_length)
-            self.layout().addWidget(btn_decayangle)
-            self.layout().addWidget(self.table)
-            self.layout().addWidget(self.cal)
-            self.layout().addWidget(btn_stereoshift)
-            self.layout().addWidget(self.mag)
-            self.layout().addWidget(btn_save)
-            self.layout().addWidget(btn_testnew)
-
-        setup_ui(self)
         # Data analysis
         self.data: List[NewParticle] = []
         # might not need this eventually
         self.mag_a = -1.0
         self.mag_b = 0.0
+
+    @property
+    def camera_center(self):
+        # update for 4d implementation as appropriate.
+        return (self.viewer.camera.center[1], self.viewer.camera.center[2])
 
     def _get_selected_points(self, layer_name="Points") -> np.array:
         """Returns array of selected points in the viewer"""
@@ -153,6 +161,7 @@ class ParticleTracksWidget(QWidget):
         out.setSelectionBehavior(QAbstractItemView.SelectRows)
         out.setSelectionMode(QAbstractItemView.SingleSelection)
         out.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        out.setSelectionBehavior(QTableWidget.SelectRows)
         return out
 
     def _set_table_visible_vars(self, calibrated) -> None:
@@ -178,6 +187,29 @@ class ParticleTracksWidget(QWidget):
         print("Column ", columntext, " not in the table")
         return -1
 
+    def _on_row_selection_changed(self) -> None:
+        """Enable/disable calculation buttons depending on the row selection"""
+        try:
+            selected_row = self._get_selected_row()
+            if self.data[selected_row].index < 4:
+                self.btn_radius.setEnabled(True)
+                self.btn_length.setEnabled(True)
+                self.btn_decayangle.setEnabled(False)
+                return
+            elif self.data[selected_row].index == 4:
+                self.btn_radius.setEnabled(False)
+                self.btn_length.setEnabled(True)
+                self.btn_decayangle.setEnabled(True)
+                return
+        except IndexError:
+            print("The table is empty.")
+        self.disable_all_buttons()
+
+    def disable_all_buttons(self) -> None:
+        self.btn_radius.setEnabled(False)
+        self.btn_length.setEnabled(False)
+        self.btn_decayangle.setEnabled(False)
+
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
         for the currently selected points and assign it to the currently selected table row.
@@ -200,43 +232,48 @@ class ParticleTracksWidget(QWidget):
             napari.utils.notifications.show_info(
                 f"Adding points to the table: {selected_points}"
             )
+        try:
+            selected_row = self._get_selected_row()
+        except IndexError:
+            napari.utils.notifications.show_error(
+                "There are no particles in the table."
+            )
+        else:
+            # Assigns the points and radius to the selected row
+            for i in range(3):
+                point = selected_points[i]
+                self.table.setItem(
+                    selected_row,
+                    self._get_table_column_index("r" + str(i + 1)),
+                    QTableWidgetItem(str(point)),
+                )
 
-        # Assigns the points and radius to the selected row
-        selected_row = self._get_selected_row()
-        for i in range(3):
-            point = selected_points[i]
+            self.data[selected_row].rpoints = selected_points
+
+            print("calculating radius!")
+            rad = radius(*selected_points)
+
             self.table.setItem(
                 selected_row,
-                self._get_table_column_index("r" + str(i + 1)),
-                QTableWidgetItem(str(point)),
+                self._get_table_column_index("radius_px"),
+                QTableWidgetItem(str(rad)),
             )
 
-        self.data[selected_row].rpoints = selected_points
+            self.data[selected_row].radius_px = rad
 
-        print("calculating radius!")
-        rad = radius(*selected_points)
+            ## Add the calibrated radius to the table
+            self.data[selected_row].radius_cm = (
+                self.data[selected_row].magnification
+                * self.data[selected_row].radius_px
+            )
+            self.table.setItem(
+                selected_row,
+                self._get_table_column_index("radius_cm"),
+                QTableWidgetItem(str(self.data[selected_row].radius_cm)),
+            )
 
-        self.table.setItem(
-            selected_row,
-            self._get_table_column_index("radius_px"),
-            QTableWidgetItem(str(rad)),
-        )
-
-        self.data[selected_row].radius_px = rad
-
-        ## Add the calibrated radius to the table
-        self.data[selected_row].radius_cm = (
-            self.data[selected_row].magnification
-            * self.data[selected_row].radius_px
-        )
-        self.table.setItem(
-            selected_row,
-            self._get_table_column_index("radius_cm"),
-            QTableWidgetItem(str(self.data[selected_row].radius_cm)),
-        )
-
-        print("Modified particle ", selected_row)
-        print(self.data[selected_row])
+            print("Modified particle ", selected_row)
+            print(self.data[selected_row])
 
     def _on_click_length(self) -> None:
         """When the 'Calculate length' button is clicked, calculate the decay length
@@ -267,38 +304,44 @@ class ParticleTracksWidget(QWidget):
             return
 
         # Assigns the points and radius to the selected row
-        selected_row = self._get_selected_row()
-        for i in range(2):
-            point = selected_points[i]
+        try:
+            selected_row = self._get_selected_row()
+        except IndexError:
+            napari.utils.notifications.show_error(
+                "There are no particles in the table."
+            )
+        else:
+            for i in range(2):
+                point = selected_points[i]
+                self.table.setItem(
+                    selected_row,
+                    self._get_table_column_index("d" + str(i + 1)),
+                    QTableWidgetItem(str(point)),
+                )
+            self.data[selected_row].dpoints = selected_points
+
+            print("calculating decay length!")
+            declen = length(*selected_points)
             self.table.setItem(
                 selected_row,
-                self._get_table_column_index("d" + str(i + 1)),
-                QTableWidgetItem(str(point)),
+                self._get_table_column_index("decay_length_px"),
+                QTableWidgetItem(str(declen)),
             )
-        self.data[selected_row].dpoints = selected_points
+            self.data[selected_row].decay_length_px = declen
 
-        print("calculating decay length!")
-        declen = length(*selected_points)
-        self.table.setItem(
-            selected_row,
-            self._get_table_column_index("decay_length_px"),
-            QTableWidgetItem(str(declen)),
-        )
-        self.data[selected_row].decay_length_px = declen
+            ## Add the calibrated decay length to the table
+            self.data[selected_row].decay_length_cm = (
+                self.data[selected_row].magnification
+                * self.data[selected_row].decay_length_px
+            )
+            self.table.setItem(
+                selected_row,
+                self._get_table_column_index("decay_length_cm"),
+                QTableWidgetItem(str(self.data[selected_row].decay_length_cm)),
+            )
 
-        ## Add the calibrated decay length to the table
-        self.data[selected_row].decay_length_cm = (
-            self.data[selected_row].magnification
-            * self.data[selected_row].decay_length_px
-        )
-        self.table.setItem(
-            selected_row,
-            self._get_table_column_index("decay_length_cm"),
-            QTableWidgetItem(str(self.data[selected_row].decay_length_cm)),
-        )
-
-        print("Modified particle ", selected_row)
-        print(self.data[selected_row])
+            print("Modified particle ", selected_row)
+            print(self.data[selected_row])
 
     def _on_click_decay_angles(self) -> None:
         """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
@@ -320,9 +363,10 @@ class ParticleTracksWidget(QWidget):
         The folder should contain three subfolders named as variations of 'view1', 'view2' and 'view3', and each subfolder should contain the same number of images.
         The images in each folder are loaded as a stack, and the stack is named according to the subfolder name.
         """
-
+        # setup UI
         test_file_dialog = QFileDialog(self)
         test_file_dialog.setFileMode(QFileDialog.Directory)
+        # retrieve image folder
         folder_name = test_file_dialog.getExistingDirectory(
             self,
             "Choose folder",
@@ -337,33 +381,52 @@ class ParticleTracksWidget(QWidget):
             return
 
         folder_subdirs = glob.glob(folder_name + "/*/")
+        # Checks whether the image folder contains a subdirectory for each view.
         three_subdirectories = len(folder_subdirs) == 3
+        # Checks that these subdirectories correspond to event views.
         subdir_names_contain_views = all(
             any(view in name.lower() for name in folder_subdirs)
             for view in VIEW_NAMES
         )
+        # Checks that each subdirectory contains the same number of images.
         same_image_count = all(
             len(glob.glob(subdir + "/*"))
             == len(glob.glob(folder_subdirs[0] + "/*"))
             for subdir in folder_subdirs
         )
+        # If all checks are passed, load the images where the event number is a
+        # new spatial dimension (stack) and the views are layers.
         if not (
             three_subdirectories
             and subdir_names_contain_views
             and same_image_count
         ):
-            print(
-                "WARNING: The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
+            self.msg = QMessageBox()
+            self.msg.setIcon(QMessageBox.Warning)
+            self.msg.setWindowTitle("Data folder structure error")
+            self.msg.setStandardButtons(QMessageBox.Ok)
+            self.msg.setText(
+                "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
             )
-            # TODO: make this a QWarningBox?
+            self.msg.show()
             return
 
-        for subdir, stack_name in zip(
-            folder_subdirs, ["stack1", "stack2", "stack3"]
-        ):
-            stack = imread(subdir + "/*")
-            self.viewer.add_image(stack, name=stack_name)
+        def crop(array):
+            # Crops view 1 and 2 to same size as view 3 by removing whitespace
+            # on left, as images align on the right.
+            return array[:, :, -8377:, :]
+
+        stacks = []
+        for subdir in folder_subdirs:
+            stack: da = imread(subdir + "/*")
+            stack = crop(stack)
+            stacks.append(stack)
             # TODO: investigate the multiscale otption.
+
+        # Concatenate stacks along new spatial dimension such that we have a view, and event slider
+        concatenated_stack = da.stack(stacks, axis=0)
+        self.viewer.add_image(concatenated_stack)
+        self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
 
     def _on_click_newref(self) -> Set_Fiducial_Dialog:
         """When the 'test new reference' button is clicked, open the set fiducial dialog."""
@@ -383,6 +446,7 @@ class ParticleTracksWidget(QWidget):
         # add new particle to data
         np = NewParticle()
         np.Name = self.cb.currentText()
+        np.index = self.cb.currentIndex()
         np.magnification_a = self.mag_a
         np.magnification_b = self.mag_b
         self.data += [np]
@@ -390,6 +454,11 @@ class ParticleTracksWidget(QWidget):
         # add particle (== new row) to the table and select it
         self.table.insertRow(self.table.rowCount())
         self.table.selectRow(self.table.rowCount() - 1)
+        self.table.setItem(
+            self.table.rowCount() - 1,
+            self._get_table_column_index("index"),
+            QTableWidgetItem(np.index),
+        )
         self.table.setItem(
             self.table.rowCount() - 1,
             self._get_table_column_index("Name"),
@@ -409,19 +478,23 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_delete_particle(self) -> None:
         """Delete particle from table and data"""
+        try:
+            selected_row = self._get_selected_row()
+        except IndexError:
+            napari.utils.notifications.show_error(
+                "There are no particles in the table."
+            )
+        else:
+            msgBox = QMessageBox()
+            msgBox.setText("Deleting selected particle")
+            msgBox.setInformativeText("Do you want to continue?")
+            msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+            msgBox.setDefaultButton(QMessageBox.Cancel)
+            ret = msgBox.exec()
 
-        selected_row = self._get_selected_row()
-
-        msgBox = QMessageBox()
-        msgBox.setText("Deleting selected particle")
-        msgBox.setInformativeText("Do you want to continue?")
-        msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-        msgBox.setDefaultButton(QMessageBox.Cancel)
-        ret = msgBox.exec()
-
-        if ret == QMessageBox.Yes:
-            del self.data[selected_row]
-            self.table.removeRow(selected_row)
+            if ret == QMessageBox.Yes:
+                del self.data[selected_row]
+                self.table.removeRow(selected_row)
 
     def _on_click_magnification(self) -> None:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""

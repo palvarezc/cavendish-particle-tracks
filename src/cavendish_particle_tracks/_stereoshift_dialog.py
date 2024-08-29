@@ -1,4 +1,7 @@
+from typing import TYPE_CHECKING
+
 import numpy as np
+from napari.utils.notifications import show_error
 from qtpy.QtWidgets import (
     QComboBox,
     QDialog,
@@ -12,9 +15,12 @@ from qtpy.QtWidgets import (
 from ._analysis import Fiducial
 from ._calculate import depth, length, stereoshift
 
+if TYPE_CHECKING:
+    from ._widget import ParticleTracksWidget
+
 
 class StereoshiftDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent: "ParticleTracksWidget"):
         # Call parent constructor
         super().__init__(parent)
 
@@ -127,15 +133,29 @@ class StereoshiftDialog(QDialog):
         # endregion
 
     def _setup_stereoshift_layer(self):
+        # retrieve current camera position
+        camera_center = self.parent.camera_center
         # add the points
         points = np.array(
             [
-                [100, 100],
-                [100, 150],
-                [200, 300],
-                [333, 111],
-                [400, 350],
-                [500, 150],
+                [
+                    camera_center[0] + 100,
+                    camera_center[1] - 200,
+                ],
+                [camera_center[0] + 100, camera_center[1]],
+                [
+                    camera_center[0] + 100,
+                    camera_center[1] + 200,
+                ],
+                [camera_center[0] - 100, camera_center[1]],
+                [
+                    camera_center[0] - 100,
+                    camera_center[1] + 200,
+                ],
+                [
+                    camera_center[0] - 100,
+                    camera_center[1] + 200,
+                ],
             ]
         )
 
@@ -253,12 +273,16 @@ class StereoshiftDialog(QDialog):
         """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
 
         # Propagate to particle
-        selected_row = self.parent._get_selected_row()
-        self.parent.data[selected_row].spoints = self.spoints
-        self.parent.data[selected_row].shift_fiducial = self.shift_fiducial
-        self.parent.data[selected_row].shift_point = self.shift_point
-        self.parent.data[selected_row].stereoshift = self.point_stereoshift
-        self.parent.data[selected_row].depth_cm = self.point_depth
+        try:
+            selected_row = self.parent._get_selected_row()
+        except IndexError:
+            show_error("There are no particles in the table.")
+        else:
+            self.parent.data[selected_row].spoints = self.spoints
+            self.parent.data[selected_row].shift_fiducial = self.shift_fiducial
+            self.parent.data[selected_row].shift_point = self.shift_point
+            self.parent.data[selected_row].stereoshift = self.point_stereoshift
+            self.parent.data[selected_row].depth_cm = self.point_depth
 
         # Propagate to parent table
         for i in range(2):
