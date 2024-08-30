@@ -54,7 +54,7 @@ class Set_Fiducial_Dialog(QDialog):
         self.layer_fiducials: Points = self._setup_fiducial_layer()
         self.layer_points: Points = self._setup_points_layer()
         self._setup_ui()
-        self.sync_layer_with_data()
+        self.copy_layer_to_data()
         self.layer_shapes = self._setup_shapes_layer()
         self.parent.viewer.layers.selection.active = self.layer_fiducials
         self.layer_fiducials.mode = "select"
@@ -67,25 +67,27 @@ class Set_Fiducial_Dialog(QDialog):
         # both of these methods should also ideally be encapsulated in a single case.
         @self.layer_points.events.data.connect
         def _on_change_layer_points(event):
-            self.layer_shapes.editable = True
-            self.sync_layer_with_data()
-            point_range = range(len(self.layer_shapes.data) - 2)
-            for i in point_range:
-                self.layer_shapes.data[i + 2][0][0] = self.points[i][0].x
-                # 1st shape, 1st point, x = x of point 1, view 1
-                self.layer_shapes.data[i + 2][0][1] = self.points[i][0].y
-                self.layer_shapes.data[i + 2][1][0] = self.points[i][1].x
-                # 1 shape, 2nd point, x = x of point 1, view 2
-                self.layer_shapes.data[i + 2][1][1] = self.points[i][1].y
-            self.layer_shapes.refresh()
-            self.layer_shapes.editable = False
+            #self.layer_shapes.editable = True
+            #self.copy_layer_to_data()
+            point_range = range(int(len(self.layer_points.data)/2))
+            self.layer_shapes.data[2][0] = self.layer_points.data[0]
+            self.layer_shapes.data[2][1] = self.layer_points.data[1]
+            #self.layer_shapes.refresh()
+            #for i in point_range:
+            #    self.layer_shapes.data[i + 2][0][0] = self.points[i][0].x
+            #    # 1st shape, 1st point, x = x of point 1, view 1
+            #    self.layer_shapes.data[i + 2][0][1] = self.points[i][0].y
+            #    self.layer_shapes.data[i + 2][1][0] = self.points[i][1].x
+            #    # 1 shape, 2nd point, x = x of point 1, view 2
+            #    self.layer_shapes.data[i + 2][1][1] = self.points[i][1].y
+            #self.layer_shapes.editable = False
             # update for more points as needed
 
         @self.layer_fiducials.events.data.connect
-        def _on_change_layer_points(event):
-            self.layer_shapes.editable = True
-            self.sync_layer_with_data()
-            point_range = range(len(self.layer_shapes.data) - 2)
+        def _on_change_layer_fiducials(event):
+            #self.layer_shapes.editable = True
+            #self.copy_layer_to_data()
+            point_range = range(int(len(self.layer_fiducials.data)/2))
             for i in point_range:
                 self.layer_shapes.data[i][0][0] = self.fiducials[i][0].x
                 # 1st shape, 1st point, x = x of point 1, view 1
@@ -93,8 +95,7 @@ class Set_Fiducial_Dialog(QDialog):
                 self.layer_shapes.data[i][0][1] = self.fiducials[i][0].y
                 # 1 shape, 2nd point, x = x of point 1, view 2
                 self.layer_shapes.data[i][1][1] = self.fiducials[i][1].y
-            self.layer_shapes.refresh()
-            self.layer_shapes.editable = False
+            #self.layer_shapes.editable = False
 
     def _setup_ui(self) -> None:
         self.setWindowTitle("Measure Stereoshift and Magnification")
@@ -391,14 +392,14 @@ class Set_Fiducial_Dialog(QDialog):
             edge_color="yellow",
             edge_width=5,
         )
-        layer_shapes.editable = False
+        #layer_shapes.editable = False
         return layer_shapes
 
     def _on_click_calculate(self) -> None:
         """Calculate the stereoshift and populate the results table."""
         # TODO need to add checks that the user hasn't deleted points or otherwise
         # Add points in the coords to corresponding text box
-        self.sync_layer_with_data()
+        self.copy_layer_to_data()
         # There may be a better way of doing this by assigning point attributes.
         # I can see this approach going wrong.
         # Take a look at the napari example nD points with features
@@ -462,7 +463,7 @@ class Set_Fiducial_Dialog(QDialog):
         self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
         self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
 
-    def sync_layer_with_data(self):
+    def copy_layer_to_data(self):
         for i in range(len(self.fiducials)):
             for j in range(len(self.fiducials[i])):
                 (self.fiducials[i][j].x, self.fiducials[i][j].y) = (
