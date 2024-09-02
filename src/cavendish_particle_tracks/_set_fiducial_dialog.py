@@ -67,35 +67,42 @@ class Set_Fiducial_Dialog(QDialog):
         # both of these methods should also ideally be encapsulated in a single case.
         @self.layer_points.events.data.connect
         def _on_change_layer_points(event):
-            #self.layer_shapes.editable = True
-            #self.copy_layer_to_data()
+            self.layer_shapes.editable = True
+            self.copy_layer_to_data()
             point_range = range(int(len(self.layer_points.data)/2))
-            self.layer_shapes.data[2][0] = self.layer_points.data[0]
-            self.layer_shapes.data[2][1] = self.layer_points.data[1]
-            #self.layer_shapes.refresh()
-            #for i in point_range:
-            #    self.layer_shapes.data[i + 2][0][0] = self.points[i][0].x
-            #    # 1st shape, 1st point, x = x of point 1, view 1
-            #    self.layer_shapes.data[i + 2][0][1] = self.points[i][0].y
-            #    self.layer_shapes.data[i + 2][1][0] = self.points[i][1].x
-            #    # 1 shape, 2nd point, x = x of point 1, view 2
-            #    self.layer_shapes.data[i + 2][1][1] = self.points[i][1].y
-            #self.layer_shapes.editable = False
+            data = self.layer_shapes.data
+            for i in point_range:
+                data[i + 2][0][0] = self.points[i][0].x
+                # 1st shape, 1st point, x = x of point 1, view 1
+                data[i + 2][0][1] = self.points[i][0].y
+                data[i + 2][1][0] = self.points[i][1].x
+                # 1 shape, 2nd point, x = x of point 1, view 2
+                data[i + 2][1][1] = self.points[i][1].y
+            self.layer_shapes.editable = False
+            self.layer_shapes.data = data
             # update for more points as needed
 
         @self.layer_fiducials.events.data.connect
         def _on_change_layer_fiducials(event):
-            #self.layer_shapes.editable = True
-            #self.copy_layer_to_data()
-            point_range = range(int(len(self.layer_fiducials.data)/2))
-            for i in point_range:
+            self.layer_shapes.editable = True
+            self.copy_layer_to_data()
+            data = self.layer_shapes.data
+            # this is mangled and needs to be fixed. need to fix data structure sync before bothering now that 
+            # the event handler is working.
+            no_fiducial_shapes = range(int(len(self.layer_fiducials.data)/4))
+            #for i in no_fiducial_shapes:
+            #    for j in range(no_coords=2):
+            #        for k in range(no_views=2):
+            #            data[i][j]
+            for i in range(2):
                 self.layer_shapes.data[i][0][0] = self.fiducials[i][0].x
                 # 1st shape, 1st point, x = x of point 1, view 1
+                self.layer_shapes.data[i][0][1] = self.fiducials[i*2][0].y
                 self.layer_shapes.data[i][1][0] = self.fiducials[i][1].x
-                self.layer_shapes.data[i][0][1] = self.fiducials[i][0].y
                 # 1 shape, 2nd point, x = x of point 1, view 2
-                self.layer_shapes.data[i][1][1] = self.fiducials[i][1].y
-            #self.layer_shapes.editable = False
+                self.layer_shapes.data[i][1][1] = self.fiducials[i*2][1].y
+            self.layer_shapes.data = data
+            self.layer_shapes.editable = False
 
     def _setup_ui(self) -> None:
         self.setWindowTitle("Measure Stereoshift and Magnification")
