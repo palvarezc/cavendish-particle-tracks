@@ -44,6 +44,8 @@ from ._stereoshift_dialog import StereoshiftDialog
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
 
+    dev_mode = True
+
     def __init__(self, napari_viewer: napari.Viewer):
         super().__init__()
         self.viewer = napari_viewer
@@ -53,7 +55,9 @@ class ParticleTracksWidget(QWidget):
         self.cmb_add_particle = QComboBox()
         self.cmb_add_particle.addItems(EXPECTED_PARTICLES)
         self.cmb_add_particle.setCurrentIndex(0)
-        self.cmb_add_particle.currentIndexChanged.connect(self._on_click_new_particle)
+        self.cmb_add_particle.currentIndexChanged.connect(
+            self._on_click_new_particle
+        )
         self.btn_delete_particle = QPushButton("Delete particle")
         self.btn_radius = QPushButton("Calculate radius")
         self.btn_length = QPushButton("Calculate length")
@@ -229,6 +233,7 @@ class ParticleTracksWidget(QWidget):
             self.btn_testnew.setEnabled(False)
 
     def set_UI_image_loaded(self, loaded: bool) -> None:
+        if(self.dev_mode): return
         if loaded:
             self.btn_load.hide()
             self.cmb_add_particle.show()
