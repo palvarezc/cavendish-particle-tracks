@@ -11,9 +11,9 @@ import glob
 from datetime import datetime
 from typing import List
 
+import dask.array as da
 import napari
 import numpy as np
-import dask.array as da
 from dask_image.imread import imread
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
