@@ -128,27 +128,29 @@ class StereoshiftDialog(QDialog):
 
     def _setup_stereoshift_layer(self):
         # retrieve current camera position
-        camera_center = self.parent.camera_center
+        origin_x = self.parent.camera_center[0]
+        origin_y = self.parent.camera_center[1]
+        zoom_factor = self.parent.viewer.camera.zoom
         # add the points
         points = np.array(
             [
                 [
-                    camera_center[0] + 100,
-                    camera_center[1] - 200,
+                    origin_x + 100 / zoom_factor,
+                    origin_y - 200 / zoom_factor,
                 ],
-                [camera_center[0] + 100, camera_center[1]],
+                [origin_x + 100 / zoom_factor, origin_y],
                 [
-                    camera_center[0] + 100,
-                    camera_center[1] + 200,
+                    origin_x + 100 / zoom_factor,
+                    origin_y + 200 / zoom_factor,
                 ],
-                [camera_center[0] - 100, camera_center[1]],
+                [origin_x - 100 / zoom_factor, origin_y],
                 [
-                    camera_center[0] - 100,
-                    camera_center[1] + 200,
+                    origin_x - 100 / zoom_factor,
+                    origin_y + 200 / zoom_factor,
                 ],
                 [
-                    camera_center[0] - 100,
-                    camera_center[1] + 200,
+                    origin_x - 100 / zoom_factor,
+                    origin_y - 200 / zoom_factor,
                 ],
             ]
         )
@@ -161,7 +163,7 @@ class StereoshiftDialog(QDialog):
 
         text = {
             "string": labels,
-            "size": 20,
+            "size": 14,
             "color": colors,
             "translation": np.array([-30, 0]),
         }
