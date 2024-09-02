@@ -424,6 +424,11 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">mag_a</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mag_b</span> <span class="o">=</span> <span class="mf">0.0</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">camera_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># update for 4d implementation as appropriate.</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">center</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
     <span class="k">def</span> <span class="nf">_get_selected_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer_name</span><span class="o">=</span><span class="s2">&quot;Points&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns array of selected points in the viewer&quot;&quot;&quot;</span>
 
