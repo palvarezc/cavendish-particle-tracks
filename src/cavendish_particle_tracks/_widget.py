@@ -12,6 +12,7 @@ import glob
 import dask.array
 import napari
 import numpy as np
+import dask.array as da
 from dask_image.imread import imread
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
@@ -46,42 +47,44 @@ class ParticleTracksWidget(QWidget):
     def __init__(self, napari_viewer: napari.viewer.Viewer):
         super().__init__()
         self.viewer = napari_viewer
+        # region UI Setup
         # define QtWidgets
-        self.load = QPushButton("Load data")
-        self.cb = QComboBox()
-        self.cb.addItems(EXPECTED_PARTICLES)
-        self.cb.setCurrentIndex(0)
-        self.cb.currentIndexChanged.connect(self._on_click_new_particle)
-        self.rad = QPushButton("Calculate radius")
-        delete_particle = QPushButton("Delete particle")
-        self.lgth = QPushButton("Calculate length")
-        self.ang = QPushButton("Calculate decay angles")
-        self.stsh = QPushButton("Stereoshift")
-        self.mag = QPushButton("Magnification")
-        save = QPushButton("Save")
-
+        self.btn_load = QPushButton("Load data")
+        self.cmb_add_particle = QComboBox()
+        self.cmb_add_particle.addItems(EXPECTED_PARTICLES)
+        self.cmb_add_particle.setCurrentIndex(0)
+        self.cmb_add_particle.currentIndexChanged.connect(
+            self._on_click_new_particle
+        )
+        self.btn_delete_particle = QPushButton("Delete particle")
+        self.btn_radius = QPushButton("Calculate radius")
+        self.btn_length = QPushButton("Calculate length")
+        self.btn_decayangle = QPushButton("Calculate decay angles")
+        self.btn_stereoshift = QPushButton("Stereoshift")
+        self.btn_save = QPushButton("Save")
+        self.btn_magnification = QPushButton("Magnification")
         # setup particle table
         self.table = self._set_up_table()
         self._set_table_visible_vars(False)
         self.table.selectionModel().selectionChanged.connect(
             self._on_row_selection_changed
         )
-
         # Apply magnification disabled until the magnification parameters are computed
         self.cal = QRadioButton("Apply magnification")
         self.cal.setEnabled(False)
 
         # connect callbacks
-        self.load.clicked.connect(self._on_click_load_data)
-        delete_particle.clicked.connect(self._on_click_delete_particle)
-        self.rad.clicked.connect(self._on_click_radius)
-        self.lgth.clicked.connect(self._on_click_length)
-        self.ang.clicked.connect(self._on_click_decay_angles)
-        self.stsh.clicked.connect(self._on_click_stereoshift)
+        self.btn_load.clicked.connect(self._on_click_load_data)
+        self.btn_delete_particle.clicked.connect(
+            self._on_click_delete_particle
+        )
+        self.btn_radius.clicked.connect(self._on_click_radius)
+        self.btn_length.clicked.connect(self._on_click_length)
+        self.btn_decayangle.clicked.connect(self._on_click_decay_angles)
+        self.btn_stereoshift.clicked.connect(self._on_click_stereoshift)
         self.cal.toggled.connect(self._on_click_apply_magnification)
-        save.clicked.connect(self._on_click_save)
-
-        self.mag.clicked.connect(self._on_click_magnification)
+        self.btn_save.clicked.connect(self._on_click_save)
+        self.btn_magnification.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
         # https://napari.org/stable/gallery/custom_mouse_functions.html
         # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
@@ -89,21 +92,19 @@ class ParticleTracksWidget(QWidget):
 
         # layout
         self.setLayout(QVBoxLayout())
-        self.layout().addWidget(self.load)
-        self.layout().addWidget(self.cb)
-        self.layout().addWidget(delete_particle)
-        self.layout().addWidget(self.rad)
-        self.layout().addWidget(self.lgth)
-        self.layout().addWidget(self.ang)
+        self.layout().addWidget(self.btn_load)
+        self.layout().addWidget(self.cmb_add_particle)
+        self.layout().addWidget(self.btn_delete_particle)
+        self.layout().addWidget(self.btn_radius)
+        self.layout().addWidget(self.btn_length)
+        self.layout().addWidget(self.btn_decayangle)
         self.layout().addWidget(self.table)
         self.layout().addWidget(self.cal)
-        self.layout().addWidget(self.stsh)
-        self.layout().addWidget(self.mag)
-        self.layout().addWidget(save)
-
-        # disable all calculation buttons
-        self.disable_all_buttons()
-        # TODO: include self.stsh in the logic, depending on what it actually ends up doing
+        self.layout().addWidget(self.btn_stereoshift)
+        self.layout().addWidget(self.btn_magnification)
+        self.layout().addWidget(self.btn_save)
+        self.set_UI_image_loaded(False)
+        # endregion
 
         # Data analysis
         self.data: list[NewParticle] = []
@@ -111,12 +112,16 @@ class ParticleTracksWidget(QWidget):
         self.mag_a = -1.0e6
         self.mag_b = -1.0e6
 
+        @self.viewer.layers.events.connect
+        def _on_layerlist_changed(event):
+            self.set_btn_availability()
+
     @property
     def camera_center(self):
         # update for 4d implementation as appropriate.
         return (self.viewer.camera.center[1], self.viewer.camera.center[2])
 
-    def _get_selected_points(self, layer_name="Radii and Lengths") -> np.array:
+    def _get_selected_points(self, layer_name="Points") -> np.array:
         """Returns array of selected points in the viewer"""
 
         # Filtering selected layer (layer names are unique)
@@ -180,26 +185,67 @@ class ParticleTracksWidget(QWidget):
 
     def _on_row_selection_changed(self) -> None:
         """Enable/disable calculation buttons depending on the row selection"""
+        self.set_btn_availability()
+
+    def set_btn_availability(self) -> None:
+        images_imported = False
+        for layer in self.viewer.layers:
+            if layer.name == "Particle Tracks":
+                images_imported = True
+                break
+        self.set_UI_image_loaded(images_imported)
         try:
             selected_row = self._get_selected_row()
+            self.btn_save.setEnabled(True)
+            self.btn_delete_particle.setEnabled(True)
+            ## think about these two + cal once done.
+            self.btn_magnification.setEnabled(True)
+            self.btn_stereoshift.setEnabled(True)
             if self.data[selected_row].index < 4:
-                self.rad.setEnabled(True)
-                self.lgth.setEnabled(True)
-                self.ang.setEnabled(False)
+                self.btn_radius.setEnabled(True)
+                self.btn_length.setEnabled(True)
+                self.btn_decayangle.setEnabled(False)
                 return
             elif self.data[selected_row].index == 4:
-                self.rad.setEnabled(False)
-                self.lgth.setEnabled(True)
-                self.ang.setEnabled(True)
+                self.btn_radius.setEnabled(False)
+                self.btn_length.setEnabled(True)
+                self.btn_decayangle.setEnabled(True)
                 return
         except IndexError:
-            print("The table is empty.")
-        self.disable_all_buttons()
+            self.btn_delete_particle.setEnabled(False)
+            self.btn_radius.setEnabled(False)
+            self.btn_length.setEnabled(False)
+            self.btn_decayangle.setEnabled(False)
+            self.cal.setEnabled(False)
+            self.btn_stereoshift.setEnabled(False)
+            self.btn_magnification.setEnabled(False)
+            self.btn_save.setEnabled(False)
 
-    def disable_all_buttons(self) -> None:
-        self.rad.setEnabled(False)
-        self.lgth.setEnabled(False)
-        self.ang.setEnabled(False)
+    def set_UI_image_loaded(self, loaded: bool) -> None:
+        if loaded:
+            self.btn_load.hide()
+            self.cmb_add_particle.show()
+            self.btn_delete_particle.show()
+            self.btn_radius.show()
+            self.btn_length.show()
+            self.btn_decayangle.show()
+            self.btn_stereoshift.show()
+            self.btn_save.show()
+            self.btn_magnification.show()
+            self.table.show()
+            self.cal.show()
+        else:
+            self.btn_load.show()
+            self.cmb_add_particle.hide()
+            self.btn_delete_particle.hide()
+            self.btn_radius.hide()
+            self.btn_length.hide()
+            self.btn_decayangle.hide()
+            self.btn_stereoshift.hide()
+            self.btn_save.hide()
+            self.btn_magnification.hide()
+            self.table.hide()
+            self.cal.hide()
 
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
@@ -434,13 +480,13 @@ class ParticleTracksWidget(QWidget):
         """When the 'New particle' button is clicked, append a new blank row to
         the table and select the first cell ready to recieve the first point.
         """
-        if self.cb.currentIndex() < 1:
+        if self.cmb_add_particle.currentIndex() < 1:
             return
 
         # add new particle to data
         np = NewParticle()
-        np.Name = self.cb.currentText()
-        np.index = self.cb.currentIndex()
+        np.Name = self.cmb_add_particle.currentText()
+        np.index = self.cmb_add_particle.currentIndex()
         np.magnification_a = self.mag_a
         np.magnification_b = self.mag_b
         self.data += [np]
@@ -465,7 +511,7 @@ class ParticleTracksWidget(QWidget):
         )
 
         print(self.data[-1])
-        self.cb.setCurrentIndex(0)
+        self.cmb_add_particle.setCurrentIndex(0)
 
         # # napari notifications
         # napari.utils.notifications.show_info("I created a new particle")
