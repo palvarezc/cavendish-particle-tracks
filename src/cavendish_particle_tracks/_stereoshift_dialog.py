@@ -165,7 +165,8 @@ class StereoshiftDialog(QDialog):
         for item in self._fiducial_views:
             labels += [item.name]
 
-        colors = ["green", "green", "blue", "blue", "red", "red"]
+        colors = ["green", "red", "green", "red", "green", "red"]
+        symbols = ["x", "x", "cross", "cross", "disc", "disc"]
 
         text = {
             "string": labels,
@@ -183,6 +184,7 @@ class StereoshiftDialog(QDialog):
             edge_width_is_relative=False,
             edge_color=colors,
             face_color=colors,
+            symbol=symbols,
         )
 
         return points_layer

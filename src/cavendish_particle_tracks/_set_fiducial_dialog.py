@@ -307,7 +307,7 @@ class Set_Fiducial_Dialog(QDialog):
             "red",
         ]
 
-        symbols = ["x", "x", "cross", "cross", "disc", "disc"]  # TODO fix
+        symbols = ["x", "x", "cross", "cross", "disc", "disc", "diamond", "diamond"]  # TODO fix
 
         text = {
             "string": fiducial_labels,
@@ -325,7 +325,7 @@ class Set_Fiducial_Dialog(QDialog):
             edge_width_is_relative=False,
             edge_color=colors,
             face_color=colors,
-            # symbol=symbols,
+            symbol=symbols,
         )
         return layer_fiducials
 
