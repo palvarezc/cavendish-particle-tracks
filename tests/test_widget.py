@@ -67,7 +67,6 @@ def test_calculate_radius_ui(cpt_widget, capsys):
     """
     # need to click "new particle" to add a row to the table
     cpt_widget.cb.setCurrentIndex(1)
-    cpt_widget._on_click_new_particle()
 
     # add three points to the points layer and select them
     cpt_widget.viewer.add_points([(0, 1), (1, 0), (0, -1)])
@@ -100,7 +99,6 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
     calculate a radius so better send a nice message."""
     # need to click "new particle" to add a row to the table
     cpt_widget.cb.setCurrentIndex(1)
-    cpt_widget._on_click_new_particle()
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
@@ -125,7 +123,6 @@ def test_add_new_particle_ui(cpt_widget, capsys):
     assert cpt_widget.table.rowCount() == 0
 
     cpt_widget.cb.setCurrentIndex(1)
-    cpt_widget._on_click_new_particle()
 
     assert cpt_widget.table.rowCount() == 1
     assert len(cpt_widget.data) == 1
@@ -134,7 +131,6 @@ def test_add_new_particle_ui(cpt_widget, capsys):
 def test_delete_particle_ui(cpt_widget):
     """Tests the removal of a particle from the table"""
     cpt_widget.cb.setCurrentIndex(1)
-    cpt_widget._on_click_new_particle()
 
     assert cpt_widget.table.rowCount() == 1
     assert len(cpt_widget.data) == 1
@@ -161,7 +157,6 @@ def test_calculate_length_ui(cpt_widget, capsys):
 
     # need to click "new particle" to add a row to the table
     cpt_widget.cb.setCurrentIndex(1)
-    cpt_widget._on_click_new_particle()
 
     # add three points to the points layer and select them
     cpt_widget.viewer.add_points([(0, 1), (0, 0)])
@@ -191,7 +186,6 @@ def test_calculate_length_fails_with_wrong_number_of_points(
     calculate a length so better send a nice message."""
     # need to click "new particle" to add a row to the table
     cpt_widget.cb.setCurrentIndex(1)
-    cpt_widget._on_click_new_particle()
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
