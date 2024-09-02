@@ -48,7 +48,7 @@ class ParticleTracksWidget(QWidget):
 
     def __init__(self, napari_viewer: napari.Viewer):
         super().__init__()
-        self.viewer = napari_viewer
+        self.viewer: napari.Viewer = napari_viewer
         # region UI Setup
         # define QtWidgets
         self.btn_load = QPushButton("Load data")
@@ -477,9 +477,15 @@ class ParticleTracksWidget(QWidget):
 
         # Concatenate stacks along new spatial dimension such that we have a view, and event slider
         concatenated_stack = da.stack(stacks, axis=0)
-        self.viewer.add_image(concatenated_stack, name="Particle Tracks")
+        layer = self.viewer.add_image(
+            concatenated_stack, name="Particle Tracks"
+        )
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
-        self.viewer.camera.center = [0, 0, 0, 0]
+        self.viewer.dims.point = [0, 0, 0, 0]
+
+        @layer.mouse_move_callbacks.append
+        def _on_mouse_move(layer, event):
+            print(self.viewer.dims.point)
 
     def _on_click_newref(self) -> Set_Fiducial_Dialog:
         """When the 'test new reference' button is clicked, open the set fiducial dialog."""
