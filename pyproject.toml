@@ -96,7 +96,6 @@ target-version = "py38"
 fix = true
 
 [tool.ruff.lint]
->>>>>>>>> Temporary merge branch 2
 select = [
     "E",
     "F",
