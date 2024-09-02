@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 import numpy as np
 from qtpy.QtWidgets import (
     QComboBox,
@@ -12,9 +14,12 @@ from qtpy.QtWidgets import (
 from ._analysis import Fiducial
 from ._calculate import depth, length, stereoshift
 
+if TYPE_CHECKING:
+    from ._widget import ParticleTracksWidget
+
 
 class StereoshiftDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent: "ParticleTracksWidget"):
         super().__init__(parent)
 
         self.parent = parent
@@ -119,18 +124,34 @@ class StereoshiftDialog(QDialog):
         self.shift_point = 0.0
         self.point_stereoshift = 0.0
         self.point_depth = -1.0
-        self.spoints = []
+        self.spoints = []  # type: ignore
 
     def _setup_stereoshift_layer(self):
+        # retrieve current camera position
+        origin_x = self.parent.camera_center[0]
+        origin_y = self.parent.camera_center[1]
+        zoom_factor = self.parent.viewer.camera.zoom
         # add the points
         points = np.array(
             [
-                [100, 100],
-                [100, 150],
-                [200, 300],
-                [333, 111],
-                [400, 350],
-                [500, 150],
+                [
+                    origin_x + 100 / zoom_factor,
+                    origin_y - 200 / zoom_factor,
+                ],
+                [origin_x + 100 / zoom_factor, origin_y],
+                [
+                    origin_x + 100 / zoom_factor,
+                    origin_y + 200 / zoom_factor,
+                ],
+                [origin_x - 100 / zoom_factor, origin_y],
+                [
+                    origin_x - 100 / zoom_factor,
+                    origin_y + 200 / zoom_factor,
+                ],
+                [
+                    origin_x - 100 / zoom_factor,
+                    origin_y - 200 / zoom_factor,
+                ],
             ]
         )
 
@@ -142,7 +163,7 @@ class StereoshiftDialog(QDialog):
 
         text = {
             "string": labels,
-            "size": 20,
+            "size": 14,
             "color": colors,
             "translation": np.array([-30, 0]),
         }

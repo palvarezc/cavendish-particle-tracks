@@ -80,32 +80,51 @@ class DecayAnglesDialog(QDialog):
     def _setup_decayangles_layer(self):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
 
-        lambda_line = np.array([[100, 100], [200, 300]])
-        proton_line = np.array([[200, 300], [300, 400]])
-        pion_line = np.array([[200, 300], [210, 400]])
+        origin_x = self.parent.camera_center[0]
+        # note down why this is preferred....
+        origin_y = self.parent.camera_center[1]
+
+        zoom_factor = self.parent.viewer.camera.zoom
+
+        # Scale offsets by the inverse of the zoom factor
+        lambda_line = np.array(
+            [
+                [origin_x + -100 / zoom_factor, origin_y + -100 / zoom_factor],
+                [origin_x + 100 / zoom_factor, origin_y + 200 / zoom_factor],
+            ]
+        )
+        proton_line = np.array(
+            [
+                [origin_x + 100 / zoom_factor, origin_y + 200 / zoom_factor],
+                [origin_x + 200 / zoom_factor, origin_y + 300 / zoom_factor],
+            ]
+        )
+        pion_line = np.array(
+            [
+                [origin_x + 100 / zoom_factor, origin_y + 200 / zoom_factor],
+                [origin_x + 110 / zoom_factor, origin_y + 300 / zoom_factor],
+            ]
+        )
 
         lines = [lambda_line, proton_line, pion_line]
-
         colors = ["green", "red", "blue"]
 
-        # Can we add labels to the shapes?
-        # text = {
-        #     "string": ["Λ", "p", "π"],
-        #     "size": 20,
-        #     "color": colors,
-        #     "translation": np.array([-30, 0]),
-        # }
+        text = {
+            "string": ["Λ", "p", "π"],
+            "size": 14,
+            "color": colors,
+            "translation": np.array([-30, 0]),
+        }
 
-        shapes_layer = self.parent.viewer.add_shapes(name="Shapes_DecayAngles")
-
-        shapes_layer.add(
+        shapes_layer = self.parent.viewer.add_shapes(
             lines,
+            name="Decay Angles Tool",
             shape_type=["line"] * 3,
             edge_width=5,
             edge_color=colors,
             face_color=colors,
+            text=text,
         )
-
         return shapes_layer
 
     def _on_click_calculate(self) -> None:
