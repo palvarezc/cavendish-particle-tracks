@@ -233,7 +233,8 @@ class ParticleTracksWidget(QWidget):
             self.btn_testnew.setEnabled(False)
 
     def set_UI_image_loaded(self, loaded: bool) -> None:
-        if(self.dev_mode): return
+        if self.dev_mode:
+            return
         if loaded:
             self.btn_load.hide()
             self.cmb_add_particle.show()
@@ -478,6 +479,7 @@ class ParticleTracksWidget(QWidget):
         concatenated_stack = da.stack(stacks, axis=0)
         self.viewer.add_image(concatenated_stack, name="Particle Tracks")
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
+        self.viewer.camera.center = [0, 0, 0, 0]
 
     def _on_click_newref(self) -> Set_Fiducial_Dialog:
         """When the 'test new reference' button is clicked, open the set fiducial dialog."""
