@@ -372,17 +372,20 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">EXPECTED_PARTICLES</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_new_particle</span><span class="p">)</span>
-        <span class="n">rad</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Calculate radius&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rad</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Calculate radius&quot;</span><span class="p">)</span>
         <span class="n">delete_particle</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Delete particle&quot;</span><span class="p">)</span>
-        <span class="n">lgth</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Calculate length&quot;</span><span class="p">)</span>
-        <span class="n">ang</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Calculate decay angles&quot;</span><span class="p">)</span>
-        <span class="n">stsh</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Stereoshift&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lgth</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Calculate length&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ang</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Calculate decay angles&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stsh</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Stereoshift&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mag</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Magnification&quot;</span><span class="p">)</span>
         <span class="n">save</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Save&quot;</span><span class="p">)</span>
 
         <span class="c1"># setup particle table</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_up_table</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_table_visible_vars</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span><span class="o">.</span><span class="n">selectionChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_on_row_selection_changed</span>
+        <span class="p">)</span>
 
         <span class="c1"># Apply magnification disabled until the magnification parameters are computed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cal</span> <span class="o">=</span> <span class="n">QRadioButton</span><span class="p">(</span><span class="s2">&quot;Apply magnification&quot;</span><span class="p">)</span>
@@ -391,10 +394,10 @@ document.write(`
         <span class="c1"># connect callbacks</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_load_data</span><span class="p">)</span>
         <span class="n">delete_particle</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_delete_particle</span><span class="p">)</span>
-        <span class="n">rad</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_radius</span><span class="p">)</span>
-        <span class="n">lgth</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_length</span><span class="p">)</span>
-        <span class="n">ang</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_decay_angles</span><span class="p">)</span>
-        <span class="n">stsh</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_stereoshift</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rad</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_radius</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lgth</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ang</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_decay_angles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stsh</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_stereoshift</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cal</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_apply_magnification</span><span class="p">)</span>
         <span class="n">save</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_save</span><span class="p">)</span>
 
@@ -409,14 +412,18 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">delete_particle</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">rad</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">lgth</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">ang</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lgth</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ang</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cal</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">stsh</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stsh</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mag</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
+
+        <span class="c1"># disable all calculation buttons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disable_all_buttons</span><span class="p">()</span>
+        <span class="c1"># TODO: include self.stsh in the logic, depending on what it actually ends up doing</span>
 
         <span class="c1"># Data analysis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">NewParticle</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -470,6 +477,7 @@ document.write(`
         <span class="n">out</span><span class="o">.</span><span class="n">setSelectionBehavior</span><span class="p">(</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">SelectRows</span><span class="p">)</span>
         <span class="n">out</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">SingleSelection</span><span class="p">)</span>
         <span class="n">out</span><span class="o">.</span><span class="n">setEditTriggers</span><span class="p">(</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">NoEditTriggers</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">setSelectionBehavior</span><span class="p">(</span><span class="n">QTableWidget</span><span class="o">.</span><span class="n">SelectRows</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>
 
     <span class="k">def</span> <span class="nf">_set_table_visible_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibrated</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -495,6 +503,32 @@ document.write(`
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Column &quot;</span><span class="p">,</span> <span class="n">columntext</span><span class="p">,</span> <span class="s2">&quot; not in the table&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
 
+    <span class="k">def</span> <span class="nf">_on_row_selection_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Enable/disable calculation buttons depending on the row selection&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rad</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lgth</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ang</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rad</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lgth</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ang</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">return</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The table is empty.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disable_all_buttons</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ParticleTracksWidget.disable_all_buttons">
+<a class="viewcode-back" href="../../api.html#cavendish_particle_tracks.ParticleTracksWidget.disable_all_buttons">[docs]</a>
+    <span class="k">def</span> <span class="nf">disable_all_buttons</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rad</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lgth</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ang</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
+
+
     <span class="k">def</span> <span class="nf">_on_click_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When the &#39;Calculate radius&#39; button is clicked, calculate the radius</span>
 <span class="sd">        for the currently selected points and assign it to the currently selected table row.</span>
@@ -517,43 +551,48 @@ document.write(`
             <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_info</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Adding points to the table: </span><span class="si">{</span><span class="n">selected_points</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
+                <span class="s2">&quot;There are no particles in the table.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Assigns the points and radius to the selected row</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                <span class="n">point</span> <span class="o">=</span> <span class="n">selected_points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
+                    <span class="n">selected_row</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;r&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+                    <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">point</span><span class="p">)),</span>
+                <span class="p">)</span>
 
-        <span class="c1"># Assigns the points and radius to the selected row</span>
-        <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-            <span class="n">point</span> <span class="o">=</span> <span class="n">selected_points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">rpoints</span> <span class="o">=</span> <span class="n">selected_points</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;calculating radius!&quot;</span><span class="p">)</span>
+            <span class="n">rad</span> <span class="o">=</span> <span class="n">radius</span><span class="p">(</span><span class="o">*</span><span class="n">selected_points</span><span class="p">)</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
                 <span class="n">selected_row</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;r&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
-                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">point</span><span class="p">)),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;radius_px&quot;</span><span class="p">),</span>
+                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rad</span><span class="p">)),</span>
             <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">rpoints</span> <span class="o">=</span> <span class="n">selected_points</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_px</span> <span class="o">=</span> <span class="n">rad</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;calculating radius!&quot;</span><span class="p">)</span>
-        <span class="n">rad</span> <span class="o">=</span> <span class="n">radius</span><span class="p">(</span><span class="o">*</span><span class="n">selected_points</span><span class="p">)</span>
+            <span class="c1">## Add the calibrated radius to the table</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_cm</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">magnification</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_px</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
+                <span class="n">selected_row</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;radius_cm&quot;</span><span class="p">),</span>
+                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_cm</span><span class="p">)),</span>
+            <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
-            <span class="n">selected_row</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;radius_px&quot;</span><span class="p">),</span>
-            <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rad</span><span class="p">)),</span>
-        <span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_px</span> <span class="o">=</span> <span class="n">rad</span>
-
-        <span class="c1">## Add the calibrated radius to the table</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_cm</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">magnification</span>
-            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_px</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
-            <span class="n">selected_row</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;radius_cm&quot;</span><span class="p">),</span>
-            <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_cm</span><span class="p">)),</span>
-        <span class="p">)</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modified particle &quot;</span><span class="p">,</span> <span class="n">selected_row</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modified particle &quot;</span><span class="p">,</span> <span class="n">selected_row</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_on_click_length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When the &#39;Calculate length&#39; button is clicked, calculate the decay length</span>
@@ -584,38 +623,44 @@ document.write(`
             <span class="k">return</span>
 
         <span class="c1"># Assigns the points and radius to the selected row</span>
-        <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
-            <span class="n">point</span> <span class="o">=</span> <span class="n">selected_points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
+                <span class="s2">&quot;There are no particles in the table.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                <span class="n">point</span> <span class="o">=</span> <span class="n">selected_points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
+                    <span class="n">selected_row</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;d&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+                    <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">point</span><span class="p">)),</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">dpoints</span> <span class="o">=</span> <span class="n">selected_points</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;calculating decay length!&quot;</span><span class="p">)</span>
+            <span class="n">declen</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="o">*</span><span class="n">selected_points</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
                 <span class="n">selected_row</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;d&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
-                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">point</span><span class="p">)),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;decay_length_px&quot;</span><span class="p">),</span>
+                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">declen</span><span class="p">)),</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">dpoints</span> <span class="o">=</span> <span class="n">selected_points</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_px</span> <span class="o">=</span> <span class="n">declen</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;calculating decay length!&quot;</span><span class="p">)</span>
-        <span class="n">declen</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="o">*</span><span class="n">selected_points</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
-            <span class="n">selected_row</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;decay_length_px&quot;</span><span class="p">),</span>
-            <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">declen</span><span class="p">)),</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_px</span> <span class="o">=</span> <span class="n">declen</span>
+            <span class="c1">## Add the calibrated decay length to the table</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_cm</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">magnification</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_px</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
+                <span class="n">selected_row</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;decay_length_cm&quot;</span><span class="p">),</span>
+                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_cm</span><span class="p">)),</span>
+            <span class="p">)</span>
 
-        <span class="c1">## Add the calibrated decay length to the table</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_cm</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">magnification</span>
-            <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_px</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
-            <span class="n">selected_row</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;decay_length_cm&quot;</span><span class="p">),</span>
-            <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_cm</span><span class="p">)),</span>
-        <span class="p">)</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modified particle &quot;</span><span class="p">,</span> <span class="n">selected_row</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modified particle &quot;</span><span class="p">,</span> <span class="n">selected_row</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_on_click_decay_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When the &#39;Calculate decay angles&#39; buttong is clicked, open the decay angles dialog&quot;&quot;&quot;</span>
@@ -693,6 +738,7 @@ document.write(`
         <span class="c1"># add new particle to data</span>
         <span class="n">np</span> <span class="o">=</span> <span class="n">NewParticle</span><span class="p">()</span>
         <span class="n">np</span><span class="o">.</span><span class="n">Name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cb</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
         <span class="n">np</span><span class="o">.</span><span class="n">magnification_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_a</span>
         <span class="n">np</span><span class="o">.</span><span class="n">magnification_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mag_b</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">+=</span> <span class="p">[</span><span class="n">np</span><span class="p">]</span>
@@ -700,6 +746,11 @@ document.write(`
         <span class="c1"># add particle (== new row) to the table and select it</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">insertRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">rowCount</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">selectRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">),</span>
+            <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;Name&quot;</span><span class="p">),</span>
@@ -719,19 +770,23 @@ document.write(`
 
     <span class="k">def</span> <span class="nf">_on_click_delete_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete particle from table and data&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
+                <span class="s2">&quot;There are no particles in the table.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msgBox</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">()</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Deleting selected particle&quot;</span><span class="p">)</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setInformativeText</span><span class="p">(</span><span class="s2">&quot;Do you want to continue?&quot;</span><span class="p">)</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span> <span class="o">|</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
+            <span class="n">msgBox</span><span class="o">.</span><span class="n">setDefaultButton</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">msgBox</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
 
-        <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
-
-        <span class="n">msgBox</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">()</span>
-        <span class="n">msgBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Deleting selected particle&quot;</span><span class="p">)</span>
-        <span class="n">msgBox</span><span class="o">.</span><span class="n">setInformativeText</span><span class="p">(</span><span class="s2">&quot;Do you want to continue?&quot;</span><span class="p">)</span>
-        <span class="n">msgBox</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span> <span class="o">|</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
-        <span class="n">msgBox</span><span class="o">.</span><span class="n">setDefaultButton</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">msgBox</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">:</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="n">selected_row</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">:</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="n">selected_row</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_click_magnification</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When the &#39;Calculate magnification&#39; button is clicked, open the magnification dialog&quot;&quot;&quot;</span>
