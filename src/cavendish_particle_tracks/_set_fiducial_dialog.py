@@ -69,7 +69,7 @@ class Set_Fiducial_Dialog(QDialog):
         def _on_change_layer_points(event):
             self.layer_shapes.editable = True
             self.copy_layer_to_data()
-            point_range = range(int(len(self.layer_points.data)/2))
+            point_range = range(int(len(self.layer_points.data) / 2))
             data = self.layer_shapes.data
             for i in point_range:
                 data[i + 2][0][0] = self.points[i][0].x
@@ -87,20 +87,20 @@ class Set_Fiducial_Dialog(QDialog):
             self.layer_shapes.editable = True
             self.copy_layer_to_data()
             data = self.layer_shapes.data
-            # this is mangled and needs to be fixed. need to fix data structure sync before bothering now that 
+            # this is mangled and needs to be fixed. need to fix data structure sync before bothering now that
             # the event handler is working.
-            no_fiducial_shapes = range(int(len(self.layer_fiducials.data)/4))
-            #for i in no_fiducial_shapes:
+            no_fiducial_shapes = range(int(len(self.layer_fiducials.data) / 4))
+            # for i in no_fiducial_shapes:
             #    for j in range(no_coords=2):
             #        for k in range(no_views=2):
             #            data[i][j]
             for i in range(2):
                 self.layer_shapes.data[i][0][0] = self.fiducials[i][0].x
                 # 1st shape, 1st point, x = x of point 1, view 1
-                self.layer_shapes.data[i][0][1] = self.fiducials[i*2][0].y
+                self.layer_shapes.data[i][0][1] = self.fiducials[i * 2][0].y
                 self.layer_shapes.data[i][1][0] = self.fiducials[i][1].x
                 # 1 shape, 2nd point, x = x of point 1, view 2
-                self.layer_shapes.data[i][1][1] = self.fiducials[i*2][1].y
+                self.layer_shapes.data[i][1][1] = self.fiducials[i * 2][1].y
             self.layer_shapes.data = data
             self.layer_shapes.editable = False
 
@@ -307,7 +307,16 @@ class Set_Fiducial_Dialog(QDialog):
             "red",
         ]
 
-        symbols = ["x", "x", "cross", "cross", "disc", "disc", "diamond", "diamond"]  # TODO fix
+        symbols = [
+            "x",
+            "x",
+            "cross",
+            "cross",
+            "disc",
+            "disc",
+            "diamond",
+            "diamond",
+        ]  # TODO fix
 
         text = {
             "string": fiducial_labels,
@@ -399,7 +408,7 @@ class Set_Fiducial_Dialog(QDialog):
             edge_color="yellow",
             edge_width=5,
         )
-        #layer_shapes.editable = False
+        # layer_shapes.editable = False
         return layer_shapes
 
     def _on_click_calculate(self) -> None:
