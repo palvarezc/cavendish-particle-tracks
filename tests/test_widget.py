@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 from random import random
 from typing import Callable
@@ -5,12 +7,11 @@ from typing import Callable
 import numpy as np
 import pytest
 import tifffile as tf
+from pytestqt.qtbot import QtBot
 from qtpy.QtCore import Qt, QTimer
-from qtpy.QtWidgets import (
-    QApplication,
-    QDialog,
-    QDialogButtonBox,
-)
+from qtpy.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
+
+from cavendish_particle_tracks import ParticleTracksWidget
 
 
 def get_dialog(
@@ -216,10 +217,10 @@ def test_calculate_length_fails_with_wrong_number_of_points(
     ],
 )
 def test_load_data(
-    cpt_widget,
+    cpt_widget: ParticleTracksWidget,
     capsys,
     tmp_path,
-    qtbot,
+    qtbot: QtBot,
     data_subdirs,
     image_count,
     expect_data_loaded,
@@ -255,8 +256,19 @@ def test_load_data(
                 and cpt_widget.viewer.layers[i].ndim == 3
             )
     else:
-        captured = capsys.readouterr()
-        assert (
-            "WARNING: The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
-            in captured.out
+        # def capture_msgbox():
+        #    for widget in QApplication.topLevelWidgets():
+        #        # top level, all widgets didn't work, active popup didn't
+        #        if isinstance(widget, QMessageBox):
+        #            return widget
+        #    return None
+
+        # qtbot.waitUntil(capture_msgbox, timeout=1000)
+        # msgbox = capture_msgbox()
+        msgbox = cpt_widget.msg
+        # msgbox = QApplication.activeWindow()
+        assert isinstance(msgbox, QMessageBox)
+        assert msgbox.icon() == QMessageBox.Warning
+        assert msgbox.text() == (
+            "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
         )
