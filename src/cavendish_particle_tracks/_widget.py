@@ -11,9 +11,9 @@ import glob
 from datetime import datetime
 from typing import List
 
+import dask.array as da
 import napari
 import numpy as np
-import dask.array as da
 from dask_image.imread import imread
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
@@ -44,7 +44,12 @@ from ._stereoshift_dialog import StereoshiftDialog
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
 
-    dev_mode = True
+    dev_mode = False
+
+    @property
+    def camera_center(self):
+        # update for 4d implementation as appropriate.
+        return (self.viewer.camera.center[1], self.viewer.camera.center[2])
 
     def __init__(self, napari_viewer: napari.Viewer):
         super().__init__()
@@ -119,11 +124,6 @@ class ParticleTracksWidget(QWidget):
         @self.viewer.layers.events.connect
         def _on_layerlist_changed(event):
             self.set_btn_availability()
-
-    @property
-    def camera_center(self):
-        # update for 4d implementation as appropriate.
-        return (self.viewer.camera.center[1], self.viewer.camera.center[2])
 
     def _get_selected_points(self, layer_name="Points") -> np.array:
         """Returns array of selected points in the viewer"""
