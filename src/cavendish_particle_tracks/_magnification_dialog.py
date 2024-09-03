@@ -1,4 +1,4 @@
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from qtpy.QtWidgets import (
     QAbstractItemView,
@@ -19,11 +19,16 @@ from ._analysis import (
 )
 from ._calculate import magnification
 
+if TYPE_CHECKING:
+    from ._widget import ParticleTracksWidget
+
 
 class MagnificationDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)  # Call QDialog constructor
-        self.parent = parent  # Assign Napari viewer as parent.
+        self.parent: ParticleTracksWidget = (
+            parent  # Assign Napari viewer as parent.
+        )
 
         self.f1 = Fiducial()
         self.f2 = Fiducial()
@@ -118,7 +123,13 @@ class MagnificationDialog(QDialog):
         )
         self.layout().addWidget(self.table, 8, 0, 1, 3)
         self.layout().addWidget(self.buttonBox, 9, 0, 1, 3)
-        # endregion
+
+        self.cal_layer = self.parent.viewer.add_points(
+            name="Points_Calibration"
+        )
+
+        self.a = self.parent.mag_a
+        self.b = self.parent.mag_b
 
     def _setup_dropdown_fiducials_combobox(self, back=False):
         """Sets up a drop-down list of fiducials for the `back` or front (`back=False`)."""
@@ -127,27 +138,12 @@ class MagnificationDialog(QDialog):
             combobox.addItems(FIDUCIAL_BACK.keys())
         else:
             combobox.addItems(FIDUCIAL_FRONT.keys())
-        combobox.currentIndexChanged.connect(self._on_click_fiducial)
         return combobox
-
-    def _on_click_fiducial(self) -> None:
-        """When fiducial is selected, we locate ourselves in the Points_calibration layer and select option 'Add point'"""
-
-        # Would be cool if we could wait for a click here and add that as the selected fiducial, but no clue how to do that yet
-        # layers  = [
-        #     layer for layer in self.parent.viewer.layers if layer.name == "Points_Calibration"
-        # ]
-        # layer = layers[0]
-        # @layer.mouse_drag_callbacks.append
-        # def callback(layer, event):  # (0,0) is the center of the upper left pixel
-        #     print(self.parent.viewer.cursor.position)
-
-        print("Add fiducial point")
 
     def _on_click_add_coords_f1(self) -> None:
         """Add first front fiducial"""
         self.f1.name = self.cmb_front1.currentText()
-        self.f1.x, self.f2.y = self._add_coords(0)
+        self.f1.x, self.f1.y = self._add_coords(0)
 
     def _on_click_add_coords_f2(self) -> None:
         """Add second front fiducial"""

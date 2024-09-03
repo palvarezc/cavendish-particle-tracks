@@ -118,8 +118,8 @@ class ParticleTracksWidget(QWidget):
         # Data analysis
         self.data: List[NewParticle] = []
         # might not need this eventually
-        self.mag_a = -1.0
-        self.mag_b = 0.0
+        self.mag_a = -1.0e6
+        self.mag_b = -1.0e6
 
         @self.viewer.layers.events.connect
         def _on_layerlist_changed(event):
@@ -555,13 +555,14 @@ class ParticleTracksWidget(QWidget):
                 del self.data[selected_row]
                 self.table.removeRow(selected_row)
 
-    def _on_click_magnification(self) -> None:
+    def _on_click_magnification(self) -> MagnificationDialog:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
 
         dlg = MagnificationDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         dlg.move(point)
+        return dlg
 
     def _propagate_magnification(self, a: float, b: float) -> None:
         """Assigns a and b to the class magnification parameters and to each of the particles in data"""
