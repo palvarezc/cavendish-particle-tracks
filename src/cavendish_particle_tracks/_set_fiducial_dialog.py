@@ -31,26 +31,16 @@ class Set_Fiducial_Dialog(QDialog):
     def __init__(self, parent: "ParticleTracksWidget"):
         # Call parent constructor
         super().__init__(parent)
-        self.parent = parent
-
-        # ignoring ruff style here to make the array clearer
-        # fmt:off
-        self.points = [
-            [Fiducial("Point View 1"), Fiducial("Point View 2")],
-        ]
-        self.fiducials = [
-            [Fiducial("Front Fiducial 1 View 1"), Fiducial("Front Fiducial 1 View 2")],
-            [Fiducial("Front Fiducial 2 View 1")],
-            [Fiducial("Back Fiducial 1 View 1"),Fiducial("Back Fiducial 1 View 2")],
-            [Fiducial("Back Fiducial 2 View 1")]
-        ]
-        # fmt:on
+        self.parent: "ParticleTracksWidget" = parent
+        # Results of stereoshift calculations
         self.shift_fiducial = 0.0
         self.shift_point = 0.0
         self.point_stereoshift = 0.0
         self.point_depth = -1.0
         self.spoints = []
-        # endregion
+        # First, check if the user has used the stereoshift tool before
+
+        # Setup relevant layers
         self.layer_fiducials: Points = self._setup_fiducial_layer()
         self.layer_points: Points = self._setup_points_layer()
         self._setup_ui()
@@ -267,35 +257,23 @@ class Set_Fiducial_Dialog(QDialog):
     # replaces the old on_click_add button
 
     def _setup_fiducial_layer(self) -> Points:
-        points = np.array(  # TODO points is a duplicate of the fiducial array, why bother keeping both? can definitely be cleaned up
-            [
-                [100, 100],  # Front Fiducial 1 View 1
-                [101, 400],  # Front Fiducial 1 View 2
-                [200, 100],  # Front Fiducial 2 View 1
-                [200, 102],  # Front Fiducial 2 View 2
-                [299, 401],  # Back Fiducial 1 View 1
-                [400, 402],  # Back Fiducial 1 View 2
-                [500, 400],  # Back Fiducial 2 View 1
-                [500, 402],  # BackFiducial 2 View 2
-                # then expand this to include the magnification points and redo the array
+        origin_x = self.parent.camera_center[0]
+        origin_y = self.parent.camera_center[1]
+        zoom_level = self.parent.viewer.camera.zoom
+        # fmt:off
+        points = np.array(
+            [   # View 1    # View 2
+                [[origin_x, origin_y],  [origin_x + 100/zoom_level, origin_y]] # Front Fiducial
+                [[origin_x, origin_y+100/zoom_level], [origin_x + 100/zoom_level, origin_y+100/zoom_level]] # Rear Fiducial
             ]
         )
-        # TODO fix all this here and check how it's actually working
-        # TODO implment the layer attributes stuff see if i can integrate it with the existing napari stuff
-        fiducial_labels = []
-        for i in self.fiducials:
-            # What I've done here is a big no-no, as the list of fiducials here
-            # carries the same name as the points used to instantiate the layer.
-            # (ie. self.points = fiducials, points = the array above as the scope is limited to this function)
-            # This is kinda why I want to change this, but leaving it as functional but odd till
-            # we figure out how to get the points to instantiate in the middle of the viewport or
-            # decide otherwise.
-            for j in i:
-                fiducial_labels += [
-                    j.name
-                ]  # TODO check this is actually working, now that i see it again it probably doesn't work
-                # how i intended it to.
+        fiducial_labels = 
+        [
+            [
 
+            ]
+        ]
+        # fmt:on
         colors = [
             "green",
             "red",
