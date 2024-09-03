@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from ._widget import ParticleTracksWidget
 
 import numpy as np
-from napari.layers import Points, Shapes
+from napari.layers import Points, Shapes, Layer
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
@@ -39,13 +39,25 @@ class Set_Fiducial_Dialog(QDialog):
         self.point_depth = -1.0
         self.spoints = []
         # First, check if the user has used the stereoshift tool before
-
+        # Attempt to locate existing layers
+        def retrieve_layer(layer_name: str) -> Layer:
+            for layer in self.parent.viewer.layers:
+                if layer.name == layer_name:
+                    return layer
+            if layer.name == "Stereo_Fiducials":
+                return self._setup_fiducial_layer()
+            elif layer.name == "Stereo_Points":
+                return self._setup_points_layer()
+            elif layer.name == "Stereo_shift_lines":
+                return self._setup_shapes_layer()
+            else:
+                raise Exception("Unexpected layer name encountered. Something really went wrong.")
+        self.layer_fiducials : Points = retrieve_layer("Stereo_Fiducials")
+        self.layer_points : Points = retrieve_layer("Stereo_Points")
+        self.layer_shapes : Shapes = retrieve_layer("Stereo_shift_lines")
         # Setup relevant layers
-        self.layer_fiducials: Points = self._setup_fiducial_layer()
-        self.layer_points: Points = self._setup_points_layer()
         self._setup_ui()
         self.copy_layer_to_data()
-        self.layer_shapes = self._setup_shapes_layer()
         self.parent.viewer.layers.selection.active = self.layer_fiducials
         self.layer_fiducials.mode = "select"
         self.layer_points.mode = "select"
@@ -228,6 +240,75 @@ class Set_Fiducial_Dialog(QDialog):
 
         self.setLayout(layout_outer)
 
+        @self.parent.viewer.mouse_over_canvas.connect
+        def _on_click_calculate(self) -> None:
+            """Calculate the stereoshift and populate the results table."""
+            # TODO need to add checks that the user hasn't deleted points or otherwise
+            # Add points in the coords to corresponding text box
+            self.copy_layer_to_data()
+            # There may be a better way of doing this by assigning point attributes.
+            # I can see this approach going wrong.
+            # Take a look at the napari example nD points with features
+            # TODO clarify whether we still want the reference offset to be displayed to the user.
+            ref_plane_index = self.cmb_set_ref_plane.currentIndex() * 2
+            # index =0 if front, 2 if rear
+            fiducial_plane__index = 2 - ref_plane_index
+            # = 2 if front, 0 if rear
+            # This could also be achieved in a more traditional/clearer way
+            # (ie one that doesn't need a comment to be obvious) using an if/switch statement
+            # But this keeps it a little more concise and is similar to the original code's use
+            # of + and % to get the correct data index.
+            # Would appreciate feedback on which style is preferred.
+            self.shift_fiducial = corrected_shift(
+                self.fiducials[fiducial_plane__index],
+                self.fiducials[ref_plane_index],
+            )
+            self.shift_point = corrected_shift(
+                self.points[0], self.fiducials[ref_plane_index]
+            )
+            # See comments in pull request.
+            self.point_stereoshift = self.shift_fiducial / self.shift_point
+            # This is called ratio in the GUI, should the front or backend be changed here?
+            # This next line is another example where the calculation is being done in
+            # calculate.py but results in duplicated function calls.
+            # I'll leave it as is for now, but it's another small thing to consider.
+            # TODO: Regardless of how we decide to refactor, could do
+            # with rewriting that function to take the list of points instead.
+            self.point_depth = depth(
+                self.fiducials[fiducial_plane__index][0],
+                self.fiducials[fiducial_plane__index][1],
+                self.points[0][0],
+                self.points[0][1],
+            )
+            self.spoints = self.layer_fiducials.data[2:]
+            # TODO this will need to be updated once magnification etc is added.
+            # also needs a better name and for the function to be more clear
+            # also worth noting that this is used when saving to table.
+            # why not use the existing points list for this to avoid duplicating it?
+            # sure, the access is a little more complicated but it keeps the number
+            # of variables down.
+
+            # Update the results table
+            self.lbl_fiducial_shift.setText(str(self.shift_fiducial))
+            self.lbl_point_shift.setText(str(self.shift_point))
+            self.lbl_stereoshift_ratio.setText(str(self.point_stereoshift))
+            self.lbl_point_depth.setText(str(self.point_depth))
+
+            # region Magnification ##################################
+            self.fiducials[0][0].name = self.cmb_front1.currentText()
+            self.fiducials[1][0].name = self.cmb_front2.currentText()
+            self.fiducials[2][0].name = self.cmb_back1.currentText()
+            self.fiducials[3][0].name = self.cmb_back2.currentText()
+            self.a, self.b = magnification(
+                self.fiducials[0][0],  # F1 View 1
+                self.fiducials[1][0],  # F2 View 1
+                self.fiducials[2][0],  # B1 View 1
+                self.fiducials[3][0],  # B2 View 1
+            )
+            # Update the magnification table
+            self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
+            self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
+
     def _setup_dropdown_fiducials_combobox(self, back=False):
         """Sets up a drop-down list of fiducials for the `back` or front (`back=False`)."""
         combobox = QComboBox()
@@ -305,7 +386,7 @@ class Set_Fiducial_Dialog(QDialog):
 
         layer_fiducials = self.parent.viewer.add_points(
             points,
-            name="Fiducials",
+            name="Stereo_Fiducials",
             text=text,
             size=20,
             edge_width=7,
@@ -346,7 +427,7 @@ class Set_Fiducial_Dialog(QDialog):
         }
         layer_fiducials = self.parent.viewer.add_points(
             points,
-            name="Points_Stereoshift",
+            name="Stereo_Points",
             text=text,
             size=20,
             edge_width=7,
@@ -385,92 +466,19 @@ class Set_Fiducial_Dialog(QDialog):
             shape_type="line",
             edge_color="yellow",
             edge_width=5,
+            name="Stereo_shift_lines",
         )
         # layer_shapes.editable = False
         return layer_shapes
 
-    def _on_click_calculate(self) -> None:
-        """Calculate the stereoshift and populate the results table."""
-        # TODO need to add checks that the user hasn't deleted points or otherwise
-        # Add points in the coords to corresponding text box
-        self.copy_layer_to_data()
-        # There may be a better way of doing this by assigning point attributes.
-        # I can see this approach going wrong.
-        # Take a look at the napari example nD points with features
-        # TODO clarify whether we still want the reference offset to be displayed to the user.
-        ref_plane_index = self.cmb_set_ref_plane.currentIndex() * 2
-        # index =0 if front, 2 if rear
-        fiducial_plane__index = 2 - ref_plane_index
-        # = 2 if front, 0 if rear
-        # This could also be achieved in a more traditional/clearer way
-        # (ie one that doesn't need a comment to be obvious) using an if/switch statement
-        # But this keeps it a little more concise and is similar to the original code's use
-        # of + and % to get the correct data index.
-        # Would appreciate feedback on which style is preferred.
-        self.shift_fiducial = corrected_shift(
-            self.fiducials[fiducial_plane__index],
-            self.fiducials[ref_plane_index],
-        )
-        self.shift_point = corrected_shift(
-            self.points[0], self.fiducials[ref_plane_index]
-        )
-        # See comments in pull request.
-        self.point_stereoshift = self.shift_fiducial / self.shift_point
-        # This is called ratio in the GUI, should the front or backend be changed here?
-        # This next line is another example where the calculation is being done in
-        # calculate.py but results in duplicated function calls.
-        # I'll leave it as is for now, but it's another small thing to consider.
-        # TODO: Regardless of how we decide to refactor, could do
-        # with rewriting that function to take the list of points instead.
-        self.point_depth = depth(
-            self.fiducials[fiducial_plane__index][0],
-            self.fiducials[fiducial_plane__index][1],
-            self.points[0][0],
-            self.points[0][1],
-        )
-        self.spoints = self.layer_fiducials.data[2:]
-        # TODO this will need to be updated once magnification etc is added.
-        # also needs a better name and for the function to be more clear
-        # also worth noting that this is used when saving to table.
-        # why not use the existing points list for this to avoid duplicating it?
-        # sure, the access is a little more complicated but it keeps the number
-        # of variables down.
-
-        # Update the results table
-        self.lbl_fiducial_shift.setText(str(self.shift_fiducial))
-        self.lbl_point_shift.setText(str(self.shift_point))
-        self.lbl_stereoshift_ratio.setText(str(self.point_stereoshift))
-        self.lbl_point_depth.setText(str(self.point_depth))
-
-        # region Magnification ##################################
-        self.fiducials[0][0].name = self.cmb_front1.currentText()
-        self.fiducials[1][0].name = self.cmb_front2.currentText()
-        self.fiducials[2][0].name = self.cmb_back1.currentText()
-        self.fiducials[3][0].name = self.cmb_back2.currentText()
-        self.a, self.b = magnification(
-            self.fiducials[0][0],  # F1 View 1
-            self.fiducials[1][0],  # F2 View 1
-            self.fiducials[2][0],  # B1 View 1
-            self.fiducials[3][0],  # B2 View 1
-        )
-        # Update the magnification table
-        self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
-        self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
-
     def copy_layer_to_data(self):
         for i in range(len(self.fiducials)):
             for j in range(len(self.fiducials[i])):
-                (self.fiducials[i][j].x, self.fiducials[i][j].y) = (
-                    self.layer_fiducials.data[i * 2 + j]
-                )
                 self.fiducial_textboxes[i].setText(
                     str(self.fiducials[i][j].xy)
                 )
         for i in range(len(self.points)):
             for j in range(len(self.points[i])):
-                (self.points[i][j].x, self.points[i][j].y) = (
-                    self.layer_points.data[i * 2 + j]
-                )
                 self.point_textboxes[i].setText(str(self.points[i][j].xy))
 
     def _on_click_save_to_table(self) -> None:
@@ -524,9 +532,6 @@ class Set_Fiducial_Dialog(QDialog):
         self.parent.viewer.layers.remove(self.layer_fiducials)
         self.parent.viewer.layers.remove(self.layer_points)
         return super().accept()
-
-    def _on_click_fiducial(self) -> None:
-        print("This is a skeleton function")
 
 
 """
