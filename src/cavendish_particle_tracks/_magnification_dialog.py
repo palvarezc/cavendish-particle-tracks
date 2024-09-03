@@ -99,6 +99,9 @@ class MagnificationDialog(QDialog):
             name="Points_Calibration"
         )
 
+        self.a = parent.mag_a
+        self.b = parent.mag_b
+
     def _setup_dropdown_fiducials_combobox(self, back=False):
         """Sets up a drop-down list of fiducials for the `back` or front (`back=False`)."""
         combobox = QComboBox()
@@ -106,27 +109,12 @@ class MagnificationDialog(QDialog):
             combobox.addItems(FIDUCIAL_BACK.keys())
         else:
             combobox.addItems(FIDUCIAL_FRONT.keys())
-        combobox.currentIndexChanged.connect(self._on_click_fiducial)
         return combobox
-
-    def _on_click_fiducial(self) -> None:
-        """When fiducial is selected, we locate ourselves in the Points_calibration layer and select option 'Add point'"""
-
-        # Would be cool if we could wait for a click here and add that as the selected fiducial, but no clue how to do that yet
-        # layers  = [
-        #     layer for layer in self.parent.viewer.layers if layer.name == "Points_Calibration"
-        # ]
-        # layer = layers[0]
-        # @layer.mouse_drag_callbacks.append
-        # def callback(layer, event):  # (0,0) is the center of the upper left pixel
-        #     print(self.parent.viewer.cursor.position)
-
-        print("Add fiducial point")
 
     def _on_click_add_coords_f1(self) -> None:
         """Add first front fiducial"""
         self.f1.name = self.cbf1.currentText()
-        self.f1.x, self.f2.y = self._add_coords(0)
+        self.f1.x, self.f1.y = self._add_coords(0)
 
     def _on_click_add_coords_f2(self) -> None:
         """Add second front fiducial"""
