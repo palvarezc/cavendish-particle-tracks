@@ -428,8 +428,8 @@ document.write(`
         <span class="c1"># Data analysis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">NewParticle</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># might not need this eventually</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mag_a</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mag_b</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_a</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0e6</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_b</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0e6</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">camera_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -788,13 +788,14 @@ document.write(`
                 <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="n">selected_row</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_on_click_magnification</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_on_click_magnification</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MagnificationDialog</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When the &#39;Calculate magnification&#39; button is clicked, open the magnification dialog&quot;&quot;&quot;</span>
 
         <span class="n">dlg</span> <span class="o">=</span> <span class="n">MagnificationDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">dlg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="n">point</span> <span class="o">=</span> <span class="n">QPoint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span><span class="o">.</span><span class="n">y</span><span class="p">())</span>
         <span class="n">dlg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dlg</span>
 
     <span class="k">def</span> <span class="nf">_propagate_magnification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Assigns a and b to the class magnification parameters and to each of the particles in data&quot;&quot;&quot;</span>
