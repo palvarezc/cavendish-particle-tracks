@@ -42,7 +42,7 @@ To load a data file, click on the `Load data` button. This will open a file dial
 
 In the Particle Tracks lab, the data is stored in the `CPT_data` folder. Please note that the images in the subfolders might not correspond to the view indicated in the folder name. You will need to check the images to determine which view they correspond to.
 
-The data is loaded as a 4D array, with the dimensions corresponding to the views, the frames, the height and the width of the images. In practice, this means that once the data is loaded, the first view of the first frame will be displayed. The bottom sliders labeled `Event` and `Views` allow you to toggle between the different frames and different views for each frame, respectively.
+The data is loaded as a 4D array, with the dimensions corresponding to the views, the frames, the height and the width of the images. In practice, this means that once the data is loaded, the first view of the first frame will be displayed. The bottom sliders labelled `Event` and `Views` allow you to toggle between the different frames and different views for each frame, respectively.
 The tool will also display the number of views and frames available, as well as the current view and frame.
 
 <!-- TOC --><a name="newparticle"></a>
