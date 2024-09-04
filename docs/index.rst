@@ -4,6 +4,7 @@
    :hidden:
 
    contributing
+   user-manual
    api
 
 .. include:: ../README.md
