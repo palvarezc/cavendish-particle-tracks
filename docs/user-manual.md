@@ -38,12 +38,20 @@ Once a particle is added, you can measure its properties. To do this, select the
 - `Stereoshift`: The [stereoshift] is a proxy for the depth of the particle in the bubble chamber, see the Particle Tracks lab manual[^3] for details on the method. In this measurement two views of the same frame need to be examined.
 
 #### Decay length
+To measure the decay length, first select the particle you are making the measurement for in the particle list. Then, place and select two points in the `Points` layer, corresponding to the origin and decay vertex. Finally, click `Calculate length`. The distance between the two points is calculated and added to the selected particle. The length is show under the `decay_length` heading for the corresponding particle either in pixels or cm, depending on whether or not the `Apply magnification` option is selected.
 
 #### Radius of curvature
+To measure the radius of curvature, first select the particle you are making the measurement for in the particle list. Then, place and select three points along the particle trajectory in the `Points` layer. Finally, click `Calculate radius`. The radius of curvature is calculated and added to the selected particle. The radius is show under the `radius` heading for the corresponding particle either in pixels or cm, depending on whether or not the `Apply magnification` option is selected.
 
 #### Decay angles
+The measurement of the decay angles is only enabled for $\Lambda^0 \to p \pi^-$ decays. To start, select the particle you are making the measurement for in the particle list and click `Calculate decay angles`. This will open the `Decay angles` menu and create a layer called `Decay angles tool` containing three lines, which will be labelled as the parent $\Lambda^0$ particle and the two decay products. Align each line with the corresponding particle trajectory and click `Calculate`. The angles between the $\Lambda^0$ and the proton and pion will be shown. Click `Save to table` to associate the angles to the selected particle in the particle list. The angles are shown under the `phi_proton` and `phi_pion` headings for the corresponding particle.
 
 #### Stereoshift
+To measure the stereoshift of any point of interest (POI) in the image, two different views of the same frame need to be examined[^4].
+
+To start, select the particle you are making the measurement for in the particle list. This will open a `Stereoshift` menu and create a layer called `Points_Stereoshift` containing a number of points to be placed in the image. The points are labelled according to the view and whether they represent a `Front fiducial`, `Back fiducial` or POI point (`Point`). Flicking between the two views, place the points on the corresponding fiducial markings and the POI. Finally, click `Calculate `. The measurement of the calculated shift for the fiducial marking and POI is shown, together with the stereoshift and the depth of the POI measured from the front bubble chamber window[^5]. Click `Save to table` to associate the depth measurement to the selected particle in the particle list. The depth is shown under the `depth` heading for the corresponding particle in cm.
+
+After each stereoshift measurement, the tool will remember position of the fiducial markings and the POI. This is useful if you need to measure the stereoshift for different points in the same region of the bubble chamber.
 
 ### Measuring the image magnification
 In addition to the properties associated with a specific particle, the tool allows you to measure the image magnification. As explained in the lab manual[^3], this is done by measuring the projected distance between two pairs of fiducial markings, one at the top and one at the bottom of the bubble chamber. To do this, click on the `Measure magnification` button. This will enable the magnification tool, which will ask you to select and identify four fiducial positions in the image. The tool will then calculate the magnification parameters, which, combined with a measurement of the depth, can be used to convert the measurements of the particle properties to real units.
@@ -62,6 +70,10 @@ Some tips...
 [^2]: Showing particle ID and the frame where the particle is located.
 
 [^3]: Particle Tracks lab manual, 2024.
+
+[^4]: Realised that for the measurement of the $\Lambda^0$ students are asked to measure the stereoshift for both the origin and decay vertex, to obtain the total decay lenth. At the moment this is not possible with the tool, as it only allows to measure the stereoshift for a single point. Need to think how to implement this, or work around it.
+
+[^5]: Understand if the Back/Front option is now obsolete.
 
 [napari]: https://napari.org/stable/
 [stereoshift]: https://www.hep.phy.cam.ac.uk/~palvarez/ParticleTracks/
