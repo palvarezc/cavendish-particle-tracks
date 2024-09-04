@@ -27,7 +27,7 @@ Open PRs without a reviewer can be treated as a draft. When a reviewer is added 
 [tox]: https://tox.readthedocs.io/en/latest/
 
 ## Contributing documentation
-To test contribution to the documentation, this can be built locally following:
+To test contributions to the documentation, this can be built locally following:
 
     python -m pip install ".[docs]"
     sphinx-build -W -b html docs docs/_build/html
