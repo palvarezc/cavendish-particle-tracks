@@ -48,7 +48,7 @@ The tool will also display the number of views and frames available, as well as 
 <!-- TOC --><a name="newparticle"></a>
 ### Adding a new particle
 Once an interesting process is identified in the image, you can record information about that process. To start, you need to add a new particle. To do this, click on the `Add particle` button, and select the process you want to record.
-This will create a new particle object in the particle list, which will be displayed as a new entry on the table [^2].
+This will create a new particle object in the particle list, which will be displayed as a new entry in the table [^2].
 
 <!-- TOC --><a name="measure"></a>
 ### Measuring particle properties
