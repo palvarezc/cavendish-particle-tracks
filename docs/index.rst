@@ -3,8 +3,8 @@
    :maxdepth: 2
    :hidden:
 
-   contributing
    user-manual
+   contributing
    api
 
 .. include:: ../README.md
