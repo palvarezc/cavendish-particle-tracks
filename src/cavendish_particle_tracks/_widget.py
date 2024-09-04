@@ -8,7 +8,6 @@ Replace code below according to your needs.
 """
 
 import glob
-from datetime import datetime
 from typing import List
 
 import napari
@@ -519,19 +518,34 @@ class ParticleTracksWidget(QWidget):
             )
 
     def _on_click_save(self) -> None:
-        """Save list of particles to csv file"""
+        """Save list of particles to csv file.
+        When the 'Save' button is clicked, the data is saved to a csv file with the current date and time as the filename.
+        """
 
         if not len(self.data):
             print("No data to be saved")
             return
 
-        filename = str(datetime.now().strftime("%Y-%m-%d_%H-%M-%S")) + ".csv"
+        # setup UI
+        file_dialog = QFileDialog(self)
+        # retrieve image folder
+        file_name, _ = file_dialog.getSaveFileName(
+            self,
+            "Save file",
+            "./",
+            "CSV files (*.csv)",
+            "CSV files (*.csv)",
+            QFileDialog.DontUseNativeDialog,
+        )
 
-        with open(filename, "w", encoding="UTF8", newline="") as f:
+        if file_name in {"", None}:
+            return
+
+        with open(file_name, "w", encoding="UTF8", newline="") as f:
             # write the header
             f.write(",".join(self.data[0]._vars_to_save()) + "\n")
 
             # write the data
             f.writelines([particle.to_csv() for particle in self.data])
 
-        print("Saved data to ", filename)
+        print("Saved data to ", file_name)
