@@ -34,7 +34,7 @@ The CPT tool is designed to be used with the data from CERN bubble chamber exper
 <!-- TOC --><a name="start"></a>
 ### Starting the tool
 
-To start the tool, double-click on the CPT icon. This will open the `napari` window. To load the CPT plugin, click on the `Plugins` menu and select `cavendish-particle-tracks`. This will the CPT window, which will be empty until you load a data file.
+To start the tool, double-click on the CPT icon. This will open the `napari` window. To load the CPT plugin, click on the `Plugins` menu and select `cavendish-particle-tracks`. This will open the CPT window, which will be empty until you load a data file.
 
 <!-- TOC --><a name="load"></a>
 ### Loading a data file
