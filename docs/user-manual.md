@@ -1,5 +1,5 @@
 
-# Cambridge Particle Tracks - User's manual
+# User's manual
 
 ## Introduction
 The Cambridge Particle Tracks (CPT) tool has been developed for the analysis of particle tracks in a detector. The tool is implemented as a [napari] plugin. [napari] is an open-source, multi-dimensional image viewer for Python, which allows the visualisation and analysis of multi-dimensional data. Our application is relatively simple, as we only use it to visualise 2D images, and we are not making use of the full capabilities of the library. To that end, the CPT plugin provides a simple and (hopefully) intuitive interface to interact with the data.
@@ -35,7 +35,7 @@ Once a particle is added, you can measure its properties. To do this, select the
 
 - `Decay angles`: The angles between the particle path and its decay products. This measurement only makes sense for particles that decay into two visible products (i.e. $\Lambda^0 \rightarrow p  \pi^-$).
 
-- `Stereoshift`: This is a proxy for the depth of the particle in the bubble chamber, see the Particle Tracks lab manual~\cite{cpt_lab_script} for details on the method. In this measurement two views of the same frame need to be examined.
+- `Stereoshift`: The [stereoshift] is a proxy for the depth of the particle in the bubble chamber, see the Particle Tracks lab manual[^3] for details on the method. In this measurement two views of the same frame need to be examined.
 
 #### Decay length
 
@@ -46,7 +46,7 @@ Once a particle is added, you can measure its properties. To do this, select the
 #### Stereoshift
 
 ### Measuring the image magnification
-In addition to the properties associated with a specific particle, the tool allows you to measure the image magnification. As explained in the lab manual~\cite{cpt_lab_script}, this is done by measuring the projected distance between two pairs of fiducial markings, one at the top and one at the bottom of the bubble chamber. To do this, click on the `Measure magnification` button. This will enable the magnification tool, which will ask you to select and identify four fiducial positions in the image. The tool will then calculate the magnification parameters, which, combined with a measurement of the depth, can be used to convert the measurements of the particle properties to real units.
+In addition to the properties associated with a specific particle, the tool allows you to measure the image magnification. As explained in the lab manual[^3], this is done by measuring the projected distance between two pairs of fiducial markings, one at the top and one at the bottom of the bubble chamber. To do this, click on the `Measure magnification` button. This will enable the magnification tool, which will ask you to select and identify four fiducial positions in the image. The tool will then calculate the magnification parameters, which, combined with a measurement of the depth, can be used to convert the measurements of the particle properties to real units.
 
 Once computed for the first time, the magnification parameters are stored and used to convert all measurements. If you need to recompute the magnification parameters, you can do so by clicking on the `Measure magnification` button again. The tool will remember previously computed magnification parameters, and will allow you to switch between them.
 
@@ -61,6 +61,8 @@ Some tips...
 
 [^2]: Showing particle ID and the frame where the particle is located.
 
+[^3]: Particle Tracks lab manual, 2024.
+
 [napari]: https://napari.org/stable/
-[cpt_lab_script]: https://www.hep.phy.cam.ac.uk/~palvarez/ParticleTracks/
+[stereoshift]: https://www.hep.phy.cam.ac.uk/~palvarez/ParticleTracks/
 [def]: #stereoshift
