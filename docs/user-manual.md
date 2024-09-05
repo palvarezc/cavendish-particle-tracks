@@ -33,7 +33,7 @@ Once a particle is added, you can measure its properties. To do this, select the
 
 - `Radius of curvature`: The radius of the circle that best fits the particle path.
 
-- `Decay angles`: The angles between the particle path and its decay products. This measurement only makes sense for particles that decay into two visible products (i.e. $\Lambda^0 \rightarrow p  \pi^-$).
+- `Decay angles`: The angles between the particle path and its decay products. This measurement only makes sense for particles that decay into two visible products (i.e. {math}`\Lambda^0 \rightarrow p  \pi^-`).
 
 - `Stereoshift`: The [stereoshift] is a proxy for the depth of the particle in the bubble chamber, see the Particle Tracks lab manual[^3] for details on the method. In this measurement two views of the same frame need to be examined.
 
