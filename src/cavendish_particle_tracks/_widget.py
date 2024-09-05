@@ -39,21 +39,31 @@ from ._decay_angles_dialog import DecayAnglesDialog
 from ._magnification_dialog import MagnificationDialog
 from ._set_fiducial_dialog import Set_Fiducial_Dialog
 from ._stereoshift_dialog import StereoshiftDialog
+from ._testdims import TestDimsDialog
 
 
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
 
-    dev_mode = False
+    dev_mode = True
 
     @property
     def camera_center(self):
         # update for 4d implementation as appropriate.
         return (self.viewer.camera.center[1], self.viewer.camera.center[2])
 
+    @property
+    def current_event(self):
+        # Returns the current event that the user is viewing.
+        return self.viewer.dims.current_step[0]
+        """dims.point also works here.
+        # napari includes both, since dims.point is the position of the camera,
+        # and dims.current_step is the position of the slider.
+        # since we're never rotating our view, they're funcitonally the same except that only dims can give you the x and y coords."""
+
     def __init__(self, napari_viewer: napari.Viewer):
-        super().__init__()
         self.viewer: napari.Viewer = napari_viewer
+        super().__init__()
         # region UI Setup
         # define QtWidgets
         self.btn_load = QPushButton("Load data")
@@ -69,6 +79,8 @@ class ParticleTracksWidget(QWidget):
         self.btn_decayangle = QPushButton("Calculate decay angles")
         self.btn_stereoshift = QPushButton("Stereoshift")
         self.btn_testnew = QPushButton("test new reference")
+        self.btn_testdims = QPushButton("test dims")
+        self.btn_testdims.clicked.connect(self._on_click_testdims)
         self.btn_save = QPushButton("Save")
         self.btn_magnification = QPushButton("Magnification")
         # setup particle table
@@ -101,6 +113,7 @@ class ParticleTracksWidget(QWidget):
         # layout
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.btn_load)
+        self.layout().addWidget(self.btn_testdims)
         self.layout().addWidget(self.cmb_add_particle)
         self.layout().addWidget(self.btn_delete_particle)
         self.layout().addWidget(self.btn_radius)
@@ -124,6 +137,14 @@ class ParticleTracksWidget(QWidget):
         @self.viewer.layers.events.connect
         def _on_layerlist_changed(event):
             self.set_btn_availability()
+
+    def _on_click_testdims(self):
+        """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
+        dlg = TestDimsDialog(self)
+        dlg.show()
+        point = QPoint(self.pos().x() + self.width(), self.pos().y())
+        dlg.move(point)
+        return dlg
 
     def _get_selected_points(self, layer_name="Points") -> np.array:
         """Returns array of selected points in the viewer"""
@@ -482,10 +503,6 @@ class ParticleTracksWidget(QWidget):
         )
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
         self.viewer.dims.point = [0, 0, 0, 0]
-
-        @layer.mouse_move_callbacks.append
-        def _on_mouse_move(layer, event):
-            print(self.viewer.dims.point)
 
     def _on_click_newref(self) -> Set_Fiducial_Dialog:
         """When the 'test new reference' button is clicked, open the set fiducial dialog."""

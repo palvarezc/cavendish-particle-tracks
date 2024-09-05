@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from ._widget import ParticleTracksWidget
 
 import numpy as np
-from napari.layers import Points, Shapes, Layer
+from napari.layers import Layer, Points, Shapes
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
@@ -19,7 +19,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
 )
 
-from ._analysis import FIDUCIAL_BACK, FIDUCIAL_FRONT, Fiducial
+from ._analysis import FIDUCIAL_BACK, FIDUCIAL_FRONT
 from ._calculate import (
     corrected_shift,
     depth,
@@ -28,45 +28,186 @@ from ._calculate import (
 
 
 class Set_Fiducial_Dialog(QDialog):
+
+    shift_fiducial: float = 0.0
+    shift_point: float = 0.0
+    point_stereoshift: float = 0.0
+    point_depth: float = -1.0
+    spoints = []
+
+    @property
+    def camera_center(self):
+        return self.parent.camera_center
+
+    @property
+    def zoom_level(self):
+        return self.parent.viewer.camera.zoom
+
+    @property
+    def current_event(self):
+        return self.parent.current_event
+
     def __init__(self, parent: "ParticleTracksWidget"):
         # Call parent constructor
         super().__init__(parent)
-        self.parent: "ParticleTracksWidget" = parent
-        # Results of stereoshift calculations
-        self.shift_fiducial = 0.0
-        self.shift_point = 0.0
-        self.point_stereoshift = 0.0
-        self.point_depth = -1.0
-        self.spoints = []
-        # First, check if the user has used the stereoshift tool before
-        # Attempt to locate existing layers
-        def retrieve_layer(layer_name: str) -> Layer:
+        self.parent: ParticleTracksWidget = parent
+        self.parent.viewer.cursor.events.position.connect(
+            self._set_new_event_fiducial_locations
+        )
+
+        # Define setup functions
+        def _setup_fiducial_layer(
+            origin_x, origin_y, zoom_level, current_event
+        ) -> Points:
+            # fmt:off
+            points = [      # View 1                                                # View 2
+                [origin_x, origin_y, current_event],                [origin_x + 100/zoom_level, origin_y, current_event],                # Front Fiducial
+                [origin_x, origin_y+100/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y+100/zoom_level, current_event]  # Rear Fiducial
+            ]
+            fiducial_labels = ["Front1", "Front2", "Rear1", "Rear2"]
+            # fmt:on
+            colors = ["green", "red", "green", "red"]
+            symbols = ["x", "x", "cross", "cross"]
+            text = {
+                "string": fiducial_labels,
+                "size": 20,
+                "color": colors,
+                "translation": np.array([-30, 0]),
+            }
+            layer_fiducials = self.parent.viewer.add_points(
+                points,
+                name="Stereo_Fiducials",
+                text=text,
+                size=20,
+                edge_width=7,
+                edge_width_is_relative=False,
+                edge_color=colors,
+                face_color=colors,
+                symbol=symbols,
+            )
+            return layer_fiducials
+
+        def _setup_points_layer(
+            origin_x, origin_y, zoom_level, current_event
+        ) -> Points:
+            # TODO since this is mostly the same as setup fiducial layer, this code can be cleaned up as a parent and two child methods
+            # TODO implment the layer attributes stuff see if i can integrate it with the existing napari stuff
+            points = [
+                [origin_x, origin_y - 100 / zoom_level, current_event],
+                [
+                    origin_x - 100 / zoom_level,
+                    origin_y + 100 / zoom_level,
+                    current_event,
+                ],  # Rear Fiducial
+            ]
+            point_labels = ["Point View 1", "Point View 2"]
+            # fmt:on
+            colors = ["green", "red", "green", "red"]
+            symbols = ["x", "x", "cross", "cross"]
+            text = {
+                "string": point_labels,
+                "size": 20,
+                "color": colors,
+                "translation": np.array([-30, 0]),
+            }
+            layer_points = self.parent.viewer.add_points(
+                points,
+                name="Stereo_Points",
+                text=text,
+                size=20,
+                edge_width=7,
+                edge_width_is_relative=False,
+                edge_color=colors,
+                face_color=colors,
+                symbol=symbols,
+            )
+            return layer_points
+
+        # TODO fix shapes last!!
+        def _setup_shapes_layer() -> Shapes:
+            self.shapes = []
+            for fiducial in self.fiducials[::2]:
+                # is there a better way to write this to combine the two arrays?
+                # this one needs to skip every 2nd element since those don't have an item in the 2nd view
+                self.shapes.append(
+                    np.array(
+                        [
+                            [fiducial[0].x, fiducial[0].y],
+                            [fiducial[1].x, fiducial[1].y],
+                        ]
+                    )
+                )  # on update should copy data to point then update, ideally we should merge the two but hey...
+                # that's for the next patch...
+            for point in self.points:
+                self.shapes.append(
+                    np.array(
+                        [[point[0].x, point[0].y], [point[1].x, point[1].y]]
+                    )
+                )
+            layer_shapes = self.parent.viewer.add_shapes(
+                self.shapes,
+                shape_type="line",
+                edge_color="yellow",
+                edge_width=5,
+                name="Stereo_shift_lines",
+            )
+            # layer_shapes.editable = False
+            return layer_shapes
+
+        def create_retrieve_layer(
+            layer_name: str, origin_x, origin_y, zoom_level, current_event
+        ) -> Layer:
             for layer in self.parent.viewer.layers:
                 if layer.name == layer_name:
                     return layer
-            if layer.name == "Stereo_Fiducials":
-                return self._setup_fiducial_layer()
-            elif layer.name == "Stereo_Points":
-                return self._setup_points_layer()
-            elif layer.name == "Stereo_shift_lines":
-                return self._setup_shapes_layer()
+            if layer_name == "Stereo_Fiducials":
+                return _setup_fiducial_layer(
+                    origin_x, origin_y, zoom_level, current_event
+                )
+            elif layer_name == "Stereo_Points":
+                return _setup_points_layer(
+                    origin_x, origin_y, zoom_level, current_event
+                )
+            elif layer_name == "Stereo_shift_lines":
+                return _setup_shapes_layer()
             else:
-                raise Exception("Unexpected layer name encountered. Something really went wrong.")
-        self.layer_fiducials : Points = retrieve_layer("Stereo_Fiducials")
-        self.layer_points : Points = retrieve_layer("Stereo_Points")
-        self.layer_shapes : Shapes = retrieve_layer("Stereo_shift_lines")
-        # Setup relevant layers
+                raise Exception(
+                    "Unexpected layer name encountered. Something has really went wrong."
+                )
+
+        # First, check if the layers already exist, if not, create them.
+        self.layer_fiducials: Points = create_retrieve_layer(
+            "Stereo_Fiducials",
+            self.camera_center[0],
+            self.camera_center[1],
+            self.zoom_level,
+            self.current_event,
+        )
+        self.layer_points: Points = create_retrieve_layer(
+            "Stereo_Points",
+            self.camera_center[0],
+            self.camera_center[1],
+            self.zoom_level,
+            self.current_event,
+        )
+        self.layer_shapes: Shapes = create_retrieve_layer("Stereo_shift_lines")
+
+        # Setup the window UI
         self._setup_ui()
-        self.copy_layer_to_data()
+        ##TODO update UI callback to update the textboxes
+
+        # Force selection mode by default.
         self.parent.viewer.layers.selection.active = self.layer_fiducials
         self.layer_fiducials.mode = "select"
         self.layer_points.mode = "select"
 
-        # in order to be more optimised, only update the one moved, not all by using the event handler
+        """ in order to be more optimised, only update the one moved, not all by using the event handler
         # what if multiple are moved how would that work?
         # let's code it so that it is inefficient but works and test more optimised methods later.
         # i have a feeling that by the time we get to 1500 images this will become a problem
-        # both of these methods should also ideally be encapsulated in a single case.
+        # both of these methods should also ideally be encapsulated in a single case. """
+
+        # TODO fix
         @self.layer_points.events.data.connect
         def _on_change_layer_points(event):
             self.layer_shapes.editable = True
@@ -105,6 +246,76 @@ class Set_Fiducial_Dialog(QDialog):
                 self.layer_shapes.data[i][1][1] = self.fiducials[i * 2][1].y
             self.layer_shapes.data = data
             self.layer_shapes.editable = False
+
+        @self.parent.viewer.mouse_over_canvas.connect
+        def _on_click_calculate(self) -> None:
+            """Calculate the stereoshift and populate the results table."""
+            # TODO need to add checks that the user hasn't deleted points or otherwise
+            # Add points in the coords to corresponding text box
+            self.copy_layer_to_data()
+            # There may be a better way of doing this by assigning point attributes.
+            # I can see this approach going wrong.
+            # Take a look at the napari example nD points with features
+            # TODO clarify whether we still want the reference offset to be displayed to the user.
+            ref_plane_index = self.cmb_set_ref_plane.currentIndex() * 2
+            # index =0 if front, 2 if rear
+            fiducial_plane__index = 2 - ref_plane_index
+            # = 2 if front, 0 if rear
+            # This could also be achieved in a more traditional/clearer way
+            # (ie one that doesn't need a comment to be obvious) using an if/switch statement
+            # But this keeps it a little more concise and is similar to the original code's use
+            # of + and % to get the correct data index.
+            # Would appreciate feedback on which style is preferred.
+            self.shift_fiducial = corrected_shift(
+                self.fiducials[fiducial_plane__index],
+                self.fiducials[ref_plane_index],
+            )
+            self.shift_point = corrected_shift(
+                self.points[0], self.fiducials[ref_plane_index]
+            )
+            # See comments in pull request.
+            self.point_stereoshift = self.shift_fiducial / self.shift_point
+            # This is called ratio in the GUI, should the front or backend be changed here?
+            # This next line is another example where the calculation is being done in
+            # calculate.py but results in duplicated function calls.
+            # I'll leave it as is for now, but it's another small thing to consider.
+            # TODO: Regardless of how we decide to refactor, could do
+            # with rewriting that function to take the list of points instead.
+            self.point_depth = depth(
+                self.fiducials[fiducial_plane__index][0],
+                self.fiducials[fiducial_plane__index][1],
+                self.points[0][0],
+                self.points[0][1],
+            )
+            self.spoints = self.layer_fiducials.data[2:]
+            # TODO this will need to be updated once magnification etc is added.
+            # also needs a better name and for the function to be more clear
+            # also worth noting that this is used when saving to table.
+            # why not use the existing points list for this to avoid duplicating it?
+            # sure, the access is a little more complicated but it keeps the number
+            # of variables down.
+
+            # Update the results table
+            self.lbl_fiducial_shift.setText(str(self.shift_fiducial))
+            self.lbl_point_shift.setText(str(self.shift_point))
+            self.lbl_stereoshift_ratio.setText(str(self.point_stereoshift))
+            self.lbl_point_depth.setText(str(self.point_depth))
+
+            # region Magnification ##################################
+            self.fiducials[0][0].name = self.cmb_front1.currentText()
+            self.fiducials[1][0].name = self.cmb_front2.currentText()
+            self.fiducials[2][0].name = self.cmb_back1.currentText()
+            self.fiducials[3][0].name = self.cmb_back2.currentText()
+            self.a, self.b = magnification(
+                self.fiducials[0][0],  # F1 View 1
+                self.fiducials[1][0],  # F2 View 1
+                self.fiducials[2][0],  # B1 View 1
+                self.fiducials[3][0],  # B2 View 1
+            )
+            # Update the magnification table
+            self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
+            self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
+            # endregion #############################################
 
     def _setup_ui(self) -> None:
         self.setWindowTitle("Measure Stereoshift and Magnification")
@@ -181,12 +392,10 @@ class Set_Fiducial_Dialog(QDialog):
         # when you need to insert into grid style layouts
         # the problem is you now need to update all the points after it
         layout_outer = QVBoxLayout()
-
         layout_refplane = QHBoxLayout()
         layout_refplane.addWidget(lbl_ref_plane)
         layout_refplane.addWidget(self.cmb_set_ref_plane)
         layout_outer.addLayout(layout_refplane)
-
         layout_fiducials = QGridLayout(margin=10)
         layout_fiducials.addWidget(lbl_front1, 0, 0)
         layout_fiducials.addWidget(self.cmb_front1, 0, 1)
@@ -194,36 +403,30 @@ class Set_Fiducial_Dialog(QDialog):
         layout_fiducials.addWidget(self.fiducial_textboxes[0], 0, 3)
         layout_fiducials.addWidget(lbl_front1_view2, 0, 4)
         layout_fiducials.addWidget(self.fiducial_textboxes[1], 0, 5)
-
         layout_fiducials.addWidget(lbl_front2, 1, 0)
         layout_fiducials.addWidget(self.cmb_front2, 1, 1)
         layout_fiducials.addWidget(lbl_front2_view1, 1, 2)
         layout_fiducials.addWidget(self.fiducial_textboxes[2], 1, 3)
-
         layout_fiducials.addWidget(lbl_back1, 2, 0)
         layout_fiducials.addWidget(self.cmb_back1, 2, 1)
         layout_fiducials.addWidget(lbl_back1_view1, 2, 2)
         layout_fiducials.addWidget(self.fiducial_textboxes[3], 2, 3)
         layout_fiducials.addWidget(lbl_back1_view2, 2, 4)
         layout_fiducials.addWidget(self.fiducial_textboxes[4], 2, 5)
-
         layout_fiducials.addWidget(lbl_back2, 3, 0)
         layout_fiducials.addWidget(self.cmb_back2, 3, 1)
         layout_fiducials.addWidget(lbl_back2_view1, 3, 2)
         layout_fiducials.addWidget(self.fiducial_textboxes[5], 3, 3)
-
         layout_fiducials.addWidget(lbl_point_coords, 4, 0)
         layout_fiducials.addWidget(lbl_point_view1, 4, 2)
         layout_fiducials.addWidget(self.point_textboxes[0], 4, 3)
         layout_fiducials.addWidget(lbl_point_view2, 4, 4)
         layout_fiducials.addWidget(self.point_textboxes[1], 4, 5)
         layout_outer.addLayout(layout_fiducials)
-
         layout_stereoshift = QHBoxLayout()
         layout_stereoshift.addWidget(self.label_stereoshift)
         layout_stereoshift.addWidget(btn_calculate)
         layout_outer.addLayout(layout_stereoshift)
-
         layout_results = QGridLayout(margin=10)
         layout_results.addWidget(QLabel("Fiducial shift"), 0, 0)
         layout_results.addWidget(self.lbl_fiducial_shift, 0, 1)
@@ -234,80 +437,9 @@ class Set_Fiducial_Dialog(QDialog):
         layout_results.addWidget(QLabel("Point depth (cm)"), 3, 0)
         layout_results.addWidget(self.lbl_point_depth, 3, 1)
         layout_outer.addLayout(layout_results)
-
         layout_outer.addWidget(self.table)
         layout_outer.addWidget(self.buttonBox)
-
         self.setLayout(layout_outer)
-
-        @self.parent.viewer.mouse_over_canvas.connect
-        def _on_click_calculate(self) -> None:
-            """Calculate the stereoshift and populate the results table."""
-            # TODO need to add checks that the user hasn't deleted points or otherwise
-            # Add points in the coords to corresponding text box
-            self.copy_layer_to_data()
-            # There may be a better way of doing this by assigning point attributes.
-            # I can see this approach going wrong.
-            # Take a look at the napari example nD points with features
-            # TODO clarify whether we still want the reference offset to be displayed to the user.
-            ref_plane_index = self.cmb_set_ref_plane.currentIndex() * 2
-            # index =0 if front, 2 if rear
-            fiducial_plane__index = 2 - ref_plane_index
-            # = 2 if front, 0 if rear
-            # This could also be achieved in a more traditional/clearer way
-            # (ie one that doesn't need a comment to be obvious) using an if/switch statement
-            # But this keeps it a little more concise and is similar to the original code's use
-            # of + and % to get the correct data index.
-            # Would appreciate feedback on which style is preferred.
-            self.shift_fiducial = corrected_shift(
-                self.fiducials[fiducial_plane__index],
-                self.fiducials[ref_plane_index],
-            )
-            self.shift_point = corrected_shift(
-                self.points[0], self.fiducials[ref_plane_index]
-            )
-            # See comments in pull request.
-            self.point_stereoshift = self.shift_fiducial / self.shift_point
-            # This is called ratio in the GUI, should the front or backend be changed here?
-            # This next line is another example where the calculation is being done in
-            # calculate.py but results in duplicated function calls.
-            # I'll leave it as is for now, but it's another small thing to consider.
-            # TODO: Regardless of how we decide to refactor, could do
-            # with rewriting that function to take the list of points instead.
-            self.point_depth = depth(
-                self.fiducials[fiducial_plane__index][0],
-                self.fiducials[fiducial_plane__index][1],
-                self.points[0][0],
-                self.points[0][1],
-            )
-            self.spoints = self.layer_fiducials.data[2:]
-            # TODO this will need to be updated once magnification etc is added.
-            # also needs a better name and for the function to be more clear
-            # also worth noting that this is used when saving to table.
-            # why not use the existing points list for this to avoid duplicating it?
-            # sure, the access is a little more complicated but it keeps the number
-            # of variables down.
-
-            # Update the results table
-            self.lbl_fiducial_shift.setText(str(self.shift_fiducial))
-            self.lbl_point_shift.setText(str(self.shift_point))
-            self.lbl_stereoshift_ratio.setText(str(self.point_stereoshift))
-            self.lbl_point_depth.setText(str(self.point_depth))
-
-            # region Magnification ##################################
-            self.fiducials[0][0].name = self.cmb_front1.currentText()
-            self.fiducials[1][0].name = self.cmb_front2.currentText()
-            self.fiducials[2][0].name = self.cmb_back1.currentText()
-            self.fiducials[3][0].name = self.cmb_back2.currentText()
-            self.a, self.b = magnification(
-                self.fiducials[0][0],  # F1 View 1
-                self.fiducials[1][0],  # F2 View 1
-                self.fiducials[2][0],  # B1 View 1
-                self.fiducials[3][0],  # B2 View 1
-            )
-            # Update the magnification table
-            self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
-            self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
 
     def _setup_dropdown_fiducials_combobox(self, back=False):
         """Sets up a drop-down list of fiducials for the `back` or front (`back=False`)."""
@@ -333,153 +465,15 @@ class Set_Fiducial_Dialog(QDialog):
         self.layer_fiducials.refresh()
         self.layer_points.refresh()
 
-    # def _on_change_cmb_fiducial etc etc
-    # add the label to the point in the view
-    # replaces the old on_click_add button
+    def _update_UI(self):
+        for i in range(self.layer_fiducials.data):
+            print("Test")
+            # what will this look like in 4D...?
 
-    def _setup_fiducial_layer(self) -> Points:
-        origin_x = self.parent.camera_center[0]
-        origin_y = self.parent.camera_center[1]
-        zoom_level = self.parent.viewer.camera.zoom
-        # fmt:off
-        points = np.array(
-            [   # View 1    # View 2
-                [[origin_x, origin_y],  [origin_x + 100/zoom_level, origin_y]] # Front Fiducial
-                [[origin_x, origin_y+100/zoom_level], [origin_x + 100/zoom_level, origin_y+100/zoom_level]] # Rear Fiducial
-            ]
-        )
-        fiducial_labels = 
-        [
-            [
-
-            ]
-        ]
-        # fmt:on
-        colors = [
-            "green",
-            "red",
-            "green",
-            "red",
-            "green",
-            "red",
-            "green",
-            "red",
-        ]
-
-        symbols = [
-            "x",
-            "x",
-            "cross",
-            "cross",
-            "disc",
-            "disc",
-            "diamond",
-            "diamond",
-        ]  # TODO fix
-
-        text = {
-            "string": fiducial_labels,
-            "size": 20,
-            "color": colors,
-            "translation": np.array([-30, 0]),
-        }
-
-        layer_fiducials = self.parent.viewer.add_points(
-            points,
-            name="Stereo_Fiducials",
-            text=text,
-            size=20,
-            edge_width=7,
-            edge_width_is_relative=False,
-            edge_color=colors,
-            face_color=colors,
-            symbol=symbols,
-        )
-        return layer_fiducials
-
-    # TODO since this is mostly the same as setup fiducial layer, this code can be cleaned up as a parent and two child methods
-    def _setup_points_layer(self) -> Points:
-        points = np.array(  # TODO points is a duplicate of the fiducial array, why bother keeping both?
-            [[600, 600], [600, 700]]  # Point 1 View 1  # point 1 view 2
-        )
-
-        # TODO fix all this here and check how it's actually working
-        # TODO implment the layer attributes stuff see if i can integrate it with the existing napari stuff
-        point_labels = []
-        for i in self.points:
-            # What I've done here is a big no-no, as the list of fiducials here
-            # carries the same name as the points used to instantiate the layer.
-            # (ie. self.points = fiducials, points = the array above as the scope is limited to this function)
-            # This is kinda why I want to change this, but leaving it as functional but odd till
-            # we figure out how to get the points to instantiate in the middle of the viewport or
-            # decide otherwise.
-            for j in i:
-                point_labels += [j.name]
-        colors = [
-            "yellow",
-            "yellow",
-        ]
-        text = {
-            "string": point_labels,
-            "size": 20,
-            "color": colors,
-            "translation": np.array([-30, 0]),
-        }
-        layer_fiducials = self.parent.viewer.add_points(
-            points,
-            name="Stereo_Points",
-            text=text,
-            size=20,
-            edge_width=7,
-            edge_width_is_relative=False,
-            edge_color=colors,
-            face_color=colors,
-            symbol="x",
-        )
-        return layer_fiducials
-
-    # there may be another way of doing this that is less computationally intensive, but I've found that this works.
-    # the shapes layer is used to connect together points between views
-    # a vector layer could also be used, but it uses n-dim projections to assign the vectors
-    # whereas shapes just uses start,end point, which is a lot easier to code as i can just pull the coords
-    # from the points layer on updates
-    def _setup_shapes_layer(self) -> Shapes:
-        self.shapes = []
-        for fiducial in self.fiducials[::2]:
-            # is there a better way to write this to combine the two arrays?
-            # this one needs to skip every 2nd element since those don't have an item in the 2nd view
-            self.shapes.append(
-                np.array(
-                    [
-                        [fiducial[0].x, fiducial[0].y],
-                        [fiducial[1].x, fiducial[1].y],
-                    ]
-                )
-            )  # on update should copy data to point then update, ideally we should merge the two but hey...
-            # that's for the next patch...
-        for point in self.points:
-            self.shapes.append(
-                np.array([[point[0].x, point[0].y], [point[1].x, point[1].y]])
-            )
-        layer_shapes = self.parent.viewer.add_shapes(
-            self.shapes,
-            shape_type="line",
-            edge_color="yellow",
-            edge_width=5,
-            name="Stereo_shift_lines",
-        )
-        # layer_shapes.editable = False
-        return layer_shapes
-
-    def copy_layer_to_data(self):
-        for i in range(len(self.fiducials)):
-            for j in range(len(self.fiducials[i])):
-                self.fiducial_textboxes[i].setText(
-                    str(self.fiducials[i][j].xy)
-                )
-        for i in range(len(self.points)):
-            for j in range(len(self.points[i])):
-                self.point_textboxes[i].setText(str(self.points[i][j].xy))
+    def _set_new_event_fiducial_locations(self):
+        i = 1
+        # print("self.parent.viewer.cursor.events.position.connect")
+        # maybe connect shapes to this instead....
 
     def _on_click_save_to_table(self) -> None:
         """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
@@ -524,7 +518,7 @@ class Set_Fiducial_Dialog(QDialog):
             QTableWidgetItem(str(self.point_depth)),
         )
 
-    def cancel(self) -> None:
+    def _on_click_cancel(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
         # TODO: this is a problem, the layer still exists... not sure how to remove it
         # TODO: Rework this with the new layer handling.
@@ -532,6 +526,16 @@ class Set_Fiducial_Dialog(QDialog):
         self.parent.viewer.layers.remove(self.layer_fiducials)
         self.parent.viewer.layers.remove(self.layer_points)
         return super().accept()
+
+    # def _on_change_cmb_fiducial etc etc
+    # add the label to the point in the view
+    # replaces the old on_click_add button
+
+    # there may be another way of doing this that is less computationally intensive, but I've found that this works.
+    # the shapes layer is used to connect together points between views
+    # a vector layer could also be used, but it uses n-dim projections to assign the vectors
+    # whereas shapes just uses start,end point, which is a lot easier to code as i can just pull the coords
+    # from the points layer on updates
 
 
 """
