@@ -50,7 +50,7 @@ def test_save_single_particle(
 
     if expect_data_loaded:
         # check we have a csv file
-        csv_files = glob("./*.csv")
+        csv_files = glob(str(tmp_path / "*.csv"))
         assert len(csv_files) == 1, "No csv file found"
         assert stat(csv_files[0]).st_size != 0, "File is empty"
     else:
