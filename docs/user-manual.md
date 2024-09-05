@@ -44,7 +44,7 @@ To measure the decay length, first select the particle you are making the measur
 To measure the radius of curvature, first select the particle you are making the measurement for in the particle list. Then, place and select three points along the particle trajectory in the `Points` layer. Finally, click `Calculate radius`. The radius of curvature is calculated and added to the selected particle. The radius is show under the `radius` heading for the corresponding particle either in pixels or cm, depending on whether or not the `Apply magnification` option is selected.
 
 #### Decay angles
-The measurement of the decay angles is only enabled for $\Lambda^0 \to p \pi^-$ decays. To start, select the particle you are making the measurement for in the particle list and click `Calculate decay angles`. This will open the `Decay angles` menu and create a layer called `Decay angles tool` containing three lines, which will be labelled as the parent $\Lambda^0$ particle and the two decay products. Align each line with the corresponding particle trajectory and click `Calculate`. The angles between the $\Lambda^0$ and the proton and pion will be shown. Click `Save to table` to associate the angles to the selected particle in the particle list. The angles are shown under the `phi_proton` and `phi_pion` headings for the corresponding particle.
+The measurement of the decay angles is only enabled for {math}`\Lambda^0 \to p \pi^-` decays. To start, select the particle you are making the measurement for in the particle list and click `Calculate decay angles`. This will open the `Decay angles` menu and create a layer called `Decay angles tool` containing three lines, which will be labelled as the parent {math}`\Lambda^0` particle and the two decay products. Align each line with the corresponding particle trajectory and click `Calculate`. The angles between the {math}`\Lambda^0` and the proton and pion will be shown. Click `Save to table` to associate the angles to the selected particle in the particle list. The angles are shown under the `phi_proton` and `phi_pion` headings for the corresponding particle.
 
 #### Stereoshift
 To measure the stereoshift of any point of interest (POI) in the image, two different views of the same frame need to be examined[^4].
@@ -71,10 +71,9 @@ Some tips...
 
 [^3]: Particle Tracks lab manual, 2024.
 
-[^4]: Realised that for the measurement of the $\Lambda^0$ students are asked to measure the stereoshift for both the origin and decay vertex, to obtain the total decay lenth. At the moment this is not possible with the tool, as it only allows to measure the stereoshift for a single point. Need to think how to implement this, or work around it.
+[^4]: Realised that for the measurement of the {math}`\Lambda^0` students are asked to measure the stereoshift for both the origin and decay vertex, to obtain the total decay lenth. At the moment this is not possible with the tool, as it only allows to measure the stereoshift for a single point. Need to think how to implement this, or work around it.
 
 [^5]: Understand if the Back/Front option is now obsolete.
 
 [napari]: https://napari.org/stable/
 [stereoshift]: https://www.hep.phy.cam.ac.uk/~palvarez/ParticleTracks/
-[def]: #stereoshift
