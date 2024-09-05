@@ -541,6 +541,15 @@ class ParticleTracksWidget(QWidget):
         if file_name in {"", None}:
             return
 
+        if file_name[-4:] != ".csv":
+            self.msg = QMessageBox()
+            self.msg.setIcon(QMessageBox.Warning)
+            self.msg.setWindowTitle("Invalid file type")
+            self.msg.setStandardButtons(QMessageBox.Ok)
+            self.msg.setText("The file must be a CSV file. Please try again.")
+            self.msg.show()
+            return
+
         with open(file_name, "w", encoding="UTF8", newline="") as f:
             # write the header
             f.write(",".join(self.data[0]._vars_to_save()) + "\n")
