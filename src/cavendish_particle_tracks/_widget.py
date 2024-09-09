@@ -51,6 +51,7 @@ class ParticleTracksWidget(QWidget):
         self.viewer: napari.Viewer = napari_viewer
         # define QtWidgets
         self.btn_load = QPushButton("Load data")
+        self.btn_load.width = 200
         self.cmb_add_particle = QComboBox()
         self.cmb_add_particle.addItems(EXPECTED_PARTICLES)
         self.cmb_add_particle.setCurrentIndex(0)
@@ -114,11 +115,13 @@ class ParticleTracksWidget(QWidget):
  | |     __ ___   _____ _ __   __| |_ ___| |__   | |__) |_ _ _ __| |_ _  ___| | ___     | |_ __ __ _  ___| | _____ 
  | |    / _` \ \ / / _ \ '_ \ / _` | / __| '_ \  |  ___/ _` | '__| __| |/ __| |/ _ \    | | '__/ _` |/ __| |/ / __|
  | |___| (_| |\ V /  __/ | | | (_| | \__ \ | | | | |  | (_| | |  | |_| | (__| |  __/    | | | | (_| | (__|   <\__ \
-  \_____\__,_| \_/ \___|_| |_|\__,_|_|___/_| |_| |_|   \__,_|_|   \__|_|\___|_|\___|    |_|_|  \__,_|\___|_|\_\___/                                                                                                               
+  \_____\__,_| \_/ \___|_| |_|\__,_|_|___/_| |_| |_|   \__,_|_|   \__|_|\___|_|\___|    |_|_|  \__,_|\___|_|\_\___/
+
+Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garvey under the MIT License  
 """
         )
         print(self.intro_text.text())
-        self.intro_text.setFont(QFont("Arial", 5))
+        self.intro_text.setFont(QFont("Consolas", 5))
         self.intro_text.setTextFormat(Qt.TextFormat.PlainText)
         self.layout().addWidget(self.intro_text)
         layout_outer.addLayout(self.buttonbox)
@@ -250,6 +253,8 @@ class ParticleTracksWidget(QWidget):
 
     def set_UI_image_loaded(self, loaded: bool) -> None:
         if loaded:
+            # Set margins (left, top, right, bottom)
+            self.buttonbox.setContentsMargins(0, 0, 0, 0)
             self.intro_text.hide()
             self.btn_load.hide()
             self.cmb_add_particle.show()
@@ -263,6 +268,8 @@ class ParticleTracksWidget(QWidget):
             self.table.show()
             self.cal.show()
         else:
+            # Set margins (left, top, right, bottom)
+            self.buttonbox.setContentsMargins(200, 0, 200, 0)
             self.intro_text.show()
             self.btn_load.show()
             self.cmb_add_particle.hide()
