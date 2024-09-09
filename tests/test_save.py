@@ -30,7 +30,7 @@ def test_save_single_particle(
 ):
 
     # start napari and the particle widget, add a single particle
-    cpt_widget.cb.setCurrentIndex(1)  # select the Σ
+    cpt_widget.cmb_add_particle.setCurrentIndex(1)  # select the Σ
     assert len(cpt_widget.data) == 1, "Expecting one particle in the table"
 
     def set_filename_and_close(dialog):

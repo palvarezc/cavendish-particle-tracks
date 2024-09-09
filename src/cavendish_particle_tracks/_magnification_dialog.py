@@ -171,7 +171,7 @@ class MagnificationDialog(QDialog):
         self.parent.viewer.layers.remove(self.cal_layer)
         self.parent.cal.setEnabled(True)
         # self.parent.mag.setEnabled(False)
-        self.parent.mag.setText("Update magnification")
+        self.parent.btn_magnification.setText("Update magnification")
         return super().accept()
 
     def reject(self) -> None:
