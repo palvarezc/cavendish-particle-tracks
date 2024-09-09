@@ -188,3 +188,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'myst_parser',
 ]
+
+# remove the primary sidebar on all pages
+# https://pydata-sphinx-theme.readthedocs.io/en/stable/user_guide/layout.html#primary-sidebar-left
+html_sidebars = { "**" = [] }

@@ -1,4 +1,5 @@
 import numpy as np
+from napari.utils.notifications import show_error
 from qtpy.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -9,6 +10,10 @@ from qtpy.QtWidgets import (
 )
 
 from ._calculate import angle, track_parameters
+
+# from ._widget import ParticleTracksWidget
+
+# from ._widget import ParticleTracksWidget
 
 
 class DecayAnglesDialog(QDialog):
@@ -80,32 +85,51 @@ class DecayAnglesDialog(QDialog):
     def _setup_decayangles_layer(self):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
 
-        lambda_line = np.array([[100, 100], [200, 300]])
-        proton_line = np.array([[200, 300], [300, 400]])
-        pion_line = np.array([[200, 300], [210, 400]])
+        origin_x = self.parent.camera_center[0]
+        # note down why this is preferred....
+        origin_y = self.parent.camera_center[1]
+
+        zoom_factor = self.parent.viewer.camera.zoom
+
+        # Scale offsets by the inverse of the zoom factor
+        lambda_line = np.array(
+            [
+                [origin_x + -100 / zoom_factor, origin_y + -100 / zoom_factor],
+                [origin_x + 100 / zoom_factor, origin_y + 200 / zoom_factor],
+            ]
+        )
+        proton_line = np.array(
+            [
+                [origin_x + 100 / zoom_factor, origin_y + 200 / zoom_factor],
+                [origin_x + 200 / zoom_factor, origin_y + 300 / zoom_factor],
+            ]
+        )
+        pion_line = np.array(
+            [
+                [origin_x + 100 / zoom_factor, origin_y + 200 / zoom_factor],
+                [origin_x + 110 / zoom_factor, origin_y + 300 / zoom_factor],
+            ]
+        )
 
         lines = [lambda_line, proton_line, pion_line]
-
         colors = ["green", "red", "blue"]
 
-        # Can we add labels to the shapes?
-        # text = {
-        #     "string": ["Λ", "p", "π"],
-        #     "size": 20,
-        #     "color": colors,
-        #     "translation": np.array([-30, 0]),
-        # }
+        text = {
+            "string": ["Λ", "p", "π"],
+            "size": 14,
+            "color": colors,
+            "translation": np.array([-30, 0]),
+        }
 
-        shapes_layer = self.parent.viewer.add_shapes(name="Shapes_DecayAngles")
-
-        shapes_layer.add(
+        shapes_layer = self.parent.viewer.add_shapes(
             lines,
+            name="Decay Angles Tool",
             shape_type=["line"] * 3,
             edge_width=5,
             edge_color=colors,
             face_color=colors,
+            text=text,
         )
-
         return shapes_layer
 
     def _on_click_calculate(self) -> None:
@@ -134,33 +158,37 @@ class DecayAnglesDialog(QDialog):
         """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
 
         # Propagate to particle
-        selected_row = self.parent._get_selected_row()
-        # self.parent.data[selected_row].spoints = self.alines
-        self.parent.data[selected_row].phi_proton = self.phi_proton
-        self.parent.data[selected_row].phi_pion = self.phi_pion
+        try:
+            selected_row = self.parent._get_selected_row()
+        except IndexError:
+            show_error("There are no particles in the table.")
+        else:
+            # self.parent.data[selected_row].spoints = self.alines
+            self.parent.data[selected_row].phi_proton = self.phi_proton
+            self.parent.data[selected_row].phi_pion = self.phi_pion
 
-        # Propagate to parent table
-        # for i in range(2):
-        #     self.parent.table.setItem(
-        #         selected_row,
-        #         self.parent._get_table_column_index("sf" + str(i + 1)),
-        #         QTableWidgetItem(str(self.spoints[i])),
-        #     )
-        #     self.parent.table.setItem(
-        #         selected_row,
-        #         self.parent._get_table_column_index("sp" + str(i + 1)),
-        #         QTableWidgetItem(str(self.spoints[i + 2])),
-        #     )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("phi_proton"),
-            QTableWidgetItem(str(self.phi_proton)),
-        )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("phi_pion"),
-            QTableWidgetItem(str(self.phi_pion)),
-        )
+            # Propagate to parent table
+            # for i in range(2):
+            #     self.parent.table.setItem(
+            #         selected_row,
+            #         self.parent._get_table_column_index("sf" + str(i + 1)),
+            #         QTableWidgetItem(str(self.spoints[i])),
+            #     )
+            #     self.parent.table.setItem(
+            #         selected_row,
+            #         self.parent._get_table_column_index("sp" + str(i + 1)),
+            #         QTableWidgetItem(str(self.spoints[i + 2])),
+            #     )
+            self.parent.table.setItem(
+                selected_row,
+                self.parent._get_table_column_index("phi_proton"),
+                QTableWidgetItem(str(self.phi_proton)),
+            )
+            self.parent.table.setItem(
+                selected_row,
+                self.parent._get_table_column_index("phi_pion"),
+                QTableWidgetItem(str(self.phi_pion)),
+            )
 
     def cancel(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
