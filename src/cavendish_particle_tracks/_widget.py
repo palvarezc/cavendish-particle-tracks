@@ -14,17 +14,20 @@ import napari
 import numpy as np
 import dask.array as da
 from dask_image.imread import imread
-from qtpy.QtCore import QPoint
+from qtpy.QtCore import QPoint, Qt
+from qtpy.QtGui import QFont
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QFileDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
     QMessageBox,
     QPushButton,
     QRadioButton,
     QTableWidget,
     QTableWidgetItem,
-    QVBoxLayout,
     QWidget,
 )
 
@@ -46,8 +49,7 @@ class ParticleTracksWidget(QWidget):
 
     def __init__(self, napari_viewer: napari.viewer.Viewer):
         super().__init__()
-        self.viewer = napari_viewer
-        # region UI Setup
+        self.viewer: napari.Viewer = napari_viewer
         # define QtWidgets
         self.btn_load = QPushButton("Load data")
         self.cmb_add_particle = QComboBox()
@@ -91,20 +93,41 @@ class ParticleTracksWidget(QWidget):
         # self.viewer.events.mouse_press(self._on_mouse_click)
 
         # layout
-        self.setLayout(QVBoxLayout())
-        self.layout().addWidget(self.btn_load)
-        self.layout().addWidget(self.cmb_add_particle)
-        self.layout().addWidget(self.btn_delete_particle)
-        self.layout().addWidget(self.btn_radius)
-        self.layout().addWidget(self.btn_length)
-        self.layout().addWidget(self.btn_decayangle)
+        self.viewer.window._qt_viewer.layerButtons.hide()  # This will break in napari 0.6.0
+        self.buttonbox = QGridLayout()
+        self.buttonbox.addWidget(self.btn_load, 0, 0)
+        self.buttonbox.addWidget(self.cmb_add_particle, 1, 0)
+        self.buttonbox.addWidget(self.btn_delete_particle, 1, 1)
+        self.buttonbox.addWidget(self.btn_radius, 2, 0)
+        self.buttonbox.addWidget(self.btn_length, 2, 1)
+        self.buttonbox.addWidget(self.btn_decayangle, 3, 0)
+        self.buttonbox.addWidget(self.btn_stereoshift, 3, 1)
+        self.buttonbox.addWidget(self.btn_magnification, 4, 0)
+        self.buttonbox.addWidget(self.cal, 4, 1)
+        self.buttonbox.addWidget(self.btn_save, 5, 0)
+
+        layout_outer = QHBoxLayout()
+        self.setLayout(layout_outer)
+        self.intro_text = QLabel(
+            r"""
+   _____                          _ _     _       _____           _   _      _        _______             _        
+  / ____|                        | (_)   | |     |  __ \         | | (_)    | |      |__   __|           | |       
+ | |     __ ___   _____ _ __   __| |_ ___| |__   | |__) |_ _ _ __| |_ _  ___| | ___     | |_ __ __ _  ___| | _____ 
+ | |    / _` \ \ / / _ \ '_ \ / _` | / __| '_ \  |  ___/ _` | '__| __| |/ __| |/ _ \    | | '__/ _` |/ __| |/ / __|
+ | |___| (_| |\ V /  __/ | | | (_| | \__ \ | | | | |  | (_| | |  | |_| | (__| |  __/    | | | | (_| | (__|   <\__ \
+  \_____\__,_| \_/ \___|_| |_|\__,_|_|___/_| |_| |_|   \__,_|_|   \__|_|\___|_|\___|    |_|_|  \__,_|\___|_|\_\___/                                                                                                               
+"""
+        )
+        print(self.intro_text.text())
+        self.intro_text.setFont(QFont("Arial", 5))
+        self.intro_text.setTextFormat(Qt.TextFormat.PlainText)
+        self.layout().addWidget(self.intro_text)
+        layout_outer.addLayout(self.buttonbox)
         self.layout().addWidget(self.table)
-        self.layout().addWidget(self.cal)
-        self.layout().addWidget(self.btn_stereoshift)
-        self.layout().addWidget(self.btn_magnification)
-        self.layout().addWidget(self.btn_save)
+
         self.set_UI_image_loaded(False)
-        # endregion
+
+        # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
         # Data analysis
         self.data: list[NewParticle] = []
@@ -223,6 +246,7 @@ class ParticleTracksWidget(QWidget):
 
     def set_UI_image_loaded(self, loaded: bool) -> None:
         if loaded:
+            self.intro_text.hide()
             self.btn_load.hide()
             self.cmb_add_particle.show()
             self.btn_delete_particle.show()
@@ -235,6 +259,7 @@ class ParticleTracksWidget(QWidget):
             self.table.show()
             self.cal.show()
         else:
+            self.intro_text.show()
             self.btn_load.show()
             self.cmb_add_particle.hide()
             self.btn_delete_particle.hide()
