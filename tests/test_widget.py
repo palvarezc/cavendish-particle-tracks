@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+from pathlib import Path
 from random import random
 
 import numpy as np
@@ -13,8 +15,9 @@ from cavendish_particle_tracks import ParticleTracksWidget
 
 from .conftest import get_dialog
 
-
-def test_calculate_radius_ui(cpt_widget, capsys):
+def test_calculate_radius_ui(
+    cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
+):
     """Test the expected behavior from the expected workflow:
 
     - Add a particle.
@@ -50,7 +53,9 @@ def test_calculate_radius_ui(cpt_widget, capsys):
 
 @pytest.mark.parametrize("npoints", [1, 2, 4, 5])
 def test_calculate_radius_fails_with_wrong_number_of_points(
-    cpt_widget, capsys, npoints
+    cpt_widget: ParticleTracksWidget,
+    capsys: pytest.CaptureFixture[str],
+    npoints,
 ):
     """Test the obvious failure modes: if I don't select 3 points, I can't
     calculate a radius so better send a nice message."""
@@ -76,7 +81,9 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
     )
 
 
-def test_add_new_particle_ui(cpt_widget, capsys):
+def test_add_new_particle_ui(
+    cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
+):
     assert cpt_widget.table.rowCount() == 0
 
     cpt_widget.cmb_add_particle.setCurrentIndex(1)
@@ -85,7 +92,27 @@ def test_add_new_particle_ui(cpt_widget, capsys):
     assert len(cpt_widget.data) == 1
 
 
-def test_delete_particle_ui(cpt_widget):
+def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
+    cpt_widget.test_mode = False
+    cpt_widget.cmb_add_particle.setCurrentIndex(1)
+    cpt_widget.viewer.add_image(
+        np.random.random((100, 100)), name="Particle Tracks"
+    )
+    assert cpt_widget.intro_text.isVisible() is False
+    assert cpt_widget.btn_load.isVisible() is False
+    assert cpt_widget.cmb_add_particle.isVisible() is True
+    assert cpt_widget.btn_delete_particle.isVisible() is True
+    assert cpt_widget.btn_radius.isVisible() is True
+    assert cpt_widget.btn_length.isVisible() is True
+    assert cpt_widget.btn_decayangle.isVisible() is True
+    assert cpt_widget.btn_stereoshift.isVisible() is True
+    assert cpt_widget.btn_save.isVisible() is True
+    assert cpt_widget.btn_magnification.isVisible() is True
+    assert cpt_widget.table.isVisible() is True
+    assert cpt_widget.cal.isVisible() is True
+
+
+def test_delete_particle_ui(cpt_widget: ParticleTracksWidget):
     """Tests the removal of a particle from the table"""
     cpt_widget.cmb_add_particle.setCurrentIndex(1)
 
@@ -108,7 +135,9 @@ def test_delete_particle_ui(cpt_widget):
     assert len(cpt_widget.data) == 0
 
 
-def test_calculate_length_ui(cpt_widget, capsys):
+def test_calculate_length_ui(
+    cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
+):
     # add a random image to the napari viewer
     cpt_widget.viewer.add_image(np.random.random((100, 100)))
 
@@ -137,7 +166,9 @@ def test_calculate_length_ui(cpt_widget, capsys):
 
 @pytest.mark.parametrize("npoints", [1, 3, 4, 5])
 def test_calculate_length_fails_with_wrong_number_of_points(
-    cpt_widget, capsys, npoints
+    cpt_widget: ParticleTracksWidget,
+    capsys: pytest.CaptureFixture[str],
+    npoints,
 ):
     """Test the obvious failure modes: if I don't select 2 points, I can't
     calculate a length so better send a nice message."""
@@ -175,12 +206,12 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 )
 def test_load_data(
     cpt_widget: ParticleTracksWidget,
-    tmp_path,
+    tmp_path: Path,
     qtbot: QtBot,
-    data_subdirs,
-    image_count,
-    expect_data_loaded,
-    reload,
+    data_subdirs: list[str],
+    image_count: list[int],
+    expect_data_loaded: bool,
+    reload:bool,
 ):
     """Test loading of images in a folder as 4D image layer with width, height, event, view dimensions."""
 
