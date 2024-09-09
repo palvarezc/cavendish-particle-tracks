@@ -502,7 +502,8 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         stacks = []
         for subdir in folder_subdirs:
             stack: da = imread(subdir + "/*")
-            stack = crop(stack)
+            if not self.test_mode:
+                stack = crop(stack)
             stacks.append(stack)
             # TODO: investigate the multiscale otption.
 

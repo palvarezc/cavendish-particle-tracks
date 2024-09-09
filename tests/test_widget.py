@@ -249,12 +249,9 @@ def test_load_data(
     )
 
     if expect_data_loaded:
-        assert len(cpt_widget.viewer.layers) == 3
-        for i in range(3):
-            assert (
-                cpt_widget.viewer.layers[i].name == "stack" + str(i + 1)
-                and cpt_widget.viewer.layers[i].ndim == 4
-            )
+        assert len(cpt_widget.viewer.layers) == 1
+        assert cpt_widget.viewer.layers[0].name == "Particle Tracks"
+        assert cpt_widget.viewer.layers[0].ndim == 4
     else:
         # def capture_msgbox():
         #    for widget in QApplication.topLevelWidgets():
