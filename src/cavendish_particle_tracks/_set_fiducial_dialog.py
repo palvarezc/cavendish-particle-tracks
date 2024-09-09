@@ -79,8 +79,8 @@ class Set_Fiducial_Dialog(QDialog):
                 name="Stereo_Fiducials",
                 text=text,
                 size=20,
-                edge_width=7,
-                edge_width_is_relative=False,
+                border_width=7,
+                border_width_is_relative=False,
                 edge_color=colors,
                 face_color=colors,
                 symbol=symbols,
@@ -102,8 +102,8 @@ class Set_Fiducial_Dialog(QDialog):
             ]
             point_labels = ["Point View 1", "Point View 2"]
             # fmt:on
-            colors = ["green", "red", "green", "red"]
-            symbols = ["x", "x", "cross", "cross"]
+            colors = ["green", "red"]
+            symbols = ["diamond", "diamond"]
             text = {
                 "string": point_labels,
                 "size": 20,
@@ -115,8 +115,8 @@ class Set_Fiducial_Dialog(QDialog):
                 name="Stereo_Points",
                 text=text,
                 size=20,
-                edge_width=7,
-                edge_width_is_relative=False,
+                border_width=7,
+                border_width_is_relative=False,
                 edge_color=colors,
                 face_color=colors,
                 symbol=symbols,
@@ -190,7 +190,7 @@ class Set_Fiducial_Dialog(QDialog):
             self.zoom_level,
             self.current_event,
         )
-        self.layer_shapes: Shapes = create_retrieve_layer("Stereo_shift_lines")
+        # self.layer_shapes: Shapes = create_retrieve_layer("Stereo_shift_lines")
 
         # Setup the window UI
         self._setup_ui()
@@ -200,6 +200,7 @@ class Set_Fiducial_Dialog(QDialog):
         self.parent.viewer.layers.selection.active = self.layer_fiducials
         self.layer_fiducials.mode = "select"
         self.layer_points.mode = "select"
+        self.parent.viewer.dims.events.connect(self._on_event_changed)
 
         """ in order to be more optimised, only update the one moved, not all by using the event handler
         # what if multiple are moved how would that work?
@@ -526,6 +527,49 @@ class Set_Fiducial_Dialog(QDialog):
         self.parent.viewer.layers.remove(self.layer_fiducials)
         self.parent.viewer.layers.remove(self.layer_points)
         return super().accept()
+
+    def _on_event_changed(self, event) -> None:
+        # this is temporary and will be refactored.
+        # TODO add check for whether there are already points in the layer.
+        # this might seem a very weird way of doing this, since i could just run a for loop above, but this means it's easy to setup
+        # the ability for fiducials to copy from one layer to the next.
+        self.layer_fiducials: Points
+        layer_created = False
+        for point in self.layer_fiducials.data:
+            if point[3] == self.current_event:
+                layer_created = True
+                break
+        if layer_created:
+            return
+        origin_x = self.camera_center[0]
+        origin_y = self.camera_center[1]
+        current_event = self.current_event
+        zoom_level = self.zoom_level
+        # fmt:off
+        points = [      # View 1                                                # View 2
+            [origin_x, origin_y, current_event],                [origin_x + 100/zoom_level, origin_y, current_event],                # Front Fiducial
+            [origin_x, origin_y+100/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y+100/zoom_level, current_event]  # Rear Fiducial
+        ]
+        fiducial_labels = ["Front1", "Front2", "Rear1", "Rear2"]
+        # fmt:on
+        colors = ["green", "red", "green", "red"]
+        symbols = ["x", "x", "cross", "cross"]
+        text = {
+            "string": fiducial_labels,
+            "size": 20,
+            "color": colors,
+            "translation": np.array([-30, 0]),
+        }
+        self.layer_fiducials.add(
+            points,
+            text=text,
+            size=20,
+            edge_width=7,
+            edge_width_is_relative=False,
+            edge_color=colors,
+            face_color=colors,
+            symbol=symbols,
+        )
 
     # def _on_change_cmb_fiducial etc etc
     # add the label to the point in the view

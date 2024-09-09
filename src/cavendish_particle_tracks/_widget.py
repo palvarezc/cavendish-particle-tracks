@@ -61,6 +61,10 @@ class ParticleTracksWidget(QWidget):
         # and dims.current_step is the position of the slider.
         # since we're never rotating our view, they're funcitonally the same except that only dims can give you the x and y coords."""
 
+    @property
+    def no_events(self):
+        return self.viewer.dims.range[0]
+
     def __init__(self, napari_viewer: napari.Viewer):
         self.viewer: napari.Viewer = napari_viewer
         super().__init__()
