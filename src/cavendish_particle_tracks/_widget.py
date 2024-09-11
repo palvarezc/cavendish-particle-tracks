@@ -10,6 +10,7 @@ Replace code below according to your needs.
 import glob
 from typing import List
 
+import dask.array as da
 import napari
 import numpy as np
 from dask_image.imread import imread
@@ -41,9 +42,18 @@ from ._stereoshift_dialog import StereoshiftDialog
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
 
-    def __init__(self, napari_viewer: napari.viewer.Viewer):
+    @property
+    def layer_measurements(self):
+        return self._layer_measurements
+
+    @layer_measurements.setter
+    def layer_measurements(self, layer):
+        self._layer_measurements = layer
+
+    def __init__(self, napari_viewer: napari.viewer.Viewer, test_mode=False):
         super().__init__()
         self.viewer = napari_viewer
+        self.test_mode = test_mode
         # define QtWidgets
         self.load = QPushButton("Load data")
         self.cb = QComboBox()
@@ -405,13 +415,36 @@ class ParticleTracksWidget(QWidget):
             self.msg.show()
             return
 
-        for subdir, stack_name in zip(
-            folder_subdirs, ["stack1", "stack2", "stack3"]
-        ):
-            stack = imread(subdir + "/*")
-            self.viewer.add_image(stack, name=stack_name)
-            # TODO: investigate the multiscale otption.
-        self.viewer.dims.axis_labels = ("Event", "Y", "X")
+        def crop(array):
+            # Crops view 1 and 2 to same size as view 3 by removing whitespace
+            # on left, as images align on the right.
+            return array[:, :, -8377:, :]
+
+        stacks = []
+        for subdir in folder_subdirs:
+            stack: da = imread(subdir + "/*")
+            if not self.test_mode:
+                stack = crop(stack)
+            stacks.append(stack)
+
+        # Concatenate stacks along new spatial dimension such that we have a view, and event slider
+        concatenated_stack = da.stack(stacks, axis=0)
+        self.viewer.add_image(concatenated_stack, name="Particle Tracks")
+        self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
+
+        measurement_layer_present = False
+        for layer in self.viewer.layers:
+            if layer.name == "Radii and Lengths":
+                measurement_layer_present = True
+                break
+
+        if not measurement_layer_present:
+            self.layer_measurements = self.viewer.add_points(
+                name="Radii and Lengths",
+                size=20,
+                border_width=7,
+                border_width_is_relative=False,
+            )
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
