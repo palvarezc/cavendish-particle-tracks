@@ -182,7 +182,7 @@ def test_load_data(
 ):
     """Test loading of images in a folder as stack associated to a certain view"""
 
-    for subdir, n in zip(data_subdirs, image_count):
+    for subdir, n in zip(data_subdirs, image_count, strict=False):
         p = tmp_path / subdir
         p.mkdir()
         for i in range(n):

@@ -72,6 +72,7 @@ def test_magnification_ui(
         text_boxes,
         add_fiducial_funcs,
         recorded_fiducials,
+        strict=False,
     ):
         cb.setCurrentIndex(cb.findText(fiducial.name))
         dlg.cal_layer.add(fiducial.xy)
