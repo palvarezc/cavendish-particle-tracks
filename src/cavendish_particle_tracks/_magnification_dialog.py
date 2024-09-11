@@ -141,9 +141,7 @@ class MagnificationDialog(QDialog):
     def _add_coords(self, fiducial: int) -> List[float]:
         """When 'Add' is selected, the selected point is added to the corresponding fiducial text box"""
 
-        selected_points = self.parent._get_selected_points(
-            "Points_Calibration"
-        )
+        selected_points = self.parent._get_selected_points("Magnification")
 
         # Forcing only 1 points
         if len(selected_points) != 1:
@@ -184,7 +182,7 @@ class MagnificationDialog(QDialog):
         return super().accept()
 
     def reject(self) -> None:
-        """On reject remove the points_Calibration layer"""
+        """On reject remove the magnification layer"""
 
         # This is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.select_previous()

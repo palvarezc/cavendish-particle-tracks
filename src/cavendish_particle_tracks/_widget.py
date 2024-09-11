@@ -430,12 +430,12 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 
     def _on_click_decay_angles(self) -> DecayAnglesDialog:
         """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
-        for widget in QApplication.topLevelWidgets():
-            if isinstance(widget, DecayAnglesDialog):
-                napari.utils.notifications.show_error(
-                    "Decay Angles dialog already open"
-                )
-                return widget
+        #for widget in QApplication.topLevelWidgets():
+        ##    if isinstance(widget, DecayAnglesDialog):
+        ##        napari.utils.notifications.show_error(
+        ##            "Decay Angles dialog already open"
+        ##        )
+        #        return widget
         dlg = DecayAnglesDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
