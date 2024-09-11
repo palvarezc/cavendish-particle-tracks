@@ -170,16 +170,16 @@ class StereoshiftDialog(QDialog):
         }
 
         # create a points layer where the face_color is set by the good_point feature
-        # and the edge_color is set via a color map (grayscale) on the confidence
+        # and the border_color is set via a color map (grayscale) on the confidence
         # feature.
         points_layer = self.parent.viewer.add_points(
             points,
             name="Points_Stereoshift",
             text=text,
             size=20,
-            edge_width=7,
-            edge_width_is_relative=False,
-            edge_color=colors,
+            border_width=7,
+            border_width_is_relative=False,
+            border_color=colors,
             face_color=colors,
         )
 
