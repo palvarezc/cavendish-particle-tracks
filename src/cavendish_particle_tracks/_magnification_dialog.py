@@ -1,4 +1,7 @@
-from typing import List
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ._widget import ParticleTracksWidget
 
 from qtpy.QtWidgets import (
     QComboBox,
@@ -95,13 +98,14 @@ class MagnificationDialog(QDialog):
 
         self.layout().addWidget(self.buttonBox, 9, 0, 1, 3)
 
-        def create_retrieve_magnification_layer(self):
-            for layer in self.parent.viewer.layers:
-                if layer.name == "Magnification":
-                    return layer
-            self.parent.viewer.add_points(name="Magnification")
-
-        self.cal_layer = create_retrieve_magnification_layer(self)
+        # def create_retrieve_magnification_layer(self):
+        #    for layer in self.parent.viewer.layers:
+        #        if layer.name == "Magnification":
+        #            return layer
+        #    return self.parent.viewer.add_points(name="Magnification")
+        #
+        # self.cal_layer = create_retrieve_magnification_layer(self)
+        self.cal_layer = self.parent.viewer.add_points(name="Magnification")
         self.a = parent.mag_a
         self.b = parent.mag_b
 
