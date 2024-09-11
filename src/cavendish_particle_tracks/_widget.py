@@ -522,8 +522,8 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
             self.layer_measurements = self.viewer.add_points(
                 name="Radii and Lengths",
                 size=20,
-                edge_width=7,
-                edge_width_is_relative=False,
+                border_width=7,
+                border_width_is_relative=False,
             )
 
     def _on_click_new_particle(self) -> None:

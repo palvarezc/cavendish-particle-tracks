@@ -73,10 +73,10 @@ def test_calculate_radius_ui(
     cpt_widget.cmb_add_particle.setCurrentIndex(1)
 
     # add three points to the points layer and select them
-    cpt_widget.viewer.add_points([(0, 1), (1, 0), (0, -1)])
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = {0, 1, 2}
+    points_layer = cpt_widget.viewer.add_points(
+        [(0, 1), (1, 0), (0, -1)], name="Radii and Lengths"
+    )
+    points_layer.selected_data = {0, 1, 2}
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
@@ -108,12 +108,12 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
-    cpt_widget.viewer.add_points(points)
+    points_layer = cpt_widget.viewer.add_points(
+        points, name="Radii and Lengths"
+    )
 
     # select the wrong number of points
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = set(range(npoints))
+    points_layer.selected_data = set(range(npoints))
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
@@ -198,10 +198,10 @@ def test_calculate_length_ui(
     cpt_widget.cmb_add_particle.setCurrentIndex(1)
 
     # add three points to the points layer and select them
-    cpt_widget.viewer.add_points([(0, 1), (0, 0)])
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = {0, 1}
+    points_layer = cpt_widget.viewer.add_points(
+        [(0, 1), (0, 0)], name="Radii and Lengths"
+    )
+    points_layer.selected_data = {0, 1}
 
     # click the calculate decay length button
     cpt_widget._on_click_length()
@@ -230,12 +230,10 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
-    cpt_widget.viewer.add_points(points)
-
-    # select the wrong number of points
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = set(range(npoints))
+    points_layer = cpt_widget.viewer.add_points(
+        points, name="Radii and Lengths"
+    )
+    points_layer.selected_data = set(range(npoints))
 
     # click the calculate decay length button
     cpt_widget._on_click_length()
@@ -258,7 +256,6 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 )
 def test_load_data(
     cpt_widget: ParticleTracksWidget,
-    capsys: pytest.CaptureFixture[str],
     tmp_path: Path,
     qtbot: QtBot,
     data_subdirs: list[str],
@@ -289,7 +286,7 @@ def test_load_data(
     )
 
     if expect_data_loaded:
-        assert len(cpt_widget.viewer.layers) == 1
+        assert len(cpt_widget.viewer.layers) == 2
         assert cpt_widget.viewer.layers[0].name == "Particle Tracks"
         assert cpt_widget.viewer.layers[0].ndim == 4
     else:
