@@ -41,6 +41,7 @@ from ._calculate import length, radius
 from ._decay_angles_dialog import DecayAnglesDialog
 from ._magnification_dialog import MagnificationDialog
 from ._stereoshift_dialog import StereoshiftDialog
+from ._testdims import TestDimsDialog
 
 
 class ParticleTracksWidget(QWidget):
@@ -53,6 +54,26 @@ class ParticleTracksWidget(QWidget):
     @layer_measurements.setter
     def layer_measurements(self, layer):
         self._layer_measurements = layer
+
+    dev_mode = True
+
+    @property
+    def camera_center(self):
+        # update for 4d implementation as appropriate.
+        return (self.viewer.camera.center[1], self.viewer.camera.center[2])
+
+    @property
+    def current_event(self):
+        # Returns the current event that the user is viewing.
+        return self.viewer.dims.current_step[0]
+        """dims.point also works here.
+        # napari includes both, since dims.point is the position of the camera,
+        # and dims.current_step is the position of the slider.
+        # since we're never rotating our view, they're funcitonally the same except that only dims can give you the x and y coords."""
+
+    @property
+    def no_events(self):
+        return self.viewer.dims.range[0]
 
     def __init__(self, napari_viewer: napari.viewer.Viewer, test_mode=False):
         super().__init__()
