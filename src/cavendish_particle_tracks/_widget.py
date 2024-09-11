@@ -16,6 +16,7 @@ from dask_image.imread import imread
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
     QAbstractItemView,
+    QApplication,
     QComboBox,
     QFileDialog,
     QMessageBox,
@@ -334,15 +335,28 @@ class ParticleTracksWidget(QWidget):
             print("Modified particle ", selected_row)
             print(self.data[selected_row])
 
-    def _on_click_decay_angles(self) -> None:
+    def _on_click_decay_angles(self) -> DecayAnglesDialog:
         """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, DecayAnglesDialog):
+                napari.utils.notifications.show_error(
+                    "Decay Angles dialog already open"
+                )
+                return widget
         dlg = DecayAnglesDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         dlg.move(point)
+        return dlg
 
     def _on_click_stereoshift(self) -> StereoshiftDialog:
         """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, StereoshiftDialog):
+                napari.utils.notifications.show_error(
+                    "Stereoshift dialog already open"
+                )
+                return widget
         dlg = StereoshiftDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
@@ -467,9 +481,6 @@ class ParticleTracksWidget(QWidget):
         print(self.data[-1])
         self.cb.setCurrentIndex(0)
 
-        # # napari notifications
-        # napari.utils.notifications.show_info("I created a new particle")
-
     def _on_click_delete_particle(self) -> None:
         """Delete particle from table and data"""
         try:
@@ -492,7 +503,12 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_magnification(self) -> MagnificationDialog:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
-
+        for widget in QApplication.topLevelWidgets():
+            if isinstance(widget, MagnificationDialog):
+                napari.utils.notifications.show_error(
+                    "Magnification dialog already open"
+                )
+                return widget
         dlg = MagnificationDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
