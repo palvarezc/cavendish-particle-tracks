@@ -15,7 +15,7 @@ def test_cant_save_empty(cpt_widget, capsys):
 
     # check we see the error info
     captured = capsys.readouterr()
-    assert "No data to be saved" in captured.out
+    assert "There is no data in the table to save." in captured.out
 
 
 @pytest.mark.parametrize(

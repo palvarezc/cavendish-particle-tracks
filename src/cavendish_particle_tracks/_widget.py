@@ -526,6 +526,7 @@ class ParticleTracksWidget(QWidget):
             napari.utils.notifications.show_error(
                 "There is no data in the table to save."
             )
+            print("There is no data in the table to save.")
             return
 
         # setup UI
