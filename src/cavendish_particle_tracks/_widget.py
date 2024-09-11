@@ -123,7 +123,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 """
         )
         print(self.intro_text.text())
-        self.intro_text.setFont(QFont("Consolas", 5))
+        self.intro_text.setFont(QFont("Lucida Console", 5))
         self.intro_text.setTextFormat(Qt.TextFormat.PlainText)
         self.layout().addWidget(self.intro_text)
         layout_outer.addLayout(self.buttonbox)
@@ -148,7 +148,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         # update for 4d implementation as appropriate.
         return (self.viewer.camera.center[1], self.viewer.camera.center[2])
 
-    def _get_selected_points(self, layer_name="Points") -> np.array:
+    def _get_selected_points(self, layer_name="Radii and Lengths") -> np.array:
         """Returns array of selected points in the viewer"""
 
         # Filtering selected layer (layer names are unique)
