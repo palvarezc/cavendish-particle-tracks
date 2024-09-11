@@ -46,6 +46,14 @@ from ._stereoshift_dialog import StereoshiftDialog
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
 
+    @property
+    def layer_measurements(self):
+        return self._layer_measurements
+
+    @layer_measurements.setter
+    def layer_measurements(self, layer):
+        self._layer_measurements = layer
+
     def __init__(self, napari_viewer: napari.viewer.Viewer, test_mode=False):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
@@ -122,7 +130,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 """
         )
         print(self.intro_text.text())
-        self.intro_text.setFont(QFont("Consolas", 5))
+        self.intro_text.setFont(QFont("Lucida Console", 5))
         self.intro_text.setTextFormat(Qt.TextFormat.PlainText)
         self.layout().addWidget(self.intro_text)
         layout_outer.addLayout(self.buttonbox)
@@ -147,7 +155,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         # update for 4d implementation as appropriate.
         return (self.viewer.camera.center[1], self.viewer.camera.center[2])
 
-    def _get_selected_points(self, layer_name="Points") -> np.array:
+    def _get_selected_points(self, layer_name="Radii and Lengths") -> np.array:
         """Returns array of selected points in the viewer"""
 
         # Filtering selected points
@@ -484,13 +492,6 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
             self.msg.setText(
                 "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
             )
-            self.msg = QMessageBox()
-            self.msg.setIcon(QMessageBox.Warning)
-            self.msg.setWindowTitle("Data folder structure error")
-            self.msg.setStandardButtons(QMessageBox.Ok)
-            self.msg.setText(
-                "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
-            )
             self.msg.show()
             return
 
@@ -511,6 +512,19 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         concatenated_stack = da.stack(stacks, axis=0)
         self.viewer.add_image(concatenated_stack, name="Particle Tracks")
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
+
+        measurement_layer_present = False
+        for layer in self.viewer.layers:
+            if layer.name == "Radii and Lengths":
+                measurement_layer_present = True
+                break
+        if not measurement_layer_present:
+            self.layer_measurements = self.viewer.add_points(
+                name="Radii and Lengths",
+                size=20,
+                edge_width=7,
+                edge_width_is_relative=False,
+            )
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
