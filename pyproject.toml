@@ -26,8 +26,13 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering :: Image Processing",
 ]
-requires-python = ">=3.8"
-dependencies = ["imagecodecs", "napari>=0.4.18, <0.5.0", "numpy", "dask-image"]
+requires-python = ">=3.9"
+dependencies = [
+    "imagecodecs",    # for opening tiff images on macos
+    "napari > 0.5.2", # need to be able to open as stack (https://github.com/napari/napari/issues/7165)
+    "numpy",
+    "dask-image",     # for image loading
+]
 dynamic = ["version"]
 
 [project.readme]
