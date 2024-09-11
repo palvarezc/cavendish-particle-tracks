@@ -37,6 +37,7 @@ Then you can install this plugin with:
 ## Getting started
 
 **TODO** put some instructions with screenshots here.
+The user manual can be found [here](https://palvarezc.github.io/cavendish-particle-tracks/user-manual.html).
 
 ## License
 

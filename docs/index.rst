@@ -3,6 +3,7 @@
    :maxdepth: 2
    :hidden:
 
+   user-manual
    contributing
    api
 

@@ -25,3 +25,19 @@ Open PRs without a reviewer can be treated as a draft. When a reviewer is added 
 
 
 [tox]: https://tox.readthedocs.io/en/latest/
+
+## Contributing documentation
+We are using the [myst](https://myst-parser.readthedocs.io/en/latest/index.html) markdown parser.
+
+To test contributions to the documentation, this can be built locally following:
+
+    python -m pip install ".[docs]"
+    sphinx-build -W -b html docs docs/_build/html
+
+Python's built in http server can be then used to serve the page:
+
+    cd docs/_build/html
+    python -m http.server
+
+> [!NOTE]
+> On macOS you can directly do `open _build/html/index.html` to open the documentation in your browser.
