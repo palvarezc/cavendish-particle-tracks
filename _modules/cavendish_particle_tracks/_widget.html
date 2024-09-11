@@ -340,7 +340,6 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">napari</span>
@@ -856,22 +855,55 @@ document.write(`
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_click_save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save list of particles to csv file&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save list of particles to csv file.</span>
+<span class="sd">        When the &#39;Save&#39; button is clicked, the data is saved to a csv file with the current date and time as the filename.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No data to be saved&quot;</span><span class="p">)</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
+                <span class="s2">&quot;There is no data in the table to save.&quot;</span>
+            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;There is no data in the table to save.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">_%H-%M-%S&quot;</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span>
+        <span class="c1"># setup UI</span>
+        <span class="n">file_dialog</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">file_dialog</span><span class="o">.</span><span class="n">setAcceptMode</span><span class="p">(</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">AcceptSave</span><span class="p">)</span>
+        <span class="n">file_dialog</span><span class="o">.</span><span class="n">setNameFilter</span><span class="p">(</span><span class="s2">&quot;CSV files (*.csv)&quot;</span><span class="p">)</span>
+        <span class="n">file_dialog</span><span class="o">.</span><span class="n">setDefaultSuffix</span><span class="p">(</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span>
+        <span class="c1"># retrieve image folder</span>
+        <span class="n">file_name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">file_dialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="s2">&quot;Save file&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;./&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;CSV files (*.csv)&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;CSV files (*.csv)&quot;</span><span class="p">,</span>
+            <span class="n">QFileDialog</span><span class="o">.</span><span class="n">DontUseNativeDialog</span><span class="p">,</span>
+        <span class="p">)</span>
 
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;UTF8&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">file_name</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">}:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
+            <span class="n">file_name</span> <span class="o">+=</span> <span class="s2">&quot;.csv&quot;</span>
+
+        <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">file_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Warning</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Invalid file type&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ok</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;The file must be a CSV file. Please try again.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;UTF8&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="c1"># write the header</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_vars_to_save</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="c1"># write the data</span>
             <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">([</span><span class="n">particle</span><span class="o">.</span><span class="n">to_csv</span><span class="p">()</span> <span class="k">for</span> <span class="n">particle</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">])</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saved data to &quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
+        <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_info</span><span class="p">(</span><span class="s2">&quot;Data saved to &quot;</span> <span class="o">+</span> <span class="n">file_name</span><span class="p">)</span></div>
 
 </pre></div>
 
