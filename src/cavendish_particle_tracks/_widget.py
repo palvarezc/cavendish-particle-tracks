@@ -523,11 +523,16 @@ class ParticleTracksWidget(QWidget):
         """
 
         if not len(self.data):
-            print("No data to be saved")
+            napari.utils.notifications.show_error(
+                "There is no data in the table to save."
+            )
             return
 
         # setup UI
         file_dialog = QFileDialog(self)
+        file_dialog.setAcceptMode(QFileDialog.AcceptSave)
+        file_dialog.setNameFilter("CSV files (*.csv)")
+        file_dialog.setDefaultSuffix("csv")
         # retrieve image folder
         file_name, _ = file_dialog.getSaveFileName(
             self,
@@ -541,7 +546,10 @@ class ParticleTracksWidget(QWidget):
         if file_name in {"", None}:
             return
 
-        if file_name[-4:] != ".csv":
+        if not file_name.endswith(".csv"):
+            file_name += ".csv"
+
+        if "." in file_name[:-4]:
             self.msg = QMessageBox()
             self.msg.setIcon(QMessageBox.Warning)
             self.msg.setWindowTitle("Invalid file type")
@@ -557,4 +565,4 @@ class ParticleTracksWidget(QWidget):
             # write the data
             f.writelines([particle.to_csv() for particle in self.data])
 
-        print("Saved data to ", file_name)
+        napari.utils.notifications.show_info("Data saved to " + file_name)
