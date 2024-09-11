@@ -171,11 +171,6 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         def _on_layerlist_changed(event):
             self.set_btn_availability()
 
-    @property
-    def camera_center(self):
-        # update for 4d implementation as appropriate.
-        return (self.viewer.camera.center[1], self.viewer.camera.center[2])
-
     def _get_selected_points(self, layer_name="Radii and Lengths") -> np.array:
         """Returns array of selected points in the viewer"""
 
