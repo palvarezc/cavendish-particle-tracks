@@ -143,10 +143,7 @@ class DecayAnglesDialog(QDialog):
 
         # # Populate the table
         for slope, intercept, track in zip(
-            self.textboxes_slope,
-            self.textboxes_intercept,
-            tracks,
-            strict=False,
+            self.textboxes_slope, self.textboxes_intercept, tracks
         ):
             slope.setText(str(track[0]))
             intercept.setText(str(track[1]))

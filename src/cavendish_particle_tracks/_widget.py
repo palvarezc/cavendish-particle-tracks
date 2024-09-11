@@ -405,7 +405,7 @@ class ParticleTracksWidget(QWidget):
             return
 
         for subdir, stack_name in zip(
-            folder_subdirs, ["stack1", "stack2", "stack3"], strict=False
+            folder_subdirs, ["stack1", "stack2", "stack3"]
         ):
             stack = imread(subdir + "/*")
             self.viewer.add_image(stack, name=stack_name)
