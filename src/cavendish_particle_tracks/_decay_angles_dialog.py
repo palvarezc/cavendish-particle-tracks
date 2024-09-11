@@ -84,7 +84,9 @@ class DecayAnglesDialog(QDialog):
 
     def _setup_decayangles_layer(self):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
-
+        for layer in self.parent.viewer.layers:
+            if layer.name == "Decay Angles Tool":
+                return layer
         origin_x = self.parent.camera_center[0]
         # note down why this is preferred....
         origin_y = self.parent.camera_center[1]
