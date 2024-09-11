@@ -117,7 +117,4 @@ def test_stereoshift_save_to_table_fails_with_empty_table(cpt_widget, capsys):
     dlg._on_click_save_to_table()
     captured = capsys.readouterr()
 
-    assert (
-        "ERROR: There are no particles in the table."
-        in captured.out
-    )
+    assert "ERROR: There are no particles in the table." in captured.out
