@@ -13,6 +13,7 @@ from typing import List
 
 import dask.array as da
 import napari
+import napari.layers
 import numpy as np
 from dask_image.imread import imread
 from qtpy.QtCore import QPoint, Qt
@@ -46,13 +47,26 @@ from ._stereoshift_dialog import StereoshiftDialog
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
 
-    @property
-    def layer_measurements(self):
-        return self._layer_measurements
+    # TODO do this properly later.
+    #    @property
+    #    def layer_measurements(self) -> napari.layers.Points:
+    #        return self.layer_measurements
 
-    @layer_measurements.setter
-    def layer_measurements(self, layer):
-        self._layer_measurements = layer
+    #    @layer_measurements.setter
+    #    def layer_measurements(self, layer):
+    #        self._layer_measurements = layer
+
+    def create_layer_measurements(self):
+        # change layer name when redoing properly...
+        for layer in self.viewer.layers:
+            if layer.name == "Points":
+                return
+        self.layer_measurements = self.viewer.add_points(
+            name="Points",
+            size=20,
+            edge_width=7,
+            edge_width_is_relative=False,
+        )
 
     def __init__(self, napari_viewer: napari.viewer.Viewer, test_mode=False):
         super().__init__()
@@ -137,6 +151,8 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         self.layout().addWidget(self.table)
 
         self.set_UI_image_loaded(False, test_mode)
+        if test_mode:
+            self.create_layer_measurements()
 
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
@@ -512,19 +528,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         concatenated_stack = da.stack(stacks, axis=0)
         self.viewer.add_image(concatenated_stack, name="Particle Tracks")
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
-
-        measurement_layer_present = False
-        for layer in self.viewer.layers:
-            if layer.name == "Radii and Lengths":
-                measurement_layer_present = True
-                break
-        if not measurement_layer_present:
-            self.layer_measurements = self.viewer.add_points(
-                name="Radii and Lengths",
-                size=20,
-                edge_width=7,
-                edge_width_is_relative=False,
-            )
+        self.create_layer_measurements()
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to

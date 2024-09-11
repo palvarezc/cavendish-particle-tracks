@@ -289,7 +289,7 @@ def test_load_data(
     )
 
     if expect_data_loaded:
-        assert len(cpt_widget.viewer.layers) == 1
+        assert len(cpt_widget.viewer.layers) == 2
         assert cpt_widget.viewer.layers[0].name == "Particle Tracks"
         assert cpt_widget.viewer.layers[0].ndim == 4
     else:
