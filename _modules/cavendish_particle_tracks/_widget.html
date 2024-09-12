@@ -340,7 +340,6 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">napari</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -438,7 +437,7 @@ document.write(`
         <span class="c1"># TODO: include self.stsh in the logic, depending on what it actually ends up doing</span>
 
         <span class="c1"># Data analysis</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">NewParticle</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">NewParticle</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># might not need this eventually</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mag_a</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0e6</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mag_b</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0e6</span>
