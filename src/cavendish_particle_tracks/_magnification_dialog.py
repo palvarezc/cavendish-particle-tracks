@@ -1,8 +1,3 @@
-from typing import List, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ._widget import ParticleTracksWidget
-
 from qtpy.QtWidgets import (
     QComboBox,
     QDialog,
@@ -105,7 +100,9 @@ class MagnificationDialog(QDialog):
         #    return self.parent.viewer.add_points(name="Magnification")
         #
         # self.cal_layer = create_retrieve_magnification_layer(self)
-        self.cal_layer = self.parent.viewer.add_points(name="Magnification")
+        self.cal_layer = self.parent.viewer.add_points(
+            name="Points_Calibration"
+        )
         self.a = parent.mag_a
         self.b = parent.mag_b
 
@@ -141,7 +138,9 @@ class MagnificationDialog(QDialog):
     def _add_coords(self, fiducial: int) -> list[float]:
         """When 'Add' is selected, the selected point is added to the corresponding fiducial text box"""
 
-        selected_points = self.parent._get_selected_points("Magnification")
+        selected_points = self.parent._get_selected_points(
+            "Points_Calibration"
+        )
 
         # Forcing only 1 points
         if len(selected_points) != 1:

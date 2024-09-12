@@ -18,7 +18,6 @@ from qtpy.QtCore import QPoint, Qt
 from qtpy.QtGui import QFont
 from qtpy.QtWidgets import (
     QAbstractItemView,
-    QApplication,
     QComboBox,
     QFileDialog,
     QGridLayout,
@@ -437,12 +436,12 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 
     def _on_click_stereoshift(self) -> StereoshiftDialog:
         """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
-        for widget in QApplication.topLevelWidgets():
-            if isinstance(widget, StereoshiftDialog):
-                napari.utils.notifications.show_error(
-                    "Stereoshift dialog already open"
-                )
-                return widget
+        # for widget in QApplication.topLevelWidgets():
+        #    if isinstance(widget, StereoshiftDialog):
+        #        napari.utils.notifications.show_error(
+        #            "Stereoshift dialog already open"
+        #        )
+        #        return widget
         dlg = StereoshiftDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
@@ -589,12 +588,13 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 
     def _on_click_magnification(self) -> MagnificationDialog:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
-        for widget in QApplication.topLevelWidgets():
-            if isinstance(widget, MagnificationDialog):
-                napari.utils.notifications.show_error(
-                    "Magnification dialog already open"
-                )
-                return widget
+        # TODO disabled until fix found.
+        # for widget in QApplication.topLevelWidgets():
+        #    if isinstance(widget, MagnificationDialog):
+        #        napari.utils.notifications.show_error(
+        #            "Magnification dialog already open"
+        #        )
+        #        return widget
         dlg = MagnificationDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
