@@ -274,38 +274,38 @@ class StereoshiftDialog(QDialog):
             self.parent.data[selected_row].stereoshift = self.point_stereoshift
             self.parent.data[selected_row].depth_cm = self.point_depth
 
-        # Propagate to parent table
-        for i in range(2):
+            # Propagate to parent table
+            for i in range(2):
+                self.parent.table.setItem(
+                    selected_row,
+                    self.parent._get_table_column_index("sf" + str(i + 1)),
+                    QTableWidgetItem(str(self.spoints[i])),
+                )
+                self.parent.table.setItem(
+                    selected_row,
+                    self.parent._get_table_column_index("sp" + str(i + 1)),
+                    QTableWidgetItem(str(self.spoints[i + 2])),
+                )
             self.parent.table.setItem(
                 selected_row,
-                self.parent._get_table_column_index("sf" + str(i + 1)),
-                QTableWidgetItem(str(self.spoints[i])),
+                self.parent._get_table_column_index("shift_fiducial"),
+                QTableWidgetItem(str(self.shift_fiducial)),
             )
             self.parent.table.setItem(
                 selected_row,
-                self.parent._get_table_column_index("sp" + str(i + 1)),
-                QTableWidgetItem(str(self.spoints[i + 2])),
+                self.parent._get_table_column_index("shift_point"),
+                QTableWidgetItem(str(self.shift_point)),
             )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("shift_fiducial"),
-            QTableWidgetItem(str(self.shift_fiducial)),
-        )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("shift_point"),
-            QTableWidgetItem(str(self.shift_point)),
-        )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("stereoshift"),
-            QTableWidgetItem(str(self.point_stereoshift)),
-        )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("depth_cm"),
-            QTableWidgetItem(str(self.point_depth)),
-        )
+            self.parent.table.setItem(
+                selected_row,
+                self.parent._get_table_column_index("stereoshift"),
+                QTableWidgetItem(str(self.point_stereoshift)),
+            )
+            self.parent.table.setItem(
+                selected_row,
+                self.parent._get_table_column_index("depth_cm"),
+                QTableWidgetItem(str(self.point_depth)),
+            )
 
     def cancel(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
