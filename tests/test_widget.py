@@ -267,17 +267,22 @@ def test_load_data(
     reload,
 ):
     """Test loading of images in a folder as 4D image layer with width, height, event, view dimensions."""
+
     data_layer_index = 0
     if reload:
         cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
             name="Radii and Lengths"
         )
         data_layer_index = 1
+
+    resolution = 8400 if expect_data_loaded else 10
     for subdir, n in zip(data_subdirs, image_count):
         p = tmp_path / subdir
         p.mkdir()
         for i in range(n):
-            data = np.random.randint(0, 255, (256, 256), "uint8")
+            data = np.random.randint(
+                0, 255, (resolution, resolution, 3), "uint8"
+            )
             tf.imwrite(p / f"temp{i}.tif", data)
 
     def set_directory_and_close(dialog):
