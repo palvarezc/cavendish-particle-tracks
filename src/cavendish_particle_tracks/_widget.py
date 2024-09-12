@@ -8,7 +8,6 @@ Replace code below according to your needs.
 """
 
 import glob
-from typing import List
 
 import napari
 import numpy as np
@@ -104,7 +103,7 @@ class ParticleTracksWidget(QWidget):
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
         # Data analysis
-        self.data: List[NewParticle] = []
+        self.data: list[NewParticle] = []
         # might not need this eventually
         self.mag_a = -1.0e6
         self.mag_b = -1.0e6

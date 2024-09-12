@@ -1,5 +1,3 @@
-from typing import List
-
 from qtpy.QtWidgets import (
     QComboBox,
     QDialog,
@@ -131,7 +129,7 @@ class MagnificationDialog(QDialog):
         self.b2.name = self.cbb2.currentText()
         self.b2.x, self.b2.y = self._add_coords(3)
 
-    def _add_coords(self, fiducial: int) -> List[float]:
+    def _add_coords(self, fiducial: int) -> list[float]:
         """When 'Add' is selected, the selected point is added to the corresponding fiducial text box"""
 
         selected_points = self.parent._get_selected_points(
