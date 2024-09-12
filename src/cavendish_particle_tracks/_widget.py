@@ -425,11 +425,7 @@ class ParticleTracksWidget(QWidget):
         self.viewer.add_image(concatenated_stack, name="Particle Tracks")
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
 
-        measurement_layer_present = False
-        for layer in self.viewer.layers:
-            if layer.name == "Radii and Lengths":
-                measurement_layer_present = True
-                break
+        measurement_layer_present = "Radii and Lengths" in self.viewer.layers
 
         if not measurement_layer_present:
             self.layer_measurements = self.viewer.add_points(
