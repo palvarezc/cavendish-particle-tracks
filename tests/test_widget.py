@@ -182,7 +182,7 @@ def test_load_data(
     expect_data_loaded,
     reload,
 ):
-    """Test loading of images in a folder as stack associated to a certain view"""
+    """Test loading of images in a folder as 4D image layer with width, height, event, view dimensions."""
     data_layer_index = 0
     if reload:
         cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
