@@ -26,10 +26,10 @@ def test_calculate_radius_ui(cpt_widget, capsys):
     cpt_widget.cb.setCurrentIndex(1)
 
     # add three points to the points layer and select them
-    cpt_widget.viewer.add_points([(0, 1), (1, 0), (0, -1)])
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = {0, 1, 2}
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+        [(0, 1), (1, 0), (0, -1)], name="Radii and Lengths"
+    )
+    cpt_widget.layer_measurements.selected_data = {0, 1, 2}
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
@@ -59,12 +59,12 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
-    cpt_widget.viewer.add_points(points)
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+        points, name="Radii and Lengths"
+    )
 
     # select the wrong number of points
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = set(range(npoints))
+    cpt_widget.layer_measurements.selected_data = set(range(npoints))
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
@@ -116,10 +116,10 @@ def test_calculate_length_ui(cpt_widget, capsys):
     cpt_widget.cb.setCurrentIndex(1)
 
     # add three points to the points layer and select them
-    cpt_widget.viewer.add_points([(0, 1), (0, 0)])
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = {0, 1}
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+        [(0, 1), (0, 0)], name="Radii and Lengths"
+    )
+    cpt_widget.layer_measurements.selected_data = {0, 1}
 
     # click the calculate decay length button
     cpt_widget._on_click_length()
@@ -146,12 +146,12 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
-    cpt_widget.viewer.add_points(points)
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+        points, name="Radii and Lengths"
+    )
 
     # select the wrong number of points
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = set(range(npoints))
+    cpt_widget.layer_measurements.selected_data = set(range(npoints))
 
     # click the calculate decay length button
     cpt_widget._on_click_length()

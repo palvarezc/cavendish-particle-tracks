@@ -116,22 +116,17 @@ class ParticleTracksWidget(QWidget):
         # update for 4d implementation as appropriate.
         return (self.viewer.camera.center[1], self.viewer.camera.center[2])
 
-    def _get_selected_points(self, layer_name="Points") -> np.array:
+    def _get_selected_points(self, layer_name="Radii and Lengths") -> np.array:
         """Returns array of selected points in the viewer"""
 
-        # Filtering selected points
+        # Filtering selected layer (layer names are unique)
         points_layers = [
             layer for layer in self.viewer.layers if layer.name == layer_name
         ]
-        try:
-            selected_points = np.array(
-                [
-                    points_layers[0].data[i]
-                    for i in points_layers[0].selected_data
-                ]
-            )
-        except IndexError:
-            selected_points = []
+        # Returning selected points in the layer
+        selected_points = np.array(
+            [points_layers[0].data[i] for i in points_layers[0].selected_data]
+        )
         return selected_points
 
     def _get_selected_row(self) -> np.array:
