@@ -55,22 +55,22 @@ class StereoshiftDialog(QDialog):
             # fmt:off
             points = [      # View 1                                                # View 2
                 [origin_x, origin_y, current_event],                [origin_x + 100/zoom_level, origin_y, current_event],                # Front L
-                [origin_x, origin_y-100/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-100/zoom_level, current_event]  # Front R
-                [origin_x, origin_y-200/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-200/zoom_level, current_event]  # Rear L
-                [origin_x, origin_y-300/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-300/zoom_level, current_event]  # Rear R
+                [origin_x, origin_y-100/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-100/zoom_level, current_event],  # Front R
+                [origin_x, origin_y-200/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-200/zoom_level, current_event],  # Rear L
+                [origin_x, origin_y-300/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-300/zoom_level, current_event],  # Rear R
             ]
             fiducial_labels = ["Front L View 1",  "Front L View 2",
                                "Front R View 1",  "Front R View 2",
                                "Rear L View 1",   "Rear R View 1"
                                "Front R View 2",  "Rear R View 2"]
 
-            colors = ["green", "red", 
-                      "green", "red"
-                      "green", "red"
-                      "green", "red"]
+            colors = ["green", "red",
+                      "green", "red",
+                      "green", "red",
+                      "green", "red",]
             symbols = ["x", "x",
                        "x", "x",
-                       "cross", "cross"
+                       "cross", "cross",
                        "cross", "cross"]
             # fmt:on
             text = {
@@ -162,9 +162,8 @@ class StereoshiftDialog(QDialog):
         def create_retrieve_layer(
             layer_name: str, origin_x, origin_y, zoom_level, current_event
         ) -> Layer:
-            for layer in self.parent.viewer.layers:
-                if layer.name == layer_name:
-                    return layer
+            if layer_name in self.parent.viewer.layers:
+                return self.parent.viewer.layers[layer_name]
             if layer_name == "Stereo_Fiducials":
                 return _setup_fiducial_layer(
                     origin_x, origin_y, zoom_level, current_event
@@ -436,7 +435,8 @@ class StereoshiftDialog(QDialog):
             combobox.addItems(FIDUCIAL_BACK.keys())
         else:
             combobox.addItems(FIDUCIAL_FRONT.keys())
-        combobox.currentIndexChanged.connect(self._on_click_fiducial)
+        # TODO fix
+        # combobox.currentIndexChanged.connect(self._on_click_fiducial)
         return combobox
 
     def _on_change_cmb_set_ref_plane(self) -> None:
