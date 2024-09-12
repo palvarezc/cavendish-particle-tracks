@@ -9,6 +9,7 @@ Replace code below according to your needs.
 
 import glob
 
+import dask.array
 import napari
 import numpy as np
 from dask_image.imread import imread
@@ -39,6 +40,8 @@ from ._stereoshift_dialog import StereoshiftDialog
 
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
+
+    layer_measurements: napari.layers.Points
 
     def __init__(self, napari_viewer: napari.viewer.Viewer):
         super().__init__()
@@ -113,22 +116,17 @@ class ParticleTracksWidget(QWidget):
         # update for 4d implementation as appropriate.
         return (self.viewer.camera.center[1], self.viewer.camera.center[2])
 
-    def _get_selected_points(self, layer_name="Points") -> np.array:
+    def _get_selected_points(self, layer_name="Radii and Lengths") -> np.array:
         """Returns array of selected points in the viewer"""
 
-        # Filtering selected points
+        # Filtering selected layer (layer names are unique)
         points_layers = [
             layer for layer in self.viewer.layers if layer.name == layer_name
         ]
-        try:
-            selected_points = np.array(
-                [
-                    points_layers[0].data[i]
-                    for i in points_layers[0].selected_data
-                ]
-            )
-        except IndexError:
-            selected_points = []
+        # Returning selected points in the layer
+        selected_points = np.array(
+            [points_layers[0].data[i] for i in points_layers[0].selected_data]
+        )
         return selected_points
 
     def _get_selected_row(self) -> np.array:
@@ -404,13 +402,33 @@ class ParticleTracksWidget(QWidget):
             self.msg.show()
             return
 
-        for subdir, stack_name in zip(
-            folder_subdirs, ["stack1", "stack2", "stack3"]
-        ):
-            stack = imread(subdir + "/*")
-            self.viewer.add_image(stack, name=stack_name)
-            # TODO: investigate the multiscale otption.
-        self.viewer.dims.axis_labels = ("Event", "Y", "X")
+        def crop(array):
+            # Crops view 1 and 2 to same size as view 3 by removing whitespace
+            # on left, as images align on the right.
+            # this number is the width of image 3.
+            magic_number_smallest_view_pixels = -8377
+            return array[:, :, magic_number_smallest_view_pixels:, :]
+
+        stacks = []
+        for subdir in folder_subdirs:
+            stack: dask.array.Array = imread(subdir + "/*")
+            stack = crop(stack)
+            stacks.append(stack)
+
+        # Concatenate stacks along new spatial dimension such that we have a view, and event slider
+        concatenated_stack = dask.array.stack(stacks, axis=0)
+        self.viewer.add_image(concatenated_stack, name="Particle Tracks")
+        self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
+
+        measurement_layer_present = "Radii and Lengths" in self.viewer.layers
+
+        if not measurement_layer_present:
+            self.layer_measurements = self.viewer.add_points(
+                name="Radii and Lengths",
+                size=20,
+                edge_width=7,
+                edge_width_is_relative=False,
+            )
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to

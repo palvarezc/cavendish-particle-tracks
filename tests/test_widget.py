@@ -26,10 +26,10 @@ def test_calculate_radius_ui(cpt_widget, capsys):
     cpt_widget.cb.setCurrentIndex(1)
 
     # add three points to the points layer and select them
-    cpt_widget.viewer.add_points([(0, 1), (1, 0), (0, -1)])
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = {0, 1, 2}
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+        [(0, 1), (1, 0), (0, -1)], name="Radii and Lengths"
+    )
+    cpt_widget.layer_measurements.selected_data = {0, 1, 2}
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
@@ -59,12 +59,12 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
-    cpt_widget.viewer.add_points(points)
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+        points, name="Radii and Lengths"
+    )
 
     # select the wrong number of points
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = set(range(npoints))
+    cpt_widget.layer_measurements.selected_data = set(range(npoints))
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
@@ -116,10 +116,10 @@ def test_calculate_length_ui(cpt_widget, capsys):
     cpt_widget.cb.setCurrentIndex(1)
 
     # add three points to the points layer and select them
-    cpt_widget.viewer.add_points([(0, 1), (0, 0)])
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = {0, 1}
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+        [(0, 1), (0, 0)], name="Radii and Lengths"
+    )
+    cpt_widget.layer_measurements.selected_data = {0, 1}
 
     # click the calculate decay length button
     cpt_widget._on_click_length()
@@ -146,12 +146,12 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
-    cpt_widget.viewer.add_points(points)
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+        points, name="Radii and Lengths"
+    )
 
     # select the wrong number of points
-    for layer in cpt_widget.viewer.layers:
-        if layer.name == "Points":
-            layer.selected_data = set(range(npoints))
+    cpt_widget.layer_measurements.selected_data = set(range(npoints))
 
     # click the calculate decay length button
     cpt_widget._on_click_length()
@@ -164,12 +164,13 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 
 
 @pytest.mark.parametrize(
-    "data_subdirs, image_count, expect_data_loaded",
+    "data_subdirs, image_count, expect_data_loaded, reload",
     [
-        (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True),
-        (["my_view1", "my_view2"], [2, 2], False),
-        (["my_view1", "my_view2", "my_view3"], [1, 2, 2], False),
-        (["my_view1", "my_view2", "no_view"], [2, 2, 2], False),
+        (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True, False),
+        (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True, True),
+        (["my_view1", "my_view2"], [2, 2], False, False),
+        (["my_view1", "my_view2", "my_view3"], [1, 2, 2], False, False),
+        (["my_view1", "my_view2", "no_view"], [2, 2, 2], False, False),
     ],
 )
 def test_load_data(
@@ -179,14 +180,25 @@ def test_load_data(
     data_subdirs,
     image_count,
     expect_data_loaded,
+    reload,
 ):
-    """Test loading of images in a folder as stack associated to a certain view"""
+    """Test loading of images in a folder as 4D image layer with width, height, event, view dimensions."""
 
+    data_layer_index = 0
+    if reload:
+        cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+            name="Radii and Lengths"
+        )
+        data_layer_index = 1
+
+    resolution = 8400 if expect_data_loaded else 10
     for subdir, n in zip(data_subdirs, image_count):
         p = tmp_path / subdir
         p.mkdir()
         for i in range(n):
-            data = np.random.randint(0, 255, (256, 256), "uint8")
+            data = np.random.randint(
+                0, 255, (resolution, resolution, 3), "uint8"
+            )
             tf.imwrite(p / f"temp{i}.tif", data)
 
     def set_directory_and_close(dialog):
@@ -204,12 +216,12 @@ def test_load_data(
     )
 
     if expect_data_loaded:
-        assert len(cpt_widget.viewer.layers) == 3
-        for i in range(3):
-            assert (
-                cpt_widget.viewer.layers[i].name == "stack" + str(i + 1)
-                and cpt_widget.viewer.layers[i].ndim == 3
-            )
+        assert len(cpt_widget.viewer.layers) == 2
+        assert (
+            cpt_widget.viewer.layers[data_layer_index].name
+            == "Particle Tracks"
+        )
+        assert cpt_widget.viewer.layers[data_layer_index].ndim == 4
     else:
         # def capture_msgbox():
         #    for widget in QApplication.topLevelWidgets():
@@ -227,3 +239,18 @@ def test_load_data(
         assert msgbox.text() == (
             "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
         )
+
+
+def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
+    """Test the show/hide buttons"""
+    assert cpt_widget.rad.isEnabled() is False
+    assert cpt_widget.lgth.isEnabled() is False
+    assert cpt_widget.ang.isEnabled() is False
+    cpt_widget.cb.setCurrentIndex(1)
+    assert cpt_widget.rad.isEnabled() is True
+    assert cpt_widget.lgth.isEnabled() is True
+    assert cpt_widget.ang.isEnabled() is False
+    cpt_widget.cb.setCurrentIndex(4)
+    assert cpt_widget.rad.isEnabled() is False
+    assert cpt_widget.lgth.isEnabled() is True
+    assert cpt_widget.ang.isEnabled() is True
