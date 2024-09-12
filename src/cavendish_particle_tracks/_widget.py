@@ -43,10 +43,9 @@ class ParticleTracksWidget(QWidget):
 
     layer_measurements: napari.layers.Points
 
-    def __init__(self, napari_viewer: napari.viewer.Viewer, test_mode=False):
+    def __init__(self, napari_viewer: napari.viewer.Viewer):
         super().__init__()
         self.viewer = napari_viewer
-        self.test_mode = test_mode
         # define QtWidgets
         self.load = QPushButton("Load data")
         self.cb = QComboBox()
@@ -417,8 +416,7 @@ class ParticleTracksWidget(QWidget):
         stacks = []
         for subdir in folder_subdirs:
             stack: dask.array.Array = imread(subdir + "/*")
-            if not self.test_mode:
-                stack = crop(stack)
+            stack = crop(stack)
             stacks.append(stack)
 
         # Concatenate stacks along new spatial dimension such that we have a view, and event slider
