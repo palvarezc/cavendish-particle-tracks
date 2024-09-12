@@ -47,7 +47,7 @@ class ParticleTracksWidget(QWidget):
 
     layer_measurements: napari.layers.Points
 
-    def __init__(self, napari_viewer: napari.viewer.Viewer, test_mode=False):
+    def __init__(self, napari_viewer: napari.viewer.Viewer, test_mode: bool = False):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
         self.test_mode = test_mode
