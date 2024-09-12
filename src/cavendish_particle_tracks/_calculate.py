@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import numpy as np
 
 from ._analysis import (
@@ -9,7 +7,7 @@ from ._analysis import (
     Fiducial,
 )
 
-Point = Tuple[float, float]
+Point = tuple[float, float]
 
 
 def radius(a: Point, b: Point, c: Point) -> float:
