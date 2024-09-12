@@ -224,3 +224,18 @@ def test_load_data(
         assert msgbox.text() == (
             "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
         )
+
+
+def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
+    """Test the show/hide buttons"""
+    assert cpt_widget.rad.isEnabled() is False
+    assert cpt_widget.lgth.isEnabled() is False
+    assert cpt_widget.ang.isEnabled() is False
+    cpt_widget.cb.setCurrentIndex(1)
+    assert cpt_widget.rad.isEnabled() is True
+    assert cpt_widget.lgth.isEnabled() is True
+    assert cpt_widget.ang.isEnabled() is False
+    cpt_widget.cb.setCurrentIndex(4)
+    assert cpt_widget.rad.isEnabled() is False
+    assert cpt_widget.lgth.isEnabled() is True
+    assert cpt_widget.ang.isEnabled() is True
