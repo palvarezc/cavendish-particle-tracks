@@ -41,6 +41,14 @@ from ._stereoshift_dialog import StereoshiftDialog
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
 
+    @property
+    def layer_measurements(self):
+        return self._layer_measurements
+
+    @layer_measurements.setter
+    def layer_measurements(self, layer):
+        self._layer_measurements = layer
+
     def __init__(self, napari_viewer: napari.viewer.Viewer, test_mode=False):
         super().__init__()
         self.viewer = napari_viewer
