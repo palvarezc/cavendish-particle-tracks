@@ -73,10 +73,10 @@ def test_calculate_radius_ui(
     cpt_widget.cmb_add_particle.setCurrentIndex(1)
 
     # add three points to the points layer and select them
-    points_layer = cpt_widget.viewer.add_points(
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
         [(0, 1), (1, 0), (0, -1)], name="Radii and Lengths"
     )
-    points_layer.selected_data = {0, 1, 2}
+    cpt_widget.layer_measurements.selected_data = {0, 1, 2}
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
@@ -108,12 +108,12 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
-    points_layer = cpt_widget.viewer.add_points(
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
         points, name="Radii and Lengths"
     )
 
     # select the wrong number of points
-    points_layer.selected_data = set(range(npoints))
+    cpt_widget.layer_measurements.selected_data = set(range(npoints))
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
@@ -200,10 +200,10 @@ def test_calculate_length_ui(
     cpt_widget.cmb_add_particle.setCurrentIndex(1)
 
     # add three points to the points layer and select them
-    points_layer = cpt_widget.viewer.add_points(
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
         [(0, 1), (0, 0)], name="Radii and Lengths"
     )
-    points_layer.selected_data = {0, 1}
+    cpt_widget.layer_measurements.selected_data = {0, 1}
 
     # click the calculate decay length button
     cpt_widget._on_click_length()
@@ -232,10 +232,12 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
-    points_layer = cpt_widget.viewer.add_points(
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
         points, name="Radii and Lengths"
     )
-    points_layer.selected_data = set(range(npoints))
+
+    # select the wrong number of points
+    cpt_widget.layer_measurements.selected_data = set(range(npoints))
 
     # click the calculate decay length button
     cpt_widget._on_click_length()
