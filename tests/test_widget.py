@@ -164,7 +164,7 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 
 
 @pytest.mark.parametrize(
-    "data_subdirs, image_count, expect_data_loaded, reload"
+    "data_subdirs, image_count, expect_data_loaded, reload",
     [
         (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True, False),
         (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True, True),
@@ -183,8 +183,12 @@ def test_load_data(
     reload,
 ):
     """Test loading of images in a folder as stack associated to a certain view"""
+    data_layer_index = 0
     if reload:
-        cpt_widget.layer_measurements(name="Radii and Lengths")
+        cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+            name="Radii and Lengths"
+        )
+        data_layer_index = 1
     for subdir, n in zip(data_subdirs, image_count):
         p = tmp_path / subdir
         p.mkdir()
@@ -208,8 +212,11 @@ def test_load_data(
 
     if expect_data_loaded:
         assert len(cpt_widget.viewer.layers) == 2
-        assert cpt_widget.viewer.layers[0].name == "Particle Tracks"
-        assert cpt_widget.viewer.layers[0].ndim == 4
+        assert (
+            cpt_widget.viewer.layers[data_layer_index].name
+            == "Particle Tracks"
+        )
+        assert cpt_widget.viewer.layers[data_layer_index].ndim == 4
     else:
         # def capture_msgbox():
         #    for widget in QApplication.topLevelWidgets():
