@@ -9,7 +9,7 @@ def test_decay_angles_dialog(cpt_widget, qtbot: QtBot):
     qtbot.addWidget(dialog)
 
     # show dialog and check that it closes
-    dialog.show()
-    qtbot.waitForWindowShown(dialog)
+    with qtbot.waitExposed(dialog):
+        dialog.show()
     dialog.close()
     qtbot.waitSignals([dialog.rejected], timeout=5000)

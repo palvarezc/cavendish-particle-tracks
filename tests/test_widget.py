@@ -246,12 +246,13 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 
 
 @pytest.mark.parametrize(
-    "data_subdirs, image_count, expect_data_loaded",
+    "data_subdirs, image_count, expect_data_loaded, reload",
     [
-        (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True),
-        (["my_view1", "my_view2"], [2, 2], False),
-        (["my_view1", "my_view2", "my_view3"], [1, 2, 2], False),
-        (["my_view1", "my_view2", "no_view"], [2, 2, 2], False),
+        (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True, False),
+        (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True, True),
+        (["my_view1", "my_view2"], [2, 2], False, False),
+        (["my_view1", "my_view2", "my_view3"], [1, 2, 2], False, False),
+        (["my_view1", "my_view2", "no_view"], [2, 2, 2], False, False),
     ],
 )
 def test_load_data(
@@ -261,9 +262,15 @@ def test_load_data(
     data_subdirs: list[str],
     image_count: list[int],
     expect_data_loaded: bool,
+    reload,
 ):
-    """Test loading of images in a folder as stack associated to a certain view"""
-
+    """Test loading of images in a folder as 4D image layer with width, height, event, view dimensions."""
+    data_layer_index = 0
+    if reload:
+        cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+            name="Radii and Lengths"
+        )
+        data_layer_index = 1
     for subdir, n in zip(data_subdirs, image_count):
         p = tmp_path / subdir
         p.mkdir()
@@ -287,8 +294,11 @@ def test_load_data(
 
     if expect_data_loaded:
         assert len(cpt_widget.viewer.layers) == 2
-        assert cpt_widget.viewer.layers[0].name == "Particle Tracks"
-        assert cpt_widget.viewer.layers[0].ndim == 4
+        assert (
+            cpt_widget.viewer.layers[data_layer_index].name
+            == "Particle Tracks"
+        )
+        assert cpt_widget.viewer.layers[data_layer_index].ndim == 4
     else:
         # def capture_msgbox():
         #    for widget in QApplication.topLevelWidgets():
@@ -306,3 +316,18 @@ def test_load_data(
         assert msgbox.text() == (
             "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
         )
+
+
+def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
+    """Test the show/hide buttons"""
+    assert cpt_widget.rad.isEnabled() is False
+    assert cpt_widget.lgth.isEnabled() is False
+    assert cpt_widget.ang.isEnabled() is False
+    cpt_widget.cb.setCurrentIndex(1)
+    assert cpt_widget.rad.isEnabled() is True
+    assert cpt_widget.lgth.isEnabled() is True
+    assert cpt_widget.ang.isEnabled() is False
+    cpt_widget.cb.setCurrentIndex(4)
+    assert cpt_widget.rad.isEnabled() is False
+    assert cpt_widget.lgth.isEnabled() is True
+    assert cpt_widget.ang.isEnabled() is True

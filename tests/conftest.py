@@ -1,3 +1,6 @@
+import time
+from collections.abc import Callable
+
 import pytest
 
 from cavendish_particle_tracks._widget import ParticleTracksWidget
