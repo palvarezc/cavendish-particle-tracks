@@ -500,7 +500,8 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
             # Crops view 1 and 2 to same size as view 3 by removing whitespace
             # on left, as images align on the right.
             # this number is the width of image 3.
-            return array[:, :, -8377:, :]
+            magic_number_smallest_view_pixels = -8377
+            return array[:, :, magic_number_smallest_view_pixels:, :]
 
         stacks = []
         for subdir in folder_subdirs:
