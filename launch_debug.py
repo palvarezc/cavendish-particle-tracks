@@ -4,7 +4,7 @@ from napari import Viewer, run
 
 viewer = Viewer()
 dock_widget, plugin_widget = viewer.window.add_plugin_dock_widget(
-    "cavendish-particle-tracks", "Cavendish Particle Tracks Analysis"
+    "cavendish-particle-tracks",
 )
 
 viewer.window.add_dock_widget(dock_widget, area="bottom")

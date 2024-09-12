@@ -1,5 +1,3 @@
-from typing import List
-
 from qtpy.QtWidgets import (
     QComboBox,
     QDialog,
@@ -95,10 +93,16 @@ class MagnificationDialog(QDialog):
 
         self.layout().addWidget(self.buttonBox, 9, 0, 1, 3)
 
+        # def create_retrieve_magnification_layer(self):
+        #    for layer in self.parent.viewer.layers:
+        #        if layer.name == "Magnification":
+        #            return layer
+        #    return self.parent.viewer.add_points(name="Magnification")
+        #
+        # self.cal_layer = create_retrieve_magnification_layer(self)
         self.cal_layer = self.parent.viewer.add_points(
             name="Points_Calibration"
         )
-
         self.a = parent.mag_a
         self.b = parent.mag_b
 
@@ -131,7 +135,7 @@ class MagnificationDialog(QDialog):
         self.b2.name = self.cbb2.currentText()
         self.b2.x, self.b2.y = self._add_coords(3)
 
-    def _add_coords(self, fiducial: int) -> List[float]:
+    def _add_coords(self, fiducial: int) -> list[float]:
         """When 'Add' is selected, the selected point is added to the corresponding fiducial text box"""
 
         selected_points = self.parent._get_selected_points(
@@ -177,7 +181,7 @@ class MagnificationDialog(QDialog):
         return super().accept()
 
     def reject(self) -> None:
-        """On reject remove the points_Calibration layer"""
+        """On reject remove the magnification layer"""
 
         # This is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.select_previous()

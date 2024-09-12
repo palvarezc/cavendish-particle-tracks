@@ -26,14 +26,12 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering :: Image Processing",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
-    "imagecodecs",
-    "napari>=0.5.2, <0.6.0",
+    "imagecodecs",           # for opening tiff images on macos
+    "napari>=0.5.2, <0.6.0", # need to be able to open as stack (https://github.com/napari/napari/issues/7165)
     "numpy",
-    # magicgui
-    "qtpy",
-    "dask-image",
+    "dask-image",     # for image loading
 ]
 dynamic = ["version"]
 
@@ -87,12 +85,12 @@ write_to = "src/cavendish_particle_tracks/_version.py"
 
 [tool.black]
 line-length = 79
-target-version = ['py38', 'py39', 'py310', 'py311']
+target-version = ['py39', 'py310', 'py311', 'py312']
 
 
 [tool.ruff]
 line-length = 79
-target-version = "py38"
+target-version = "py39"
 fix = true
 
 [tool.ruff.lint]
@@ -154,6 +152,7 @@ python =
     3.9: py39
     3.10: py310
     3.11: py311
+    3.12: py312
 
 [gh-actions:env]
 PLATFORM =

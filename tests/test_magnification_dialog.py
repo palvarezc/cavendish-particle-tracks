@@ -5,6 +5,7 @@ from cavendish_particle_tracks._analysis import Fiducial
 from cavendish_particle_tracks._calculate import CHAMBER_DEPTH as CD
 from cavendish_particle_tracks._calculate import FIDUCIAL_BACK as FB
 from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
+from cavendish_particle_tracks._magnification_dialog import MagnificationDialog
 
 
 @pytest.mark.parametrize(
@@ -47,7 +48,7 @@ def test_magnification_ui(
     - Magnification is calculated on click of calculate button.
     - Magnification is propagated to the table when "ok" is clicked.
     """
-    dlg = cpt_widget._on_click_magnification()
+    dlg: MagnificationDialog = cpt_widget._on_click_magnification()
 
     # add fiducials
     fiducials = [

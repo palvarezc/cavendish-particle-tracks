@@ -9,9 +9,8 @@ Replace code below according to your needs.
 
 import glob
 from datetime import datetime
-from typing import List
 
-import dask.array as da
+import dask.array
 import napari
 import numpy as np
 from dask_image.imread import imread
@@ -47,13 +46,7 @@ from ._testdims import TestDimsDialog
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
 
-    @property
-    def layer_measurements(self):
-        return self._layer_measurements
-
-    @layer_measurements.setter
-    def layer_measurements(self, layer):
-        self._layer_measurements = layer
+    layer_measurements: napari.layers.Points
 
     dev_mode = True
 
@@ -162,7 +155,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
         # Data analysis
-        self.data: List[NewParticle] = []
+        self.data: list[NewParticle] = []
         # might not need this eventually
         self.mag_a = -1.0e6
         self.mag_b = -1.0e6
@@ -443,15 +436,28 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
             print("Modified particle ", selected_row)
             print(self.data[selected_row])
 
-    def _on_click_decay_angles(self) -> None:
+    def _on_click_decay_angles(self) -> DecayAnglesDialog:
         """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
+        # for widget in QApplication.topLevelWidgets():
+        ##    if isinstance(widget, DecayAnglesDialog):
+        ##        napari.utils.notifications.show_error(
+        ##            "Decay Angles dialog already open"
+        ##        )
+        #        return widget
         dlg = DecayAnglesDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         dlg.move(point)
+        return dlg
 
     def _on_click_stereoshift(self) -> StereoshiftDialog:
         """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
+        # for widget in QApplication.topLevelWidgets():
+        #    if isinstance(widget, StereoshiftDialog):
+        #        napari.utils.notifications.show_error(
+        #            "Stereoshift dialog already open"
+        #        )
+        #        return widget
         dlg = StereoshiftDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
@@ -514,32 +520,29 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         def crop(array):
             # Crops view 1 and 2 to same size as view 3 by removing whitespace
             # on left, as images align on the right.
+            # this number is the width of image 3.
             return array[:, :, -8377:, :]
 
         stacks = []
         for subdir in folder_subdirs:
-            stack: da = imread(subdir + "/*")
+            stack: dask.array.Array = imread(subdir + "/*")
             if not self.test_mode:
                 stack = crop(stack)
             stacks.append(stack)
-            # TODO: investigate the multiscale otption.
 
         # Concatenate stacks along new spatial dimension such that we have a view, and event slider
-        concatenated_stack = da.stack(stacks, axis=0)
+        concatenated_stack = dask.array.stack(stacks, axis=0)
         self.viewer.add_image(concatenated_stack, name="Particle Tracks")
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
 
-        measurement_layer_present = False
-        for layer in self.viewer.layers:
-            if layer.name == "Radii and Lengths":
-                measurement_layer_present = True
-                break
+        measurement_layer_present = "Radii and Lengths" in self.viewer.layers
+
         if not measurement_layer_present:
             self.layer_measurements = self.viewer.add_points(
                 name="Radii and Lengths",
                 size=20,
-                border_width=7,
-                border_width_is_relative=False,
+                edge_width=7,
+                edge_width_is_relative=False,
             )
 
     def _on_click_new_particle(self) -> None:
@@ -579,9 +582,6 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         print(self.data[-1])
         self.cmb_add_particle.setCurrentIndex(0)
 
-        # # napari notifications
-        # napari.utils.notifications.show_info("I created a new particle")
-
     def _on_click_delete_particle(self) -> None:
         """Delete particle from table and data"""
         try:
@@ -604,7 +604,13 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 
     def _on_click_magnification(self) -> MagnificationDialog:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
-
+        # TODO disabled until fix found.
+        # for widget in QApplication.topLevelWidgets():
+        #    if isinstance(widget, MagnificationDialog):
+        #        napari.utils.notifications.show_error(
+        #            "Magnification dialog already open"
+        #        )
+        #        return widget
         dlg = MagnificationDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())

@@ -141,7 +141,6 @@ def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
     cpt_widget.viewer.add_image(
         np.random.random((100, 100)), name="Particle Tracks"
     )
-
     # # If we manage to make the cpt_widget visible
     # assert cpt_widget.intro_text.isVisible() is False
     # assert cpt_widget.btn_load.isVisible() is False
@@ -155,14 +154,17 @@ def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
     # assert cpt_widget.btn_magnification.isVisible() is True
     # assert cpt_widget.table.isVisible() is True
     # assert cpt_widget.cal.isVisible() is True
-
-    assert cpt_widget.cmb_add_particle.isEnabled() is True
-    assert cpt_widget.btn_delete_particle.isEnabled() is False
     assert cpt_widget.btn_radius.isEnabled() is False
-    cpt_widget.cmb_add_particle.setCurrentIndex(1)
-    assert cpt_widget.btn_delete_particle.isEnabled() is True
-    assert cpt_widget.btn_radius.isEnabled() is True
+    assert cpt_widget.btn_length.isEnabled() is False
     assert cpt_widget.btn_decayangle.isEnabled() is False
+    cpt_widget.cmb_add_particle.setCurrentIndex(1)
+    assert cpt_widget.btn_radius.isEnabled() is True
+    assert cpt_widget.btn_length.isEnabled() is True
+    assert cpt_widget.btn_decayangle.isEnabled() is False
+    cpt_widget.cmb_add_particle.setCurrentIndex(4)
+    assert cpt_widget.btn_radius.isEnabled() is False
+    assert cpt_widget.btn_length.isEnabled() is True
+    assert cpt_widget.btn_decayangle.isEnabled() is True
 
 
 def test_delete_particle_ui(cpt_widget: ParticleTracksWidget):
@@ -246,12 +248,13 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 
 
 @pytest.mark.parametrize(
-    "data_subdirs, image_count, expect_data_loaded",
+    "data_subdirs, image_count, expect_data_loaded, reload",
     [
-        (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True),
-        (["my_view1", "my_view2"], [2, 2], False),
-        (["my_view1", "my_view2", "my_view3"], [1, 2, 2], False),
-        (["my_view1", "my_view2", "no_view"], [2, 2, 2], False),
+        (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True, False),
+        (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True, True),
+        (["my_view1", "my_view2"], [2, 2], False, False),
+        (["my_view1", "my_view2", "my_view3"], [1, 2, 2], False, False),
+        (["my_view1", "my_view2", "no_view"], [2, 2, 2], False, False),
     ],
 )
 def test_load_data(
@@ -261,9 +264,15 @@ def test_load_data(
     data_subdirs: list[str],
     image_count: list[int],
     expect_data_loaded: bool,
+    reload,
 ):
-    """Test loading of images in a folder as stack associated to a certain view"""
-
+    """Test loading of images in a folder as 4D image layer with width, height, event, view dimensions."""
+    data_layer_index = 0
+    if reload:
+        cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
+            name="Radii and Lengths"
+        )
+        data_layer_index = 1
     for subdir, n in zip(data_subdirs, image_count):
         p = tmp_path / subdir
         p.mkdir()
@@ -287,8 +296,11 @@ def test_load_data(
 
     if expect_data_loaded:
         assert len(cpt_widget.viewer.layers) == 2
-        assert cpt_widget.viewer.layers[0].name == "Particle Tracks"
-        assert cpt_widget.viewer.layers[0].ndim == 4
+        assert (
+            cpt_widget.viewer.layers[data_layer_index].name
+            == "Particle Tracks"
+        )
+        assert cpt_widget.viewer.layers[data_layer_index].ndim == 4
     else:
         # def capture_msgbox():
         #    for widget in QApplication.topLevelWidgets():
