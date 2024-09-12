@@ -9,23 +9,25 @@ Replace code below according to your needs.
 
 import glob
 from datetime import datetime
-from typing import List
 
-import dask.array as da
+import dask.array
 import napari
 import numpy as np
 from dask_image.imread import imread
-from qtpy.QtCore import QPoint
+from qtpy.QtCore import QPoint, Qt
+from qtpy.QtGui import QFont
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QFileDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
     QMessageBox,
     QPushButton,
     QRadioButton,
     QTableWidget,
     QTableWidgetItem,
-    QVBoxLayout,
     QWidget,
 )
 
@@ -44,6 +46,8 @@ from ._testdims import TestDimsDialog
 
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
+
+    layer_measurements: napari.layers.Points
 
     dev_mode = True
 
@@ -65,12 +69,13 @@ class ParticleTracksWidget(QWidget):
     def no_events(self):
         return self.viewer.dims.range[0]
 
-    def __init__(self, napari_viewer: napari.Viewer):
-        self.viewer: napari.Viewer = napari_viewer
+    def __init__(self, napari_viewer: napari.viewer.Viewer, test_mode=False):
         super().__init__()
-        # region UI Setup
+        self.viewer: napari.Viewer = napari_viewer
+        self.test_mode = test_mode
         # define QtWidgets
         self.btn_load = QPushButton("Load data")
+        self.btn_load.width = 200
         self.cmb_add_particle = QComboBox()
         self.cmb_add_particle.addItems(EXPECTED_PARTICLES)
         self.cmb_add_particle.setCurrentIndex(0)
@@ -82,8 +87,7 @@ class ParticleTracksWidget(QWidget):
         self.btn_length = QPushButton("Calculate length")
         self.btn_decayangle = QPushButton("Calculate decay angles")
         self.btn_stereoshift = QPushButton("Stereoshift")
-        self.btn_testnew = QPushButton("test new reference")
-        self.btn_testdims = QPushButton("test dims")
+        self.btn_testdims = QPushButton("Test Dims")
         self.btn_testdims.clicked.connect(self._on_click_testdims)
         self.btn_save = QPushButton("Save")
         self.btn_magnification = QPushButton("Magnification")
@@ -97,7 +101,6 @@ class ParticleTracksWidget(QWidget):
         self.cal = QRadioButton("Apply magnification")
         self.cal.setEnabled(False)
         # connect callbacks
-        # NOTE: This isn't consistent in the code structure. Connects for the combobox etc have been done above.
         self.btn_load.clicked.connect(self._on_click_load_data)
         self.btn_delete_particle.clicked.connect(
             self._on_click_delete_particle
@@ -108,32 +111,52 @@ class ParticleTracksWidget(QWidget):
         self.btn_stereoshift.clicked.connect(self._on_click_stereoshift)
         self.cal.toggled.connect(self._on_click_apply_magnification)
         self.btn_save.clicked.connect(self._on_click_save)
-        self.btn_testnew.clicked.connect(self._on_click_newref)
         self.btn_magnification.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
         # https://napari.org/stable/gallery/custom_mouse_functions.html
         # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
         # self.viewer.events.mouse_press(self._on_mouse_click)
         # layout
-        self.setLayout(QVBoxLayout())
-        self.layout().addWidget(self.btn_load)
-        self.layout().addWidget(self.btn_testdims)
-        self.layout().addWidget(self.cmb_add_particle)
-        self.layout().addWidget(self.btn_delete_particle)
-        self.layout().addWidget(self.btn_radius)
-        self.layout().addWidget(self.btn_length)
-        self.layout().addWidget(self.btn_decayangle)
+        self.viewer.window._qt_viewer.layerButtons.hide()  # This will break in napari 0.6.0
+        self.buttonbox = QGridLayout()
+        self.buttonbox.addWidget(self.btn_load, 0, 0)
+        self.buttonbox.addWidget(self.cmb_add_particle, 1, 0)
+        self.buttonbox.addWidget(self.btn_delete_particle, 1, 1)
+        self.buttonbox.addWidget(self.btn_radius, 2, 0)
+        self.buttonbox.addWidget(self.btn_length, 2, 1)
+        self.buttonbox.addWidget(self.btn_decayangle, 3, 0)
+        self.buttonbox.addWidget(self.btn_stereoshift, 3, 1)
+        self.buttonbox.addWidget(self.btn_magnification, 4, 0)
+        self.buttonbox.addWidget(self.cal, 4, 1)
+        self.buttonbox.addWidget(self.btn_save, 5, 0)
+        self.buttonbox.addWidget(self.btn_testdims, 5, 1)
+        layout_outer = QHBoxLayout()
+        self.setLayout(layout_outer)
+        self.intro_text = QLabel(
+            r"""
+   _____                          _ _     _       _____           _   _      _        _______             _
+  / ____|                        | (_)   | |     |  __ \         | | (_)    | |      |__   __|           | |
+ | |     __ ___   _____ _ __   __| |_ ___| |__   | |__) |_ _ _ __| |_ _  ___| | ___     | |_ __ __ _  ___| | _____
+ | |    / _` \ \ / / _ \ '_ \ / _` | / __| '_ \  |  ___/ _` | '__| __| |/ __| |/ _ \    | | '__/ _` |/ __| |/ / __|
+ | |___| (_| |\ V /  __/ | | | (_| | \__ \ | | | | |  | (_| | |  | |_| | (__| |  __/    | | | | (_| | (__|   <\__ \
+  \_____\__,_| \_/ \___|_| |_|\__,_|_|___/_| |_| |_|   \__,_|_|   \__|_|\___|_|\___|    |_|_|  \__,_|\___|_|\_\___/
+
+Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garvey under the MIT License.
+"""
+        )
+        print(self.intro_text.text())
+        self.intro_text.setFont(QFont("Lucida Console", 5))
+        self.intro_text.setTextFormat(Qt.TextFormat.PlainText)
+        self.layout().addWidget(self.intro_text)
+        layout_outer.addLayout(self.buttonbox)
         self.layout().addWidget(self.table)
-        self.layout().addWidget(self.cal)
-        self.layout().addWidget(self.btn_stereoshift)
-        self.layout().addWidget(self.btn_magnification)
-        self.layout().addWidget(self.btn_save)
-        self.layout().addWidget(self.btn_testnew)
-        self.set_UI_image_loaded(False)
-        # endregion
+
+        self.set_UI_image_loaded(False, test_mode)
+
+        # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
         # Data analysis
-        self.data: List[NewParticle] = []
+        self.data: list[NewParticle] = []
         # might not need this eventually
         self.mag_a = -1.0e6
         self.mag_b = -1.0e6
@@ -150,7 +173,7 @@ class ParticleTracksWidget(QWidget):
         dlg.move(point)
         return dlg
 
-    def _get_selected_points(self, layer_name="Points") -> np.array:
+    def _get_selected_points(self, layer_name="Radii and Lengths") -> np.array:
         """Returns array of selected points in the viewer"""
 
         # Filtering selected points
@@ -227,7 +250,7 @@ class ParticleTracksWidget(QWidget):
             if layer.name == "Particle Tracks":
                 images_imported = True
                 break
-        self.set_UI_image_loaded(images_imported)
+        self.set_UI_image_loaded(images_imported, self.test_mode)
         try:
             selected_row = self._get_selected_row()
             self.btn_save.setEnabled(True)
@@ -240,8 +263,14 @@ class ParticleTracksWidget(QWidget):
                 self.btn_radius.setEnabled(True)
                 self.btn_length.setEnabled(True)
                 self.btn_decayangle.setEnabled(False)
+                self.btn_radius.setEnabled(True)
+                self.btn_length.setEnabled(True)
+                self.btn_decayangle.setEnabled(False)
                 return
             elif self.data[selected_row].index == 4:
+                self.btn_radius.setEnabled(False)
+                self.btn_length.setEnabled(True)
+                self.btn_decayangle.setEnabled(True)
                 self.btn_radius.setEnabled(False)
                 self.btn_length.setEnabled(True)
                 self.btn_decayangle.setEnabled(True)
@@ -255,12 +284,14 @@ class ParticleTracksWidget(QWidget):
             self.btn_stereoshift.setEnabled(False)
             self.btn_magnification.setEnabled(False)
             self.btn_save.setEnabled(False)
-            self.btn_testnew.setEnabled(False)
 
-    def set_UI_image_loaded(self, loaded: bool) -> None:
-        if self.dev_mode:
+    def set_UI_image_loaded(self, loaded: bool, test_mode: bool) -> None:
+        if test_mode:
             return
         if loaded:
+            # Set margins (left, top, right, bottom)
+            self.buttonbox.setContentsMargins(0, 0, 0, 0)
+            self.intro_text.hide()
             self.btn_load.hide()
             self.cmb_add_particle.show()
             self.btn_delete_particle.show()
@@ -268,12 +299,14 @@ class ParticleTracksWidget(QWidget):
             self.btn_length.show()
             self.btn_decayangle.show()
             self.btn_stereoshift.show()
-            self.btn_testnew.show()
             self.btn_save.show()
             self.btn_magnification.show()
             self.table.show()
             self.cal.show()
         else:
+            # Set margins (left, top, right, bottom)
+            self.buttonbox.setContentsMargins(200, 0, 200, 0)
+            self.intro_text.show()
             self.btn_load.show()
             self.cmb_add_particle.hide()
             self.btn_delete_particle.hide()
@@ -281,7 +314,6 @@ class ParticleTracksWidget(QWidget):
             self.btn_length.hide()
             self.btn_decayangle.hide()
             self.btn_stereoshift.hide()
-            self.btn_testnew.hide()
             self.btn_save.hide()
             self.btn_magnification.hide()
             self.table.hide()
@@ -420,15 +452,28 @@ class ParticleTracksWidget(QWidget):
             print("Modified particle ", selected_row)
             print(self.data[selected_row])
 
-    def _on_click_decay_angles(self) -> None:
+    def _on_click_decay_angles(self) -> DecayAnglesDialog:
         """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
+        # for widget in QApplication.topLevelWidgets():
+        ##    if isinstance(widget, DecayAnglesDialog):
+        ##        napari.utils.notifications.show_error(
+        ##            "Decay Angles dialog already open"
+        ##        )
+        #        return widget
         dlg = DecayAnglesDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         dlg.move(point)
+        return dlg
 
     def _on_click_stereoshift(self) -> StereoshiftDialog:
         """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
+        # for widget in QApplication.topLevelWidgets():
+        #    if isinstance(widget, StereoshiftDialog):
+        #        napari.utils.notifications.show_error(
+        #            "Stereoshift dialog already open"
+        #        )
+        #        return widget
         dlg = StereoshiftDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
@@ -491,22 +536,30 @@ class ParticleTracksWidget(QWidget):
         def crop(array):
             # Crops view 1 and 2 to same size as view 3 by removing whitespace
             # on left, as images align on the right.
+            # this number is the width of image 3.
             return array[:, :, -8377:, :]
 
         stacks = []
         for subdir in folder_subdirs:
-            stack: da = imread(subdir + "/*")
-            stack = crop(stack)
+            stack: dask.array.Array = imread(subdir + "/*")
+            if not self.test_mode:
+                stack = crop(stack)
             stacks.append(stack)
-            # TODO: investigate the multiscale otption.
 
         # Concatenate stacks along new spatial dimension such that we have a view, and event slider
-        concatenated_stack = da.stack(stacks, axis=0)
-        layer = self.viewer.add_image(
-            concatenated_stack, name="Particle Tracks"
-        )
+        concatenated_stack = dask.array.stack(stacks, axis=0)
+        self.viewer.add_image(concatenated_stack, name="Particle Tracks")
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
         self.viewer.dims.point = [0, 0, 0, 0]
+        measurement_layer_present = "Radii and Lengths" in self.viewer.layers
+
+        if not measurement_layer_present:
+            self.layer_measurements = self.viewer.add_points(
+                name="Radii and Lengths",
+                size=20,
+                edge_width=7,
+                edge_width_is_relative=False,
+            )
 
     def _on_click_newref(self) -> Set_Fiducial_Dialog:
         """When the 'test new reference' button is clicked, open the set fiducial dialog."""
@@ -553,9 +606,6 @@ class ParticleTracksWidget(QWidget):
         print(self.data[-1])
         self.cmb_add_particle.setCurrentIndex(0)
 
-        # # napari notifications
-        # napari.utils.notifications.show_info("I created a new particle")
-
     def _on_click_delete_particle(self) -> None:
         """Delete particle from table and data"""
         try:
@@ -578,7 +628,13 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_magnification(self) -> MagnificationDialog:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
-
+        # TODO disabled until fix found.
+        # for widget in QApplication.topLevelWidgets():
+        #    if isinstance(widget, MagnificationDialog):
+        #        napari.utils.notifications.show_error(
+        #            "Magnification dialog already open"
+        #        )
+        #        return widget
         dlg = MagnificationDialog(self)
         dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())

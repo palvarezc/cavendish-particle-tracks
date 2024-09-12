@@ -73,7 +73,7 @@ def test_calculate_stereoshift_ui(
     - The textboxes should be updated.
     """
     # need to click "new particle" to add a row to the table
-    cpt_widget.cb.setCurrentIndex(1)
+    cpt_widget.cmb_add_particle.setCurrentIndex(1)
 
     dlg = cpt_widget._on_click_stereoshift()
 
@@ -106,3 +106,15 @@ def test_calculate_stereoshift_ui(
     assert cpt_widget.data[0].stereoshift == dlg.point_stereoshift
     # these names should be more consistent between different parts of the program
     assert cpt_widget.data[0].depth_cm == dlg.point_depth
+
+
+def test_stereoshift_save_to_table_fails_with_empty_table(cpt_widget, capsys):
+    """Test the expected failure modes: if I don't have any data in the table."""
+    # open the dialog
+    dlg = cpt_widget._on_click_stereoshift()
+
+    # click the save to table button
+    dlg._on_click_save_to_table()
+    captured = capsys.readouterr()
+
+    assert "ERROR: There are no particles in the table." in captured.out
