@@ -93,10 +93,15 @@ class MagnificationDialog(QDialog):
 
         self.layout().addWidget(self.buttonBox, 9, 0, 1, 3)
 
-        self.cal_layer = self.parent.viewer.add_points(
-            name="Points_Calibration"
-        )
+        def create_retrieve_magnification_layer(self):
+            if "Points_Calibration" in self.parent.viewer.layers:
+                return self.parent.viewer.layers["Points_Calibration"]
+            return self.parent.viewer.add_points(name="Points_Calibration")
 
+        self.cal_layer = create_retrieve_magnification_layer(self)
+        # self.cal_layer = self.parent.viewer.add_points(
+        #     name="Points_Calibration"
+        # )
         self.a = parent.mag_a
         self.b = parent.mag_b
 
@@ -171,11 +176,11 @@ class MagnificationDialog(QDialog):
         self.parent.viewer.layers.remove(self.cal_layer)
         self.parent.cal.setEnabled(True)
         # self.parent.mag.setEnabled(False)
-        self.parent.mag.setText("Update magnification")
+        self.parent.btn_magnification.setText("Update magnification")
         return super().accept()
 
     def reject(self) -> None:
-        """On reject remove the points_Calibration layer"""
+        """On reject remove the magnification layer"""
 
         # This is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.select_previous()

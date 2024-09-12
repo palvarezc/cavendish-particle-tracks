@@ -57,7 +57,7 @@ class ParticleTracksWidget(QWidget):
         self.lgth = QPushButton("Calculate length")
         self.ang = QPushButton("Calculate decay angles")
         self.stsh = QPushButton("Stereoshift")
-        self.mag = QPushButton("Magnification")
+        self.btn_magnification = QPushButton("Magnification")
         save = QPushButton("Save")
 
         # setup particle table
@@ -81,7 +81,7 @@ class ParticleTracksWidget(QWidget):
         self.cal.toggled.connect(self._on_click_apply_magnification)
         save.clicked.connect(self._on_click_save)
 
-        self.mag.clicked.connect(self._on_click_magnification)
+        self.btn_magnification.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
         # https://napari.org/stable/gallery/custom_mouse_functions.html
         # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
@@ -98,7 +98,7 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.table)
         self.layout().addWidget(self.cal)
         self.layout().addWidget(self.stsh)
-        self.layout().addWidget(self.mag)
+        self.layout().addWidget(self.btn_magnification)
         self.layout().addWidget(save)
 
         # disable all calculation buttons
