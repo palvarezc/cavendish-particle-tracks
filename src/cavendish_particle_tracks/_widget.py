@@ -9,7 +9,7 @@ Replace code below according to your needs.
 
 import glob
 
-import dask.array as da
+import dask.array
 import napari
 import numpy as np
 from dask_image.imread import imread
@@ -411,17 +411,18 @@ class ParticleTracksWidget(QWidget):
         def crop(array):
             # Crops view 1 and 2 to same size as view 3 by removing whitespace
             # on left, as images align on the right.
+            # this number is the width of image 3.
             return array[:, :, -8377:, :]
 
         stacks = []
         for subdir in folder_subdirs:
-            stack: da = imread(subdir + "/*")
+            stack: dask.array.Array = imread(subdir + "/*")
             if not self.test_mode:
                 stack = crop(stack)
             stacks.append(stack)
 
         # Concatenate stacks along new spatial dimension such that we have a view, and event slider
-        concatenated_stack = da.stack(stacks, axis=0)
+        concatenated_stack = dask.array.stack(stacks, axis=0)
         self.viewer.add_image(concatenated_stack, name="Particle Tracks")
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
 
