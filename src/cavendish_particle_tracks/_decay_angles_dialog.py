@@ -43,7 +43,7 @@ class DecayAnglesDialog(QDialog):
         bap.clicked.connect(self._on_click_save_to_table)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
-        self.buttonBox.clicked.connect(self.cancel)
+        self.buttonBox.clicked.connect(self.reject)
 
         # layout
         self.setLayout(QGridLayout())
@@ -191,11 +191,11 @@ class DecayAnglesDialog(QDialog):
                 QTableWidgetItem(str(self.phi_pion)),
             )
 
-    def cancel(self) -> None:
+    def reject(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
 
         # TODO: this is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.select_previous()
         self.parent.viewer.layers.remove(self.cal_layer)
         self.parent.decay_angles_is_open = False
-        return super().accept()
+        return super().reject()
