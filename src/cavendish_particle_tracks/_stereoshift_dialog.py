@@ -313,4 +313,5 @@ class StereoshiftDialog(QDialog):
         # TODO: this is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.select_previous()
         self.parent.viewer.layers.remove(self.cal_layer)
+        self.parent.stereoshift_isopen = False
         return super().accept()

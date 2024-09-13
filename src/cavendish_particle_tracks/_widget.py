@@ -16,7 +16,6 @@ from dask_image.imread import imread
 from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
     QAbstractItemView,
-    QApplication,
     QComboBox,
     QFileDialog,
     QMessageBox,
@@ -111,8 +110,11 @@ class ParticleTracksWidget(QWidget):
         # might not need this eventually
         self.mag_a = -1.0e6
         self.mag_b = -1.0e6
-        # Magnification dialog
+
+        # Dialog pointers to reuse
         self.mag_dlg: MagnificationDialog | None = None
+        self.stereoshift_dlg: StereoshiftDialog | None = None
+        self.stereoshift_isopen = False
 
     @property
     def camera_center(self):
@@ -353,17 +355,18 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_stereoshift(self) -> StereoshiftDialog:
         """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
-        for widget in QApplication.topLevelWidgets():
-            if isinstance(widget, StereoshiftDialog):
-                napari.utils.notifications.show_error(
-                    "Stereoshift dialog already open"
-                )
-                return widget
-        dlg = StereoshiftDialog(self)
-        dlg.show()
+        # Different behaviour to the Magnification dialog, waiting for the definition of the stereoshift layer structure
+        if (self.stereoshift_dlg is not None) and (
+            self.stereoshift_isopen is True
+        ):
+            self.stereoshift_dlg.raise_()
+            return self.stereoshift_dlg
+        self.stereoshift_dlg = StereoshiftDialog(self)
+        self.stereoshift_dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        dlg.move(point)
-        return dlg
+        self.stereoshift_dlg.move(point)
+        self.stereoshift_isopen = True
+        return self.stereoshift_dlg
 
     def _on_click_load_data(self) -> None:
         """When the 'Load data' button is clicked, a dialog opens to select the folder containing the data.
@@ -506,7 +509,7 @@ class ParticleTracksWidget(QWidget):
     def _on_click_magnification(self) -> MagnificationDialog:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
         if self.mag_dlg is not None:
-            self.mag_dlg.show()
+            self.mag_dlg.raise_()
             self.mag_dlg._activate_cal_layer()
             return self.mag_dlg
         self.mag_dlg = MagnificationDialog(self)
