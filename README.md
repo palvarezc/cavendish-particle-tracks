@@ -3,7 +3,7 @@
 <p align="center"><img src="./docs/ParticleCrocodile.png" width=300 /></p>
 
 [![License MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/samcunliffe/cavendish-particle-tracks/raw/main/LICENSE)
-[![Python Version](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)](https://python.org)
+[![Python Version](https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue)](https://python.org)
 [![ci](https://github.com/palvarezc/cavendish-particle-tracks/workflows/ci/badge.svg)](https://github.com/palvarezc/cavendish-particle-tracks/actions)
 [![codecov](https://codecov.io/github/palvarezc/cavendish-particle-tracks/graph/badge.svg?token=9R8IVMJT90)](https://codecov.io/github/palvarezc/cavendish-particle-tracks)
 [![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v0.json)](https://github.com/charliermarsh/ruff)
