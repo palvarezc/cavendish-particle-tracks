@@ -20,10 +20,10 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Image Processing",
 ]
 requires-python = ">=3.9"
@@ -143,12 +143,11 @@ exclude = [
 legacy_tox_ini = """
 
 [tox]
-envlist = py{38,39,310,311}-{linux,macos,windows}
+envlist = py{39,310,311,312}-{linux,macos,windows}
 isolated_build=true
 
 [gh-actions]
 python =
-    3.8: py38
     3.9: py39
     3.10: py310
     3.11: py311
