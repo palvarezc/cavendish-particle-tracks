@@ -78,6 +78,7 @@ def test_magnification_ui(
         dlg.cal_layer.selected_data = {len(dlg.cal_layer.data) - 1}
         add_fiducial_func()
         assert recorded_fiducial == fiducial
+        # TODO: check text box
 
     dlg._on_click_magnification()
     assert dlg.a == pytest.approx(expected_magnification_params[0], rel=1e-3)

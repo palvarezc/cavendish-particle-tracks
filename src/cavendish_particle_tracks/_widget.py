@@ -111,6 +111,8 @@ class ParticleTracksWidget(QWidget):
         # might not need this eventually
         self.mag_a = -1.0e6
         self.mag_b = -1.0e6
+        # Magnification dialog
+        self.mag_dlg: MagnificationDialog | None = None
 
     @property
     def camera_center(self):
@@ -337,7 +339,7 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_decay_angles(self) -> DecayAnglesDialog:
         """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
-        #for widget in QApplication.topLevelWidgets():
+        # for widget in QApplication.topLevelWidgets():
         ##    if isinstance(widget, DecayAnglesDialog):
         ##        napari.utils.notifications.show_error(
         ##            "Decay Angles dialog already open"
@@ -503,17 +505,15 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_magnification(self) -> MagnificationDialog:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
-        for widget in QApplication.topLevelWidgets():
-            if isinstance(widget, MagnificationDialog):
-                napari.utils.notifications.show_error(
-                    "Magnification dialog already open"
-                )
-                return widget
-        dlg = MagnificationDialog(self)
-        dlg.show()
+        if self.mag_dlg is not None:
+            self.mag_dlg.show()
+            self.mag_dlg._activate_cal_layer()
+            return self.mag_dlg
+        self.mag_dlg = MagnificationDialog(self)
+        self.mag_dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        dlg.move(point)
-        return dlg
+        self.mag_dlg.move(point)
+        return self.mag_dlg
 
     def _propagate_magnification(self, a: float, b: float) -> None:
         """Assigns a and b to the class magnification parameters and to each of the particles in data"""
