@@ -128,37 +128,6 @@ class StereoshiftDialog(QDialog):
             )
             return layer_points
 
-        # TODO fix shapes last!!
-        def _setup_shapes_layer() -> Shapes:
-            self.shapes = []
-            for fiducial in self.fiducials[::2]:
-                # is there a better way to write this to combine the two arrays?
-                # this one needs to skip every 2nd element since those don't have an item in the 2nd view
-                self.shapes.append(
-                    np.array(
-                        [
-                            [fiducial[0].x, fiducial[0].y],
-                            [fiducial[1].x, fiducial[1].y],
-                        ]
-                    )
-                )  # on update should copy data to point then update, ideally we should merge the two but hey...
-                # that's for the next patch...
-            for point in self.points:
-                self.shapes.append(
-                    np.array(
-                        [[point[0].x, point[0].y], [point[1].x, point[1].y]]
-                    )
-                )
-            layer_shapes = self.parent.viewer.add_shapes(
-                self.shapes,
-                shape_type="line",
-                edge_color="yellow",
-                edge_width=5,
-                name="Stereo_shift_lines",
-            )
-            # layer_shapes.editable = False
-            return layer_shapes
-
         def create_retrieve_layer(
             layer_name: str, origin_x, origin_y, zoom_level, current_event
         ) -> Layer:
@@ -172,8 +141,8 @@ class StereoshiftDialog(QDialog):
                 return _setup_points_layer(
                     origin_x, origin_y, zoom_level, current_event
                 )
-            elif layer_name == "Stereo_shift_lines":
-                return _setup_shapes_layer()
+            # elif layer_name == "Stereo_shift_lines":
+            #    return _setup_shapes_layer()
             else:
                 raise Exception(
                     "Unexpected layer name encountered. Something has really went wrong."
@@ -194,12 +163,9 @@ class StereoshiftDialog(QDialog):
             self.zoom_level,
             self.current_event,
         )
-        # TODO add shapes back in
-        # self.layer_shapes: Shapes = create_retrieve_layer("Stereo_shift_lines")
 
         # Setup the window UI
         self._setup_ui()
-        ##TODO update UI callback to update the textboxes
 
         # Force selection mode by default.
         self.parent.viewer.layers.selection.active = self.layer_fiducials
@@ -207,67 +173,17 @@ class StereoshiftDialog(QDialog):
         self.layer_points.mode = "select"
         self.parent.viewer.dims.events.connect(self._on_event_changed)
 
-        # region Shapes handling
-        # TODO fix
-        # @self.layer_points.events.data.connect
-        # def _on_change_layer_points(event):
-        #     self.layer_shapes.editable = True
-        #     self.copy_layer_to_data()
-        #     point_range = range(int(len(self.layer_points.data) / 2))
-        #     data = self.layer_shapes.data
-        #     for i in point_range:
-        #         data[i + 2][0][0] = self.points[i][0].x
-        #         # 1st shape, 1st point, x = x of point 1, view 1
-        #         data[i + 2][0][1] = self.points[i][0].y
-        #         data[i + 2][1][0] = self.points[i][1].x
-        #         # 1 shape, 2nd point, x = x of point 1, view 2
-        #         data[i + 2][1][1] = self.points[i][1].y
-        #     self.layer_shapes.editable = False
-        #     self.layer_shapes.data = data
-        #     # update for more points as needed
-
-        # @self.layer_fiducials.events.data.connect
-        # def _on_change_layer_fiducials(event):
-        #     self.layer_shapes.editable = True
-        #     self.copy_layer_to_data()
-        #     data = self.layer_shapes.data
-        #     # this is mangled and needs to be fixed. need to fix data structure sync before bothering now that
-        #     # the event handler is working.
-        #     no_fiducial_shapes = range(int(len(self.layer_fiducials.data) / 4))
-        #     # for i in no_fiducial_shapes:
-        #     #    for j in range(no_coords=2):
-        #     #        for k in range(no_views=2):
-        #     #            data[i][j]
-        #     for i in range(2):
-        #         self.layer_shapes.data[i][0][0] = self.fiducials[i][0].x
-        #         # 1st shape, 1st point, x = x of point 1, view 1
-        #         self.layer_shapes.data[i][0][1] = self.fiducials[i * 2][0].y
-        #         self.layer_shapes.data[i][1][0] = self.fiducials[i][1].x
-        #         # 1 shape, 2nd point, x = x of point 1, view 2
-        #         self.layer_shapes.data[i][1][1] = self.fiducials[i * 2][1].y
-        #     self.layer_shapes.data = data
-        #     self.layer_shapes.editable = False
-        # endregion
-
         @self.parent.viewer.mouse_over_canvas.connect
         def _on_click_calculate(self) -> None:
             """Calculate the stereoshift and populate the results table."""
-            # TODO need to add checks that the user hasn't deleted points or otherwise
-            # Add points in the coords to corresponding text box
-            self.copy_layer_to_data()
-            # There may be a better way of doing this by assigning point attributes.
-            # I can see this approach going wrong.
-            # Take a look at the napari example nD points with features
+            # There may be a better way of doing this by assigning point attributes and accessing their labels.
             # TODO clarify whether we still want the reference offset to be displayed to the user.
-            ref_plane_index = self.cmb_set_ref_plane.currentIndex() * 2
-            # index =0 if front, 2 if rear
-            fiducial_plane__index = 2 - ref_plane_index
-            # = 2 if front, 0 if rear
-            # This could also be achieved in a more traditional/clearer way
-            # (ie one that doesn't need a comment to be obvious) using an if/switch statement
-            # But this keeps it a little more concise and is similar to the original code's use
-            # of + and % to get the correct data index.
-            # Would appreciate feedback on which style is preferred.
+            ref_plane_index = self.cmb_set_ref_plane.currentIndex()
+            # index =0 if front, 1 if rear
+            fiducial_plane__index = 1 - ref_plane_index
+            # = 1 if front, 0 if rear
+            # This could also be achieved in a more traditional/clearer way using an if/switch statement
+            # Would appreciate some feedback on which style is preferred.
             self.shift_fiducial = corrected_shift(
                 self.fiducials[fiducial_plane__index],
                 self.fiducials[ref_plane_index],
@@ -277,12 +193,6 @@ class StereoshiftDialog(QDialog):
             )
             # See comments in pull request.
             self.point_stereoshift = self.shift_fiducial / self.shift_point
-            # This is called ratio in the GUI, should the front or backend be changed here?
-            # This next line is another example where the calculation is being done in
-            # calculate.py but results in duplicated function calls.
-            # I'll leave it as is for now, but it's another small thing to consider.
-            # TODO: Regardless of how we decide to refactor, could do
-            # with rewriting that function to take the list of points instead.
             self.point_depth = depth(
                 self.fiducials[fiducial_plane__index][0],
                 self.fiducials[fiducial_plane__index][1],
@@ -290,12 +200,6 @@ class StereoshiftDialog(QDialog):
                 self.points[0][1],
             )
             self.spoints = self.layer_fiducials.data[2:]
-            # TODO this will need to be updated once magnification etc is added.
-            # also needs a better name and for the function to be more clear
-            # also worth noting that this is used when saving to table.
-            # why not use the existing points list for this to avoid duplicating it?
-            # sure, the access is a little more complicated but it keeps the number
-            # of variables down.
 
             # Update the results table
             self.lbl_fiducial_shift.setText(str(self.shift_fiducial))
