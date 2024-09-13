@@ -40,9 +40,9 @@ file = "README.md"
 content-type = "text/markdown"
 
 [project.urls]
-Homepage = "https://github.com/samcunliffe/cavendish-particle-tracks"
+Homepage = "https://palvarezc.github.io/cavendish-particle-tracks/"
 "Bug Tracker" = "https://github.com/samcunliffe/cavendish-particle-tracks/issues"
-Documentation = "https://github.com/samcunliffe/cavendish-particle-tracks#readme"
+Documentation = "https://palvarezc.github.io/cavendish-particle-tracks/user-manual.html"
 "Source Code" = "https://github.com/samcunliffe/cavendish-particle-tracks"
 "User Support" = "https://github.com/samcunliffe/cavendish-particle-tracks/issues"
 
