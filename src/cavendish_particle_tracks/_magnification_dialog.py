@@ -1,4 +1,7 @@
+from typing import TYPE_CHECKING
+
 from qtpy.QtWidgets import (
+    QAbstractItemView,
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -16,13 +19,16 @@ from ._analysis import (
 )
 from ._calculate import magnification
 
+if TYPE_CHECKING:
+    from ._widget import ParticleTracksWidget
+
 
 class MagnificationDialog(QDialog):
     def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.parent = parent
-
+        super().__init__(parent)  # Call QDialog constructor
+        self.parent: ParticleTracksWidget = (
+            parent  # Assign Napari viewer as parent.
+        )
         self.setWindowTitle("Magnification")
 
         self.f1 = Fiducial()
@@ -30,67 +36,93 @@ class MagnificationDialog(QDialog):
         self.b1 = Fiducial()
         self.b2 = Fiducial()
 
-        # drop-down lists of fiducials
-        self.cbf1 = self._setup_dropdown_fiducials_combobox()
-        self.cbf2 = self._setup_dropdown_fiducials_combobox()
-        self.cbb1 = self._setup_dropdown_fiducials_combobox(back=True)
-        self.cbb2 = self._setup_dropdown_fiducials_combobox(back=True)
+        # region UI Setup
+        self.ui_setup()
+        self.cal_layer = self.parent.viewer.add_points(
+            name="Points_Calibration"
+        )
 
-        # text boxes
-        self.txf1 = QLabel(self)
-        self.txf2 = QLabel(self)
-        self.txb1 = QLabel(self)
-        self.txb2 = QLabel(self)
+        @self.cal_layer.mouse_drag_callbacks.append
+        def _on_click_layer(layer, event):
+            print("This has worked!")
 
-        self.txboxes = [self.txf1, self.txf2, self.txb1, self.txb2]
+    def ui_setup(self):
+        self.setWindowTitle("Magnification")
+        # Drop-down selection of Fiducials
+        self.cmb_front1 = self._setup_dropdown_fiducials_combobox()
+        self.cmb_front2 = self._setup_dropdown_fiducials_combobox()
+        self.cmb_back1 = self._setup_dropdown_fiducials_combobox(back=True)
+        self.cmb_back2 = self._setup_dropdown_fiducials_combobox(back=True)
+        # text boxes indicating the coordinates of the fiducials
+        self.txt_f1coord = QLabel(self)  # front fiducial 1
+        self.txt_f2coord = QLabel(self)  # front fiducial 2
+        self.txt_b1coord = QLabel(self)  # back fiducial 1
+        self.txt_b2coord = QLabel(self)  # back fiducial 2
+        self.txboxes = [
+            self.txt_f1coord,
+            self.txt_f2coord,
+            self.txt_b1coord,
+            self.txt_b2coord,
+        ]
         for txt in self.txboxes:
             txt.setMinimumWidth(200)
-
-        # add coords buttons
-        self.cof1 = QPushButton("Add")
-        self.cof2 = QPushButton("Add")
-        self.cob1 = QPushButton("Add")
-        self.cob2 = QPushButton("Add")
-        self.cof1.clicked.connect(self._on_click_add_coords_f1)
-        self.cof2.clicked.connect(self._on_click_add_coords_f2)
-        self.cob1.clicked.connect(self._on_click_add_coords_b1)
-        self.cob2.clicked.connect(self._on_click_add_coords_b2)
-
-        self.bmag = QPushButton("Calculate magnification")
-        self.bmag.clicked.connect(self._on_click_magnification)
-
+        # Add selected fiducial buttons
+        self.btn_add_f1 = QPushButton("Add")
+        self.btn_add_f2 = QPushButton("Add")
+        self.btn_add_b1 = QPushButton("Add")
+        self.btn_add_b2 = QPushButton("Add")
+        self.btn_add_f1.clicked.connect(self._on_click_add_coords_f1)
+        self.btn_add_f2.clicked.connect(self._on_click_add_coords_f2)
+        self.btn_add_b1.clicked.connect(self._on_click_add_coords_b1)
+        self.btn_add_b2.clicked.connect(self._on_click_add_coords_b2)
+        # Calculate magnification button
+        self.btn_mag = QPushButton("Calculate magnification")
+        self.btn_mag.clicked.connect(self._on_click_magnification)
+        # Add table to show the resultant magnification parameter
         self.table = QTableWidget(1, 2)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.setHorizontalHeaderLabels(["a", "b"])
-
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
+        # Add Ok/Cancel button box
+        self.buttonBox = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        )
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
-
-        # layout
+        # Set up GUI layout.
         self.setLayout(QGridLayout())
         self.layout().addWidget(
             QLabel("Select front fiducial marks"), 0, 0, 1, 3
         )
         for i, widget in enumerate(
-            [self.cbf1, self.txf1, self.cof1, self.cbf2, self.txf2, self.cof2]
+            [
+                self.cmb_front1,
+                self.txt_f1coord,
+                self.btn_add_f1,
+                self.cmb_front2,
+                self.txt_f2coord,
+                self.btn_add_f2,
+            ]
         ):
             self.layout().addWidget(widget, i // 3 + 1, i % 3)
         self.layout().addWidget(
             QLabel("Select back fiducial marks"), 3, 0, 1, 3
         )
         for i, widget in enumerate(
-            [self.cbb1, self.txb1, self.cob1, self.cbb2, self.txb2, self.cob2]
+            [
+                self.cmb_back1,
+                self.txt_b1coord,
+                self.btn_add_b1,
+                self.cmb_back2,
+                self.txt_b2coord,
+                self.btn_add_b2,
+            ]
         ):
             self.layout().addWidget(widget, i // 3 + 4, i % 3)
-
-        self.layout().addWidget(self.bmag, 6, 0, 1, 3)
-
+        self.layout().addWidget(self.btn_mag, 6, 0, 1, 3)
         self.layout().addWidget(
             QLabel("Magnification parameters (M = a + b z)"), 7, 0, 1, 3
         )
         self.layout().addWidget(self.table, 8, 0, 1, 3)
-
         self.layout().addWidget(self.buttonBox, 9, 0, 1, 3)
 
         # def create_retrieve_magnification_layer(self):
@@ -103,8 +135,9 @@ class MagnificationDialog(QDialog):
         self.cal_layer = self.parent.viewer.add_points(
             name="Points_Calibration"
         )
-        self.a = parent.mag_a
-        self.b = parent.mag_b
+
+        self.a = self.parent.mag_a
+        self.b = self.parent.mag_b
 
     def _setup_dropdown_fiducials_combobox(self, back=False):
         """Sets up a drop-down list of fiducials for the `back` or front (`back=False`)."""
@@ -117,22 +150,22 @@ class MagnificationDialog(QDialog):
 
     def _on_click_add_coords_f1(self) -> None:
         """Add first front fiducial"""
-        self.f1.name = self.cbf1.currentText()
+        self.f1.name = self.cmb_front1.currentText()
         self.f1.x, self.f1.y = self._add_coords(0)
 
     def _on_click_add_coords_f2(self) -> None:
         """Add second front fiducial"""
-        self.f2.name = self.cbf2.currentText()
+        self.f2.name = self.cmb_front2.currentText()
         self.f2.x, self.f2.y = self._add_coords(1)
 
     def _on_click_add_coords_b1(self) -> None:
         """Add first back fiducial"""
-        self.b1.name = self.cbb1.currentText()
+        self.b1.name = self.cmb_back1.currentText()
         self.b1.x, self.b1.y = self._add_coords(2)
 
     def _on_click_add_coords_b2(self) -> None:
         """Add second back fiducial"""
-        self.b2.name = self.cbb2.currentText()
+        self.b2.name = self.cmb_back2.currentText()
         self.b2.x, self.b2.y = self._add_coords(3)
 
     def _add_coords(self, fiducial: int) -> list[float]:
