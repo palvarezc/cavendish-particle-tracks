@@ -235,7 +235,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
             if layer.name == "Particle Tracks":
                 images_imported = True
                 break
-        self.set_UI_image_loaded(images_imported, self.test_mode)
+        self.set_UI_image_loaded(images_imported)
         try:
             selected_row = self._get_selected_row()
             self.btn_save.setEnabled(True)
@@ -263,9 +263,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
             self.btn_magnification.setEnabled(False)
             self.btn_save.setEnabled(False)
 
-    def set_UI_image_loaded(self, loaded: bool, test_mode: bool) -> None:
-        if test_mode:
-            return
+    def set_UI_image_loaded(self, loaded: bool) -> None:
         if loaded:
             # Set margins (left, top, right, bottom)
             self.buttonbox.setContentsMargins(0, 0, 0, 0)

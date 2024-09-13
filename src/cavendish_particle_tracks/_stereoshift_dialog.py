@@ -172,12 +172,7 @@ class StereoshiftDialog(QDialog):
     def _on_click_calculate(self) -> None:
         """Calculate the stereoshift and populate the results table."""
         f = self._retrieve_fiducial(0, 0, 1)
-        # There may be a better way of doing this by assigning point attributes and accessing their labels.
         # TODO clarify whether we still want the reference offset to be displayed to the user.
-        ref_plane_index = self.cmb_set_ref_plane.currentIndex()
-        # index =0 if front, 1 if rear
-        fiducial_plane__index = 1 - ref_plane_index
-        # = 1 if front, 0 if rear
         # This could also be achieved in a more traditional/clearer way using an if/switch statement
         # Would appreciate some feedback on which style is preferred.
         # Previously, I had used Fiducial objects and passed these in to the corrected_shift function.
@@ -280,7 +275,7 @@ class StereoshiftDialog(QDialog):
         self.buttonBox = QDialogButtonBox(
             QDialogButtonBox.Save | QDialogButtonBox.Cancel
         )
-        self.buttonBox.clicked.connect(self.cancel)
+        self.buttonBox.rejected.connect(self._on_click_cancel)
         self.buttonBox.accepted.connect(self._on_click_save_to_table)
         # Layout
         # surely there's a nicer way of doing this grid layout stuff.
@@ -483,7 +478,11 @@ class StereoshiftDialog(QDialog):
         #      2  [origin_x, origin_y-100/zoom_level, current_event],  3  [origin_x + 100/zoom_level, origin_y-100/zoom_level, current_event],  # Reference
         #      4  [origin_x, origin_y-200/zoom_level, current_event],  5  [origin_x + 100/zoom_level, origin_y-200/zoom_level, current_event],  # Rear
         data = self.layer_fiducials.data[depth_index * 2 + (view - 1)]
-        return Fiducial("", data[0], data[1])  # double check these are correct
+        # Layer data has a different coordinate order than world data.
+        # so even though the axis_labels are event, view, y, x
+        # these remain as they were intialised.
+        # so [x,y,event] is the correct order, as above.
+        return Fiducial("", data[0], data[1])
         # depth,view
         # case (0,1) -> front, view 1 -> 0
         # case (0,2) -> front, view 2 -> 1
