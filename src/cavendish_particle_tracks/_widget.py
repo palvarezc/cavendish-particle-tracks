@@ -115,6 +115,8 @@ class ParticleTracksWidget(QWidget):
         self.mag_dlg: MagnificationDialog | None = None
         self.stereoshift_dlg: StereoshiftDialog | None = None
         self.stereoshift_isopen = False
+        self.decay_angles_dlg: DecayAnglesDialog | None = None
+        self.decay_angles_isopen = False
 
     @property
     def camera_center(self):
@@ -341,17 +343,17 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_decay_angles(self) -> DecayAnglesDialog:
         """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
-        # for widget in QApplication.topLevelWidgets():
-        ##    if isinstance(widget, DecayAnglesDialog):
-        ##        napari.utils.notifications.show_error(
-        ##            "Decay Angles dialog already open"
-        ##        )
-        #        return widget
-        dlg = DecayAnglesDialog(self)
-        dlg.show()
+        if (self.decay_angles_dlg is not None) and (
+            self.decay_angles_isopen is True
+        ):
+            self.decay_angles_dlg.raise_()
+            return self.decay_angles_dlg
+        self.decay_angles_dlg = DecayAnglesDialog(self)
+        self.decay_angles_dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        dlg.move(point)
-        return dlg
+        self.decay_angles_dlg.move(point)
+        self.decay_angles_isopen = True
+        return self.decay_angles_dlg
 
     def _on_click_stereoshift(self) -> StereoshiftDialog:
         """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
