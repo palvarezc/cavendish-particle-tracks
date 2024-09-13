@@ -171,7 +171,6 @@ class StereoshiftDialog(QDialog):
 
     def _on_click_calculate(self) -> None:
         """Calculate the stereoshift and populate the results table."""
-        f = self._retrieve_fiducial(0, 0, 1)
         # TODO clarify whether we still want the reference offset to be displayed to the user.
         # This could also be achieved in a more traditional/clearer way using an if/switch statement
         # Would appreciate some feedback on which style is preferred.
@@ -185,6 +184,13 @@ class StereoshiftDialog(QDialog):
         # I'm also not a fan of the way that these calculations get duplicated.
         # i.e depth can just use the previous results.
         # self.shift_reference
+        front_1 = self._retrieve_fiducial(0, 0, 1)
+        front_2 = self._retrieve_fiducial(0, 0, 2)
+        ref_1 = self._retrieve_fiducial(0, 1, 1)
+        ref_2 = self._retrieve_fiducial(0, 1, 2)
+        back_1 = self._retrieve_fiducial(0, 2, 1)
+        back_2 = self._retrieve_fiducial(0, 2, 2)
+
         self.shift_fiducial = corrected_shift(
             self.fiducials[fiducial_plane__index],
             self.fiducials[ref_plane_index],
