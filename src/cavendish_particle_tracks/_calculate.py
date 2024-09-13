@@ -35,10 +35,10 @@ def length(a: Point, b: Point) -> float:
     return np.linalg.norm(pa - pb)
 
 
-def corrected_shift(points: list[Fiducial], offsets: list[Fiducial]) -> float:
+def corrected_shift(points, offsets) -> float:
     """Calculates the distance between two points, correcting for the offset/movement of the plane between two images.
-    Points = Fiducial[]: The two points to calculate the distance between.
-    Offsets = Fiducial[]: The two points to correct the distance calculation. (A fiducial in the reference plane)
+    Points = [[x,y], [x,y]]: The two points to calculate the distance between.
+    Offsets =  [[x,y], [x,y]]:: The two points to correct the distance calculation. (A fiducial in the reference plane)
     """
     # TODO: Improve docstring here.
     # Bodge a fix here till we come up with a better approach
@@ -48,6 +48,10 @@ def corrected_shift(points: list[Fiducial], offsets: list[Fiducial]) -> float:
     a = (points[0].x, points[0].y)
     b = (points[1].x, points[1].y)
     return length(a, b)
+
+
+def stereoshift(fiducial_shift, point_shift):
+    return fiducial_shift / point_shift
 
 
 def magnification(f1: Fiducial, f2: Fiducial, b1: Fiducial, b2: Fiducial):
@@ -63,16 +67,6 @@ def magnification(f1: Fiducial, f2: Fiducial, b1: Fiducial, b2: Fiducial):
     ) / CHAMBER_DEPTH
 
     return a, b
-
-
-def stereoshift(fa: Point, fb: Point, pa: Point, pb: Point):
-    # stereoshift = (Delta p)/(Delta f)
-    nfa = np.array(fa)
-    nfb = np.array(fb)
-    npa = np.array(pa)
-    npb = np.array(pb)
-
-    return np.linalg.norm(npa - npb) / np.linalg.norm(nfa - nfb)
 
 
 def depth(

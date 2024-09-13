@@ -20,7 +20,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
 )
 
-from ._analysis import FIDUCIAL_BACK, FIDUCIAL_FRONT
+from ._analysis import FIDUCIAL_BACK, FIDUCIAL_FRONT, Fiducial
 from ._calculate import corrected_shift, depth, stereoshift
 
 
@@ -54,23 +54,19 @@ class StereoshiftDialog(QDialog):
         ) -> Points:
             # fmt:off
             points = [      # View 1                                                # View 2
-                [origin_x, origin_y, current_event],                [origin_x + 100/zoom_level, origin_y, current_event],                # Front L
-                [origin_x, origin_y-100/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-100/zoom_level, current_event],  # Front R
-                [origin_x, origin_y-200/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-200/zoom_level, current_event],  # Rear L
-                [origin_x, origin_y-300/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-300/zoom_level, current_event],  # Rear R
+                [origin_x, origin_y, current_event],                [origin_x + 100/zoom_level, origin_y, current_event],                # Front
+                [origin_x, origin_y-100/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-100/zoom_level, current_event],  # Reference
+                [origin_x, origin_y-200/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-200/zoom_level, current_event],  # Rear
             ]
-            fiducial_labels = ["Front L View 1",  "Front L View 2",
-                               "Front R View 1",  "Front R View 2",
-                               "Rear L View 1",   "Rear R View 1"
-                               "Front R View 2",  "Rear R View 2"]
+            fiducial_labels = ["Front View 1",  "Front View 2",
+                               "Reference View 1", "Reference View 2",
+                               "Rear View 2",   "Rear View 2"]
 
             colors = ["green", "red",
                       "green", "red",
-                      "green", "red",
                       "green", "red",]
             symbols = ["x", "x",
-                       "x", "x",
-                       "cross", "cross",
+                       "square", "square",
                        "cross", "cross"]
             # fmt:on
             text = {
@@ -173,40 +169,51 @@ class StereoshiftDialog(QDialog):
         self.layer_points.mode = "select"
         self.parent.viewer.dims.events.connect(self._on_event_changed)
 
-        @self.parent.viewer.mouse_over_canvas.connect
-        def _on_click_calculate(self) -> None:
-            """Calculate the stereoshift and populate the results table."""
-            # There may be a better way of doing this by assigning point attributes and accessing their labels.
-            # TODO clarify whether we still want the reference offset to be displayed to the user.
-            ref_plane_index = self.cmb_set_ref_plane.currentIndex()
-            # index =0 if front, 1 if rear
-            fiducial_plane__index = 1 - ref_plane_index
-            # = 1 if front, 0 if rear
-            # This could also be achieved in a more traditional/clearer way using an if/switch statement
-            # Would appreciate some feedback on which style is preferred.
-            self.shift_fiducial = corrected_shift(
-                self.fiducials[fiducial_plane__index],
-                self.fiducials[ref_plane_index],
-            )
-            self.shift_point = corrected_shift(
-                self.points[0], self.fiducials[ref_plane_index]
-            )
-            # See comments in pull request.
-            self.point_stereoshift = self.shift_fiducial / self.shift_point
-            self.point_depth = depth(
-                self.fiducials[fiducial_plane__index][0],
-                self.fiducials[fiducial_plane__index][1],
-                self.points[0][0],
-                self.points[0][1],
-            )
-            self.spoints = self.layer_fiducials.data[2:]
-
-            # Update the results table
-            self.lbl_fiducial_shift.setText(str(self.shift_fiducial))
-            self.lbl_point_shift.setText(str(self.shift_point))
-            self.lbl_stereoshift_ratio.setText(str(self.point_stereoshift))
-            self.lbl_point_depth.setText(str(self.point_depth))
-            # endregion #############################################
+    def _on_click_calculate(self) -> None:
+        """Calculate the stereoshift and populate the results table."""
+        f = self._retrieve_fiducial(0, 0, 1)
+        # There may be a better way of doing this by assigning point attributes and accessing their labels.
+        # TODO clarify whether we still want the reference offset to be displayed to the user.
+        ref_plane_index = self.cmb_set_ref_plane.currentIndex()
+        # index =0 if front, 1 if rear
+        fiducial_plane__index = 1 - ref_plane_index
+        # = 1 if front, 0 if rear
+        # This could also be achieved in a more traditional/clearer way using an if/switch statement
+        # Would appreciate some feedback on which style is preferred.
+        # Previously, I had used Fiducial objects and passed these in to the corrected_shift function.
+        # eg. self.shift_fiducial = corrected_shift(self.fiducials[fiducial_plane__index], self.fiducials[ref_plane_index])
+        # this was when we had the 2D array of fiducial objects, and had to do a load of code to sync up napari's data
+        # structure with ours.
+        # I'm not really a fan of duplicating the data here, and would rather just use pointers to the right data
+        # in napari, than have to create fiducial objects and pass them in.
+        # but, feel free to suggest that I change it back.
+        # I'm also not a fan of the way that these calculations get duplicated.
+        # i.e depth can just use the previous results.
+        # self.shift_reference
+        self.shift_fiducial = corrected_shift(
+            self.fiducials[fiducial_plane__index],
+            self.fiducials[ref_plane_index],
+        )
+        self.shift_point = corrected_shift(
+            self.points[0], self.fiducials[ref_plane_index]
+        )
+        # this is called ratio in the GUI, should I change its name here or there?
+        self.point_stereoshift = stereoshift(
+            self.shift_fiducial, self.shift_point
+        )
+        self.point_depth = depth(
+            self.fiducials[fiducial_plane__index][0],
+            self.fiducials[fiducial_plane__index][1],
+            self.points[0][0],
+            self.points[0][1],
+        )
+        self.spoints = self.layer_fiducials.data[2:]
+        # Update the results table
+        self.lbl_fiducial_shift.setText(str(self.shift_fiducial))
+        self.lbl_point_shift.setText(str(self.shift_point))
+        self.lbl_stereoshift_ratio.setText(str(self.point_stereoshift))
+        self.lbl_point_depth.setText(str(self.point_depth))
+        # endregion #############################################
 
     def _setup_ui(self) -> None:
         self.setWindowTitle("Measure Stereoshift and Magnification")
@@ -461,6 +468,29 @@ class StereoshiftDialog(QDialog):
             face_color=colors,
             symbol=symbols,
         )
+
+    def _retrieve_fiducial(self, event, depth_index, view):
+        """Access a fiducial by:
+        [ (event=),  (front=0,ref=1,back=2), (view=1,2)]"""
+        # this is written on the assumption the layers are deleted after every use.
+        # this will be updated to work for many layers in the next PR
+        # filter down a subset of the points using the above criteria.
+        # in this temp mode, we already know the order of the data in the layer so can access directly
+        # will need to filter view by the text, as viewpoints persist across multiple view layers.
+        # remember that the layer is set up such that:
+        #            points = [      # View 1                                                # View 2
+        #      0  [origin_x, origin_y, current_event],                 1  [origin_x + 100/zoom_level, origin_y, current_event],                # Front
+        #      2  [origin_x, origin_y-100/zoom_level, current_event],  3  [origin_x + 100/zoom_level, origin_y-100/zoom_level, current_event],  # Reference
+        #      4  [origin_x, origin_y-200/zoom_level, current_event],  5  [origin_x + 100/zoom_level, origin_y-200/zoom_level, current_event],  # Rear
+        data = self.layer_fiducials.data[depth_index * 2 + (view - 1)]
+        return Fiducial("", data[0], data[1])  # double check these are correct
+        # depth,view
+        # case (0,1) -> front, view 1 -> 0
+        # case (0,2) -> front, view 2 -> 1
+        # case (1,1) -> ref, view 1 -> 2
+        # case (1,2) -> ref, view 2 -> 3
+        # case (2,1) -> back, view 1 -> 4
+        # case (2,2) -> back, view 2 -> 5
 
     # def _on_change_cmb_fiducial etc etc
     # add the label to the point in the view
