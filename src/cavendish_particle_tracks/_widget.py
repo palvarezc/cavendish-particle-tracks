@@ -511,6 +511,7 @@ class ParticleTracksWidget(QWidget):
     def _on_click_magnification(self) -> MagnificationDialog:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
         if self.mag_dlg is not None:
+            self.mag_dlg.show()
             self.mag_dlg.raise_()
             self.mag_dlg._activate_cal_layer()
             return self.mag_dlg
