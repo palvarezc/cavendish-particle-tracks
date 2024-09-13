@@ -8,7 +8,7 @@ from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
 
 
 @pytest.mark.parametrize(
-    "front_fiducial1, front_fiducial2, back_fiducial1, back_fiducial2, expected_magnification_params",
+    "front_fiducial1, front_fiducial2, back_fiducial1, back_fiducial2, expected_magnification_params, double_click",
     [
         (
             Fiducial("C'", *FF["C'"]),
@@ -16,6 +16,7 @@ from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
             Fiducial("C", *FB["C"]),
             Fiducial("F", *FB["F"]),
             (1.0, 0.0),
+            True,
         ),
         (
             Fiducial("C'", *np.multiply(2, FF["C'"])),
@@ -23,6 +24,7 @@ from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
             Fiducial("C", *np.multiply(2, FB["C"])),
             Fiducial("F", *np.multiply(2, FB["F"])),
             (0.5, 0.0),
+            False,
         ),
         (
             Fiducial("C'", *np.multiply(2, FF["C'"])),
@@ -30,6 +32,7 @@ from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
             Fiducial("C", *np.divide(FB["C"], 0.5 + 0.3 * CD)),
             Fiducial("F", *np.divide(FB["F"], 0.5 + 0.3 * CD)),
             (0.5, 0.3),
+            False,
         ),
     ],
 )
@@ -40,6 +43,7 @@ def test_magnification_ui(
     back_fiducial1,
     back_fiducial2,
     expected_magnification_params,
+    double_click,
 ):
     """Tests the expected behaviour from the expected workflow.
     - Add 4 fiducials in layer
@@ -48,6 +52,8 @@ def test_magnification_ui(
     - Magnification is propagated to the table when "ok" is clicked.
     """
     dlg = cpt_widget._on_click_magnification()
+    if double_click:
+        dlg = cpt_widget._on_click_magnification()
 
     # add fiducials
     fiducials = [
