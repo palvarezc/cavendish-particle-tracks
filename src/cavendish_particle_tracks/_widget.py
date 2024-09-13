@@ -68,10 +68,9 @@ class ParticleTracksWidget(QWidget):
     def no_events(self):
         return self.viewer.dims.range[0]
 
-    def __init__(self, napari_viewer: napari.viewer.Viewer, test_mode=False):
+    def __init__(self, napari_viewer: napari.viewer.Viewer):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
-        self.test_mode = test_mode
         # define QtWidgets
         self.btn_load = QPushButton("Load data")
         self.btn_load.width = 200
@@ -150,7 +149,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         layout_outer.addLayout(self.buttonbox)
         self.layout().addWidget(self.table)
 
-        self.set_UI_image_loaded(False, test_mode)
+        self.set_UI_image_loaded(False)
 
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
@@ -167,19 +166,14 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
     def _get_selected_points(self, layer_name="Radii and Lengths") -> np.array:
         """Returns array of selected points in the viewer"""
 
-        # Filtering selected points
+        # Filtering selected layer (layer names are unique)
         points_layers = [
             layer for layer in self.viewer.layers if layer.name == layer_name
         ]
-        try:
-            selected_points = np.array(
-                [
-                    points_layers[0].data[i]
-                    for i in points_layers[0].selected_data
-                ]
-            )
-        except IndexError:
-            selected_points = []
+        # Returning selected points in the layer
+        selected_points = np.array(
+            [points_layers[0].data[i] for i in points_layers[0].selected_data]
+        )
         return selected_points
 
     def _get_selected_row(self) -> np.array:
@@ -521,13 +515,13 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
             # Crops view 1 and 2 to same size as view 3 by removing whitespace
             # on left, as images align on the right.
             # this number is the width of image 3.
-            return array[:, :, -8377:, :]
+            magic_number_smallest_view_pixels = -8377
+            return array[:, :, magic_number_smallest_view_pixels:, :]
 
         stacks = []
         for subdir in folder_subdirs:
             stack: dask.array.Array = imread(subdir + "/*")
-            if not self.test_mode:
-                stack = crop(stack)
+            stack = crop(stack)
             stacks.append(stack)
 
         # Concatenate stacks along new spatial dimension such that we have a view, and event slider
@@ -541,8 +535,8 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
             self.layer_measurements = self.viewer.add_points(
                 name="Radii and Lengths",
                 size=20,
-                edge_width=7,
-                edge_width_is_relative=False,
+                border_width=7,
+                border_width_is_relative=False,
             )
 
     def _on_click_new_particle(self) -> None:

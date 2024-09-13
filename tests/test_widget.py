@@ -73,10 +73,10 @@ def test_calculate_radius_ui(
     cpt_widget.cmb_add_particle.setCurrentIndex(1)
 
     # add three points to the points layer and select them
-    points_layer = cpt_widget.viewer.add_points(
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
         [(0, 1), (1, 0), (0, -1)], name="Radii and Lengths"
     )
-    points_layer.selected_data = {0, 1, 2}
+    cpt_widget.layer_measurements.selected_data = {0, 1, 2}
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
@@ -108,12 +108,12 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
-    points_layer = cpt_widget.viewer.add_points(
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
         points, name="Radii and Lengths"
     )
 
     # select the wrong number of points
-    points_layer.selected_data = set(range(npoints))
+    cpt_widget.layer_measurements.selected_data = set(range(npoints))
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
@@ -200,10 +200,10 @@ def test_calculate_length_ui(
     cpt_widget.cmb_add_particle.setCurrentIndex(1)
 
     # add three points to the points layer and select them
-    points_layer = cpt_widget.viewer.add_points(
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
         [(0, 1), (0, 0)], name="Radii and Lengths"
     )
-    points_layer.selected_data = {0, 1}
+    cpt_widget.layer_measurements.selected_data = {0, 1}
 
     # click the calculate decay length button
     cpt_widget._on_click_length()
@@ -232,10 +232,12 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
-    points_layer = cpt_widget.viewer.add_points(
+    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
         points, name="Radii and Lengths"
     )
-    points_layer.selected_data = set(range(npoints))
+
+    # select the wrong number of points
+    cpt_widget.layer_measurements.selected_data = set(range(npoints))
 
     # click the calculate decay length button
     cpt_widget._on_click_length()
@@ -267,17 +269,22 @@ def test_load_data(
     reload,
 ):
     """Test loading of images in a folder as 4D image layer with width, height, event, view dimensions."""
+
     data_layer_index = 0
     if reload:
         cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
             name="Radii and Lengths"
         )
         data_layer_index = 1
+
+    resolution = 8400 if expect_data_loaded else 10
     for subdir, n in zip(data_subdirs, image_count):
         p = tmp_path / subdir
         p.mkdir()
         for i in range(n):
-            data = np.random.randint(0, 255, (256, 256), "uint8")
+            data = np.random.randint(
+                0, 255, (resolution, resolution, 3), "uint8"
+            )
             tf.imwrite(p / f"temp{i}.tif", data)
 
     def set_directory_and_close(dialog):
