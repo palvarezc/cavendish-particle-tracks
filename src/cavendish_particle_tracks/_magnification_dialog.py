@@ -194,5 +194,5 @@ class MagnificationDialog(QDialog):
     def reject(self) -> None:
         """On reject remove the magnification layer"""
 
-        self._deactivate_cal_layer()
+        self._deactivate_calibration_layer()
         return super().reject()
