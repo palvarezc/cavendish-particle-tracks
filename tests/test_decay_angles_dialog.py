@@ -9,7 +9,7 @@ from pytestqt.qtbot import QtBot
         False,
     ],
 )
-def test_decay_angles_dialog(cpt_widget, qtbot: QtBot, double_click):
+def test_decay_angles_dialog(cpt_widget, qtbot: QtBot, click_twice: bool):
     """Smoke test for the DecayAnglesDialog."""
     cpt_widget.cb.setCurrentIndex(4)
 
