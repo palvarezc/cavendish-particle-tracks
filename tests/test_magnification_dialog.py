@@ -7,8 +7,9 @@ from cavendish_particle_tracks._calculate import FIDUCIAL_BACK as FB
 from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
 
 
+@pytest.mark.parametrize("click_twice", [True, False])
 @pytest.mark.parametrize(
-    "front_fiducial1, front_fiducial2, back_fiducial1, back_fiducial2, expected_magnification_params, double_click",
+    "front_fiducial1, front_fiducial2, back_fiducial1, back_fiducial2, expected_magnification_params",
     [
         (
             Fiducial("C'", *FF["C'"]),
@@ -16,7 +17,6 @@ from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
             Fiducial("C", *FB["C"]),
             Fiducial("F", *FB["F"]),
             (1.0, 0.0),
-            True,
         ),
         (
             Fiducial("C'", *np.multiply(2, FF["C'"])),
@@ -24,7 +24,6 @@ from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
             Fiducial("C", *np.multiply(2, FB["C"])),
             Fiducial("F", *np.multiply(2, FB["F"])),
             (0.5, 0.0),
-            False,
         ),
         (
             Fiducial("C'", *np.multiply(2, FF["C'"])),
@@ -32,7 +31,6 @@ from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
             Fiducial("C", *np.divide(FB["C"], 0.5 + 0.3 * CD)),
             Fiducial("F", *np.divide(FB["F"], 0.5 + 0.3 * CD)),
             (0.5, 0.3),
-            False,
         ),
     ],
 )
