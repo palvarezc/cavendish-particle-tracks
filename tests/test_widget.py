@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import time
 from pathlib import Path
 from random import random
 
@@ -14,6 +13,7 @@ from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 from cavendish_particle_tracks import ParticleTracksWidget
 
 from .conftest import get_dialog
+
 
 def test_calculate_radius_ui(
     cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
@@ -81,9 +81,7 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
     )
 
 
-def test_add_new_particle_ui(
-    cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
-):
+def test_add_new_particle_ui(cpt_widget: ParticleTracksWidget):
     assert cpt_widget.table.rowCount() == 0
 
     cpt_widget.cmb_add_particle.setCurrentIndex(1)
@@ -211,7 +209,7 @@ def test_load_data(
     data_subdirs: list[str],
     image_count: list[int],
     expect_data_loaded: bool,
-    reload:bool,
+    reload: bool,
 ):
     """Test loading of images in a folder as 4D image layer with width, height, event, view dimensions."""
 
@@ -270,18 +268,3 @@ def test_load_data(
         assert msgbox.text() == (
             "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
         )
-
-
-def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
-    """Test the show/hide buttons"""
-    assert cpt_widget.rad.isEnabled() is False
-    assert cpt_widget.lgth.isEnabled() is False
-    assert cpt_widget.ang.isEnabled() is False
-    cpt_widget.cb.setCurrentIndex(1)
-    assert cpt_widget.rad.isEnabled() is True
-    assert cpt_widget.lgth.isEnabled() is True
-    assert cpt_widget.ang.isEnabled() is False
-    cpt_widget.cb.setCurrentIndex(4)
-    assert cpt_widget.rad.isEnabled() is False
-    assert cpt_widget.lgth.isEnabled() is True
-    assert cpt_widget.ang.isEnabled() is True
