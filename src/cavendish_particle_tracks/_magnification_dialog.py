@@ -185,7 +185,7 @@ class MagnificationDialog(QDialog):
 
         print("Propagating magnification to table.")
         self.parent._propagate_magnification(self.a, self.b)
-        self._deactivate_cal_layer()
+        self._deactivate_calibration_layer()
         self.parent.cal.setEnabled(True)
         # self.parent.mag.setEnabled(False)
         self.parent.mag.setText("Update magnification")
