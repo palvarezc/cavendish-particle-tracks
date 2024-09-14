@@ -41,7 +41,7 @@ def test_magnification_ui(
     back_fiducial1,
     back_fiducial2,
     expected_magnification_params,
-    double_click,
+    click_twice,
 ):
     """Tests the expected behaviour from the expected workflow.
     - Add 4 fiducials in layer
