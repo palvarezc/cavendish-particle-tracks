@@ -49,9 +49,10 @@ def test_magnification_ui(
     - Magnification is calculated on click of calculate button.
     - Magnification is propagated to the table when "ok" is clicked.
     """
+    # The user opens the child dialog (also test fringe case that they click the button again).
+    if click_twice:
+        cpt_widget._on_click_magnification()
     dlg = cpt_widget._on_click_magnification()
-    if double_click:
-        dlg = cpt_widget._on_click_magnification()
 
     # add fiducials
     fiducials = [
