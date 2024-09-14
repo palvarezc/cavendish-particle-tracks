@@ -513,7 +513,7 @@ class ParticleTracksWidget(QWidget):
         if self.mag_dlg is not None:
             self.mag_dlg.show()
             self.mag_dlg.raise_()
-            self.mag_dlg._activate_cal_layer()
+            self.mag_dlg._activate_calibration_layer()
             return self.mag_dlg
         self.mag_dlg = MagnificationDialog(self)
         self.mag_dlg.show()

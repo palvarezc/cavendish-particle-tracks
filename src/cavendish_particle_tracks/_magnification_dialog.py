@@ -93,12 +93,12 @@ class MagnificationDialog(QDialog):
 
         self.layout().addWidget(self.buttonBox, 9, 0, 1, 3)
 
-        def create_retrieve_magnification_layer(self):
+        def create_or_retrieve_magnification_layer(self):
             if "Magnification" in self.parent.viewer.layers:
                 return self.parent.viewer.layers["Magnification"]
             return self.parent.viewer.add_points(name="Magnification")
 
-        self.cal_layer = create_retrieve_magnification_layer(self)
+        self.cal_layer = create_or_retrieve_magnification_layer(self)
         self.a = parent.mag_a
         self.b = parent.mag_b
 
