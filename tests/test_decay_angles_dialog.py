@@ -3,7 +3,7 @@ from pytestqt.qtbot import QtBot
 
 
 @pytest.mark.parametrize(
-    "double_click",
+    "click_twice",
     [
         True,
         False,
