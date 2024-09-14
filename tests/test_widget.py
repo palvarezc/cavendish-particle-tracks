@@ -243,14 +243,14 @@ def test_load_data(
 
 def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
     """Test the show/hide buttons"""
-    assert cpt_widget.rad.isEnabled() is False
-    assert cpt_widget.lgth.isEnabled() is False
-    assert cpt_widget.ang.isEnabled() is False
-    cpt_widget.cb.setCurrentIndex(1)
-    assert cpt_widget.rad.isEnabled() is True
-    assert cpt_widget.lgth.isEnabled() is True
-    assert cpt_widget.ang.isEnabled() is False
-    cpt_widget.cb.setCurrentIndex(4)
-    assert cpt_widget.rad.isEnabled() is False
-    assert cpt_widget.lgth.isEnabled() is True
-    assert cpt_widget.ang.isEnabled() is True
+    assert cpt_widget.radius_button.isEnabled() is False
+    assert cpt_widget.length_button.isEnabled() is False
+    assert cpt_widget.decay_angles_button.isEnabled() is False
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+    assert cpt_widget.radius_button.isEnabled() is True
+    assert cpt_widget.length_button.isEnabled() is True
+    assert cpt_widget.decay_angles_button.isEnabled() is False
+    cpt_widget.particle_decays_menu.setCurrentIndex(4)
+    assert cpt_widget.radius_button.isEnabled() is False
+    assert cpt_widget.length_button.isEnabled() is True
+    assert cpt_widget.decay_angles_button.isEnabled() is True
