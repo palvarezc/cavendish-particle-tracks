@@ -161,7 +161,7 @@ class MagnificationDialog(QDialog):
         self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
         self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
 
-    def _activate_cal_layer(self):
+    def _activate_calibration_layer(self):
         """Show the calibration layer and move it to the top"""
         self.cal_layer.visible = True
         # Move the calibration layer to the top
