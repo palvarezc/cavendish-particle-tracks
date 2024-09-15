@@ -50,7 +50,7 @@ class Fiducial:
 # Idea is to save a list of ParticleDecays as we go along, and then pandas.DataFrame(list_of_particles) does all the magic
 @dataclass
 class ParticleDecay:
-    Name: str = ""
+    name: str = ""
     index: int = 0
     r1: list[float] = field(default_factory=list)
     r2: list[float] = field(default_factory=list)

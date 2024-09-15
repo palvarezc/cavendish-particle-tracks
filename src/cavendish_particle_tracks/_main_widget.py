@@ -1,9 +1,9 @@
 """
 This module contains the main Cavendish Particle Tracks widget.
 
-It's the students' home widget, that contains the table of particle decays, and the
-buttons to perform all analysis calculations, and to export (save) the data for
-further analysis.
+It's the students' home widget, that contains the table of particle decays, and
+the buttons to perform all analysis calculations, and to export (save) the data
+for further analysis.
 """
 
 import glob
@@ -438,7 +438,7 @@ class ParticleTracksWidget(QWidget):
 
         # add a new particle to data
         new_particle = ParticleDecay()
-        new_particle.Name = self.particle_decays_menu.currentText()
+        new_particle.name = self.particle_decays_menu.currentText()
         new_particle.index = self.particle_decays_menu.currentIndex()
         new_particle.magnification_a = self.mag_a
         new_particle.magnification_b = self.mag_b
@@ -455,7 +455,7 @@ class ParticleTracksWidget(QWidget):
         self.table.setItem(
             self.table.rowCount() - 1,
             self._get_table_column_index("Name"),
-            QTableWidgetItem(new_particle.Name),
+            QTableWidgetItem(new_particle.name),
         )
         self.table.setItem(
             self.table.rowCount() - 1,
