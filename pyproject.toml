@@ -28,10 +28,10 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "imagecodecs",    # for opening tiff images on macos
-    "napari > 0.5.2", # need to be able to open as stack (https://github.com/napari/napari/issues/7165)
+    "imagecodecs",         # for opening tiff images on macos
+    "napari[all] > 0.5.2", # need to be able to open as stack (https://github.com/napari/napari/issues/7165)
     "numpy",
-    "dask-image",     # for image loading
+    "dask-image",          # for image loading
 ]
 dynamic = ["version"]
 
@@ -62,7 +62,6 @@ testing = [
     "pytest-cov",  # https://pytest-cov.readthedocs.io/en/latest/
     "pytest-mock",
     "pytest-qt",   # https://pytest-qt.readthedocs.io/en/latest/
-    "napari",
 ]
 
 [tool.setuptools]
