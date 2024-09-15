@@ -1,11 +1,23 @@
+import pytest
 from pytestqt.qtbot import QtBot
 
-from cavendish_particle_tracks._decay_angles_dialog import DecayAnglesDialog
 
-
-def test_decay_angles_dialog(cpt_widget, qtbot: QtBot):
+@pytest.mark.parametrize(
+    "click_twice",
+    [
+        True,
+        False,
+    ],
+)
+def test_decay_angles_dialog(cpt_widget, qtbot: QtBot, click_twice: bool):
     """Smoke test for the DecayAnglesDialog."""
-    dialog = DecayAnglesDialog(parent=cpt_widget)
+    cpt_widget.cmb_add_particle.setCurrentIndex(4)
+
+    # The user clicks the button (also test fringe case that they click the button again).
+    if click_twice:
+        cpt_widget._on_click_decay_angles()
+    dialog = cpt_widget._on_click_decay_angles()
+
     qtbot.addWidget(dialog)
 
     # show dialog and check that it closes

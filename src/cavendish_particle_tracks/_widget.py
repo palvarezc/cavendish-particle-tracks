@@ -130,6 +130,10 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         layout_outer.addLayout(self.buttonbox)
         self.layout().addWidget(self.table)
 
+        # Disable native napari layer controls - show again on closing this widget (hide).
+        # NB: This will break in napari 0.6.0
+        self.viewer.window._qt_viewer.layerButtons.hide()
+
         self.set_UI_image_loaded(False, test_mode)
 
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
@@ -140,9 +144,21 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         self.mag_a = -1.0e6
         self.mag_b = -1.0e6
 
+        # Dialog pointers to reuse
+        self.mag_dlg: MagnificationDialog | None = None
+        self.stereoshift_dlg: StereoshiftDialog | None = None
+        self.stereoshift_isopen = False
+        self.decay_angles_dlg: DecayAnglesDialog | None = None
+        self.decay_angles_isopen = False
+
         @self.viewer.layers.events.connect
         def _on_layerlist_changed(event):
             self.set_btn_availability()
+
+    def hideEvent(self, event):
+        """When the widget is 'closed' (napari just hides it), show the layer buttons again."""
+        self.viewer.window._qt_viewer.layerButtons.show()
+        super().hideEvent(event)
 
     @property
     def camera_center(self):
@@ -416,20 +432,34 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
             print("Modified particle ", selected_row)
             print(self.data[selected_row])
 
-    def _on_click_decay_angles(self) -> None:
+    def _on_click_decay_angles(self) -> DecayAnglesDialog:
         """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
-        dlg = DecayAnglesDialog(self)
-        dlg.show()
+        if (self.decay_angles_dlg is not None) and (
+            self.decay_angles_isopen is True
+        ):
+            self.decay_angles_dlg.raise_()
+            return self.decay_angles_dlg
+        self.decay_angles_dlg = DecayAnglesDialog(self)
+        self.decay_angles_dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        dlg.move(point)
+        self.decay_angles_dlg.move(point)
+        self.decay_angles_isopen = True
+        return self.decay_angles_dlg
 
     def _on_click_stereoshift(self) -> StereoshiftDialog:
         """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
-        dlg = StereoshiftDialog(self)
-        dlg.show()
+        # Different behaviour to the Magnification dialog, waiting for the definition of the stereoshift layer structure
+        if (self.stereoshift_dlg is not None) and (
+            self.stereoshift_isopen is True
+        ):
+            self.stereoshift_dlg.raise_()
+            return self.stereoshift_dlg
+        self.stereoshift_dlg = StereoshiftDialog(self)
+        self.stereoshift_dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        dlg.move(point)
-        return dlg
+        self.stereoshift_dlg.move(point)
+        self.stereoshift_isopen = True
+        return self.stereoshift_dlg
 
     def _on_click_load_data(self) -> None:
         """When the 'Load data' button is clicked, a dialog opens to select the folder containing the data.
@@ -549,9 +579,6 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         print(self.data[-1])
         self.cmb_add_particle.setCurrentIndex(0)
 
-        # # napari notifications
-        # napari.utils.notifications.show_info("I created a new particle")
-
     def _on_click_delete_particle(self) -> None:
         """Delete particle from table and data"""
         try:
@@ -574,12 +601,16 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 
     def _on_click_magnification(self) -> MagnificationDialog:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
-
-        dlg = MagnificationDialog(self)
-        dlg.show()
+        if self.mag_dlg is not None:
+            self.mag_dlg.show()
+            self.mag_dlg.raise_()
+            self.mag_dlg._activate_calibration_layer()
+            return self.mag_dlg
+        self.mag_dlg = MagnificationDialog(self)
+        self.mag_dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        dlg.move(point)
-        return dlg
+        self.mag_dlg.move(point)
+        return self.mag_dlg
 
     def _propagate_magnification(self, a: float, b: float) -> None:
         """Assigns a and b to the class magnification parameters and to each of the particles in data"""
