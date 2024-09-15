@@ -101,6 +101,10 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.mag)
         self.layout().addWidget(save)
 
+        # Disable native napari layer controls - show again on closing this widget (hide).
+        # NB: This will break in napari 0.6.0
+        self.viewer.window._qt_viewer.layerButtons.hide()
+
         # disable all calculation buttons
         self.disable_all_buttons()
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
@@ -117,6 +121,11 @@ class ParticleTracksWidget(QWidget):
         self.stereoshift_isopen = False
         self.decay_angles_dlg: DecayAnglesDialog | None = None
         self.decay_angles_isopen = False
+
+    def hideEvent(self, event):
+        """When the widget is 'closed' (napari just hides it), show the layer buttons again."""
+        self.viewer.window._qt_viewer.layerButtons.show()
+        super().hideEvent(event)
 
     @property
     def camera_center(self):
@@ -450,6 +459,9 @@ class ParticleTracksWidget(QWidget):
                 border_width=7,
                 border_width_is_relative=False,
             )
+
+        # Disable the load button after loading the data (interim solution until we can move to bottom-docked UI)
+        self.load.setEnabled(False)
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
