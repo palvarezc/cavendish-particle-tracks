@@ -88,6 +88,7 @@ class ParticleTracksWidget(QWidget):
         # self.viewer.events.mouse_press(self._on_mouse_click)
 
         # layout
+        self.viewer.window._qt_viewer.layerButtons.hide()  # This will break in napari 0.6.0
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.load)
         self.layout().addWidget(self.cb)
@@ -450,6 +451,9 @@ class ParticleTracksWidget(QWidget):
                 border_width=7,
                 border_width_is_relative=False,
             )
+
+        # Disable the load button after loading the data (interim solution until we can move to bottom-docked UI)
+        self.load.setEnabled(False)
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
