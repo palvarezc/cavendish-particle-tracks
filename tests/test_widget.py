@@ -91,7 +91,6 @@ def test_add_new_particle_ui(cpt_widget: ParticleTracksWidget):
 
 
 def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
-    cpt_widget.test_mode = False
     cpt_widget.viewer.add_image(
         np.random.random((100, 100)), name="Particle Tracks"
     )

@@ -47,11 +47,13 @@ class ParticleTracksWidget(QWidget):
     layer_measurements: napari.layers.Points
 
     def __init__(
-        self, napari_viewer: napari.viewer.Viewer, test_mode: bool = False
+        self,
+        napari_viewer: napari.viewer.Viewer,
+        bypass_load_screen: bool = False,
     ):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
-        self.test_mode = test_mode
+        self.bypass_load_screen = bypass_load_screen
         # define QtWidgets
         self.btn_load = QPushButton("Load data")
         self.btn_load.width = 200
@@ -134,7 +136,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         # NB: This will break in napari 0.6.0
         self.viewer.window._qt_viewer.layerButtons.hide()
 
-        self.set_UI_image_loaded(False, test_mode)
+        self.set_UI_image_loaded(False, bypass_load_screen)
 
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
@@ -237,7 +239,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
             if layer.name == "Particle Tracks":
                 images_imported = True
                 break
-        self.set_UI_image_loaded(images_imported, self.test_mode)
+        self.set_UI_image_loaded(images_imported, self.bypass_load_screen)
         try:
             selected_row = self._get_selected_row()
             self.btn_save.setEnabled(True)
@@ -265,8 +267,10 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
             self.btn_magnification.setEnabled(False)
             self.btn_save.setEnabled(False)
 
-    def set_UI_image_loaded(self, loaded: bool, test_mode: bool) -> None:
-        if test_mode:
+    def set_UI_image_loaded(
+        self, loaded: bool, bypass_load_screen: bool
+    ) -> None:
+        if bypass_load_screen:
             return
         if loaded:
             # Set margins (left, top, right, bottom)
