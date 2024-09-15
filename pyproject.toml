@@ -29,7 +29,7 @@ classifiers = [
 requires-python = ">=3.9"
 dependencies = [
     "imagecodecs",   # for opening tiff images on macos
-    "napari>=0.5.2, <0.6.0", # need >=0.5.2 to be able to open as stack (https://github.com/napari/napari/issues/7165) and <0.6.0 to hide layers controls
+    "napari >= 0.5.2, < 0.6.0", # need >= 0.5.2 to be able to open as stack (https://github.com/napari/napari/issues/7165) and < 0.6.0 to hide layers controls
     "numpy",
     "dask-image",     # for image loading
 ]
