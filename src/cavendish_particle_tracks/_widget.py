@@ -88,7 +88,6 @@ class ParticleTracksWidget(QWidget):
         # self.viewer.events.mouse_press(self._on_mouse_click)
 
         # layout
-        self.viewer.window._qt_viewer.layerButtons.hide()  # This will break in napari 0.6.0
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.load)
         self.layout().addWidget(self.cb)
@@ -101,6 +100,10 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(self.stsh)
         self.layout().addWidget(self.mag)
         self.layout().addWidget(save)
+
+        # Disable native napari layer controls - show again on closing this widget (hide).
+        # NB: This will break in napari 0.6.0
+        self.viewer.window._qt_viewer.layerButtons.hide()
 
         # disable all calculation buttons
         self.disable_all_buttons()
@@ -118,6 +121,11 @@ class ParticleTracksWidget(QWidget):
         self.stereoshift_isopen = False
         self.decay_angles_dlg: DecayAnglesDialog | None = None
         self.decay_angles_isopen = False
+
+    def hideEvent(self, event):
+        """When the widget is 'closed' (napari just hides it), show the layer buttons again."""
+        self.viewer.window._qt_viewer.layerButtons.show()
+        super().hideEvent(event)
 
     @property
     def camera_center(self):
