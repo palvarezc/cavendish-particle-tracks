@@ -55,7 +55,6 @@ docs = [
     "sphinx-pyproject",    # (take project conf from pyproject.toml) https://sphinx-pyproject.readthedocs.io
     "pydata-sphinx-theme",
     "myst-parser",
-    "pyqt5",
 ]
 testing = [
     "tox",
@@ -64,7 +63,6 @@ testing = [
     "pytest-mock",
     "pytest-qt",   # https://pytest-qt.readthedocs.io/en/latest/
     "napari",
-    "pyqt5",
 ]
 
 [tool.setuptools]
