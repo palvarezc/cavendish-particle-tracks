@@ -155,7 +155,7 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 
         @self.viewer.layers.events.connect
         def _on_layerlist_changed(event):
-            self.set_btn_availability()
+            self.set_button_availability()
 
     def hideEvent(self, event):
         """When the widget is 'closed' (napari just hides it), show the layer buttons again."""
@@ -231,9 +231,9 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 
     def _on_row_selection_changed(self) -> None:
         """Enable/disable calculation buttons depending on the row selection"""
-        self.set_btn_availability()
+        self.set_button_availability()
 
-    def set_btn_availability(self) -> None:
+    def set_button_availability(self) -> None:
         images_imported = False
         for layer in self.viewer.layers:
             if layer.name == "Particle Tracks":
