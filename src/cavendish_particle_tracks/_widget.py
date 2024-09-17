@@ -127,7 +127,8 @@ class ParticleTracksWidget(QWidget):
         If data has been recorded, prompt the user to save it before closing the widget.
         """
         if len(self.data) > 0:
-            message_box = QMessageBox()
+            message_box = QMessageBox(self)
+            message_box.setIcon(QMessageBox.Warning)
             message_box.setText(
                 "Closing Cavendish Particle Tracks. Any unsaved data will be lost."
             )
