@@ -90,34 +90,6 @@ def test_add_new_particle_ui(cpt_widget: ParticleTracksWidget):
     assert len(cpt_widget.data) == 1
 
 
-def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
-    cpt_widget.viewer.add_image(
-        np.random.random((100, 100)), name="Particle Tracks"
-    )
-
-    # # If we manage to make the cpt_widget visible
-    # assert cpt_widget.intro_text.isVisible() is False
-    # assert cpt_widget.btn_load.isVisible() is False
-    # assert cpt_widget.cmb_add_particle.isVisible() is True
-    # assert cpt_widget.btn_delete_particle.isVisible() is True
-    # assert cpt_widget.btn_radius.isVisible() is True
-    # assert cpt_widget.btn_length.isVisible() is True
-    # assert cpt_widget.btn_decayangle.isVisible() is True
-    # assert cpt_widget.btn_stereoshift.isVisible() is True
-    # assert cpt_widget.btn_save.isVisible() is True
-    # assert cpt_widget.btn_magnification.isVisible() is True
-    # assert cpt_widget.table.isVisible() is True
-    # assert cpt_widget.cal.isVisible() is True
-
-    assert cpt_widget.cmb_add_particle.isEnabled() is True
-    assert cpt_widget.btn_delete_particle.isEnabled() is False
-    assert cpt_widget.btn_radius.isEnabled() is False
-    cpt_widget.cmb_add_particle.setCurrentIndex(1)
-    assert cpt_widget.btn_delete_particle.isEnabled() is True
-    assert cpt_widget.btn_radius.isEnabled() is True
-    assert cpt_widget.btn_decayangle.isEnabled() is False
-
-
 def test_delete_particle_ui(cpt_widget: ParticleTracksWidget):
     """Tests the removal of a particle from the table"""
     cpt_widget.cmb_add_particle.setCurrentIndex(1)
@@ -276,3 +248,48 @@ def test_load_data(
         assert msgbox.text() == (
             "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
         )
+
+
+def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
+    cpt_widget.viewer.add_image(
+        np.random.random((100, 100)), name="Particle Tracks"
+    )
+    # ideally would like to test isVisible instead of isEnabled, but that requires showing the widget
+    # need to think about how to do that, or if it's worth it
+    assert cpt_widget.cmb_add_particle.isEnabled() is True
+    assert cpt_widget.btn_delete_particle.isEnabled() is False
+    assert cpt_widget.btn_radius.isEnabled() is False
+    assert cpt_widget.btn_length.isEnabled() is False
+    assert cpt_widget.btn_decayangle.isEnabled() is False
+    cpt_widget.cmb_add_particle.setCurrentIndex(1)
+    assert cpt_widget.btn_delete_particle.isEnabled() is True
+    assert cpt_widget.btn_radius.isEnabled() is True
+    assert cpt_widget.btn_length.isEnabled() is True
+    assert cpt_widget.btn_decayangle.isEnabled() is False
+    cpt_widget.cmb_add_particle.setCurrentIndex(4)
+    assert cpt_widget.btn_delete_particle.isEnabled() is True
+    assert cpt_widget.btn_radius.isEnabled() is False
+    assert cpt_widget.btn_length.isEnabled() is True
+    assert cpt_widget.btn_decayangle.isEnabled() is True
+
+
+def test_close_widget(cpt_widget: ParticleTracksWidget, qtbot: QtBot):
+    """Test the close button"""
+    cpt_widget.cmb_add_particle.setCurrentIndex(4)
+    cpt_widget.show()  # the function hideEvent is not called if the widget is not shown
+
+    def check_dialog_and_click_no(dialog):
+        assert isinstance(dialog, QMessageBox)
+        assert dialog.icon() == QMessageBox.Warning
+        assert dialog.text() == (
+            "Closing Cavendish Particle Tracks. Any unsaved data will be lost."
+        )
+        buttonbox = dialog.findChild(QDialogButtonBox)
+        nobutton = buttonbox.children()[2]
+        nobutton.click()
+
+    get_dialog(
+        dialog_trigger=cpt_widget.window().close,
+        dialog_action=check_dialog_and_click_no,
+        time_out=5,
+    )
