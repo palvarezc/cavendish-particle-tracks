@@ -7,6 +7,7 @@ from cavendish_particle_tracks._calculate import FIDUCIAL_BACK as FB
 from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
 
 
+@pytest.mark.parametrize("click_twice", [True, False])
 @pytest.mark.parametrize(
     "front_fiducial1, front_fiducial2, back_fiducial1, back_fiducial2, expected_magnification_params",
     [
@@ -40,6 +41,7 @@ def test_magnification_ui(
     back_fiducial1,
     back_fiducial2,
     expected_magnification_params,
+    click_twice,
 ):
     """Tests the expected behaviour from the expected workflow.
     - Add 4 fiducials in layer
@@ -47,6 +49,9 @@ def test_magnification_ui(
     - Magnification is calculated on click of calculate button.
     - Magnification is propagated to the table when "ok" is clicked.
     """
+    # The user opens the child dialog (also test fringe case that they click the button again).
+    if click_twice:
+        cpt_widget._on_click_magnification()
     dlg = cpt_widget._on_click_magnification()
 
     # add fiducials
@@ -78,6 +83,7 @@ def test_magnification_ui(
         dlg.cal_layer.selected_data = {len(dlg.cal_layer.data) - 1}
         add_fiducial_func()
         assert recorded_fiducial == fiducial
+        # TODO: check text box
 
     dlg._on_click_magnification()
     assert dlg.a == pytest.approx(expected_magnification_params[0], rel=1e-3)

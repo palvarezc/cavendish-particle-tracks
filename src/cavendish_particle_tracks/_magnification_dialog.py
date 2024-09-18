@@ -125,10 +125,12 @@ class MagnificationDialog(QDialog):
 
         self.layout().addWidget(self.buttonBox, 9, 0, 1, 3)
 
-        self.cal_layer = self.parent.viewer.add_points(
-            name="Points_Calibration"
-        )
+        def create_or_retrieve_magnification_layer(self):
+            if "Magnification" in self.parent.viewer.layers:
+                return self.parent.viewer.layers["Magnification"]
+            return self.parent.viewer.add_points(name="Magnification")
 
+        self.cal_layer = create_or_retrieve_magnification_layer(self)
         self.a = self.parent.mag_a
         self.b = self.parent.mag_b
 
@@ -191,14 +193,31 @@ class MagnificationDialog(QDialog):
         self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
         self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
 
+    def _activate_calibration_layer(self):
+        """Show the calibration layer and move it to the top"""
+        self.cal_layer.visible = True
+        # Move the calibration layer to the top
+        self.parent.viewer.layers.move(
+            self.parent.viewer.layers.index(self.cal_layer),
+            len(self.parent.viewer.layers),
+        )
+        self.parent.viewer.layers.selection.active = self.cal_layer
+
+    def _deactivate_calibration_layer(self):
+        """Hide the calibration layer and move it to the bottom"""
+        # self.parent.viewer.layers.select_previous()
+        self.cal_layer.visible = False
+        # Move the calibration layer to the bottom
+        self.parent.viewer.layers.move(
+            self.parent.viewer.layers.index(self.cal_layer), 0
+        )
+
     def accept(self) -> None:
         """On accept propagate the calibration information to the main window and remove the points_Calibration layer"""
 
         print("Propagating magnification to table.")
         self.parent._propagate_magnification(self.a, self.b)
-        # TODO: this is a problem, the layer still exists... not sure how to remove it
-        self.parent.viewer.layers.select_previous()
-        self.parent.viewer.layers.remove(self.cal_layer)
+        self._deactivate_calibration_layer()
         self.parent.cal.setEnabled(True)
         # self.parent.mag.setEnabled(False)
         self.parent.btn_magnification.setText("Update magnification")
@@ -207,7 +226,5 @@ class MagnificationDialog(QDialog):
     def reject(self) -> None:
         """On reject remove the magnification layer"""
 
-        # This is a problem, the layer still exists... not sure how to remove it
-        self.parent.viewer.layers.select_previous()
-        self.parent.viewer.layers.remove(self.cal_layer)
+        self._deactivate_calibration_layer()
         return super().reject()
