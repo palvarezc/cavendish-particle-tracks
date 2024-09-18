@@ -123,7 +123,22 @@ class ParticleTracksWidget(QWidget):
         self.decay_angles_isopen = False
 
     def hideEvent(self, event):
-        """When the widget is 'closed' (napari just hides it), show the layer buttons again."""
+        """When the widget is 'closed' (napari just hides it), show the layer buttons again.
+        If data has been recorded, prompt the user to save it before closing the widget.
+        """
+        if len(self.data) > 0:
+            message_box = QMessageBox(self)
+            message_box.setIcon(QMessageBox.Warning)
+            message_box.setText(
+                "Closing Cavendish Particle Tracks. Any unsaved data will be lost."
+            )
+            message_box.setInformativeText("Do you want to save your data?")
+            message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            message_box.setDefaultButton(QMessageBox.Yes)
+            reply = message_box.exec()
+
+            if reply == QMessageBox.Yes:
+                self._on_click_save()
         self.viewer.window._qt_viewer.layerButtons.show()
         super().hideEvent(event)
 
