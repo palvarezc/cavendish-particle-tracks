@@ -479,7 +479,7 @@ class ParticleTracksWidget(QWidget):
             )
 
         # Disable the load button after loading the data (interim solution until we can move to bottom-docked UI)
-        self.load.setEnabled(False)
+        self.load_button.setEnabled(False)
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
