@@ -68,7 +68,7 @@ class StereoshiftDialog(QDialog):
         bap.clicked.connect(self._on_click_save_to_table)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
-        self.buttonBox.clicked.connect(self.cancel)
+        self.buttonBox.clicked.connect(self.reject)
 
         lviewf1 = QLabel("View 1")
         lviewf2 = QLabel("View 2")
@@ -177,9 +177,9 @@ class StereoshiftDialog(QDialog):
             name="Points_Stereoshift",
             text=text,
             size=20,
-            edge_width=7,
-            edge_width_is_relative=False,
-            edge_color=colors,
+            border_width=7,
+            border_width_is_relative=False,
+            border_color=colors,
             face_color=colors,
         )
 
@@ -307,10 +307,11 @@ class StereoshiftDialog(QDialog):
                 QTableWidgetItem(str(self.point_depth)),
             )
 
-    def cancel(self) -> None:
+    def reject(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
 
         # TODO: this is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.select_previous()
         self.parent.viewer.layers.remove(self.cal_layer)
-        return super().accept()
+        self.parent.stereoshift_isopen = False
+        return super().reject()

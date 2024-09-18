@@ -325,3 +325,40 @@ def test_load_data(
         assert msgbox.text() == (
             "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
         )
+
+
+def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
+    """Test the show/hide buttons"""
+    assert cpt_widget.rad.isEnabled() is False
+    assert cpt_widget.lgth.isEnabled() is False
+    assert cpt_widget.ang.isEnabled() is False
+    cpt_widget.cb.setCurrentIndex(1)
+    assert cpt_widget.rad.isEnabled() is True
+    assert cpt_widget.lgth.isEnabled() is True
+    assert cpt_widget.ang.isEnabled() is False
+    cpt_widget.cb.setCurrentIndex(4)
+    assert cpt_widget.rad.isEnabled() is False
+    assert cpt_widget.lgth.isEnabled() is True
+    assert cpt_widget.ang.isEnabled() is True
+
+
+def test_close_widget(cpt_widget: ParticleTracksWidget, qtbot: QtBot):
+    """Test the close button"""
+    cpt_widget.cb.setCurrentIndex(4)
+    cpt_widget.show()  # the function hideEvent is not called if the widget is not shown
+
+    def check_dialog_and_click_no(dialog):
+        assert isinstance(dialog, QMessageBox)
+        assert dialog.icon() == QMessageBox.Warning
+        assert dialog.text() == (
+            "Closing Cavendish Particle Tracks. Any unsaved data will be lost."
+        )
+        buttonbox = dialog.findChild(QDialogButtonBox)
+        nobutton = buttonbox.children()[2]
+        nobutton.click()
+
+    get_dialog(
+        dialog_trigger=cpt_widget.window().close,
+        dialog_action=check_dialog_and_click_no,
+        time_out=5,
+    )
