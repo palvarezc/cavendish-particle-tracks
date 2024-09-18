@@ -40,7 +40,7 @@ class ParticleTracksWidget(QWidget):
 
     def __init__(self, napari_viewer: napari.viewer.Viewer):
         super().__init__()
-        self.viewer = napari_viewer
+        self.viewer: napari.viewer.Viewer = napari_viewer
         # define QtWidgets
         self.load_button = QPushButton("Load data")
         self.particle_decays_menu = QComboBox()
