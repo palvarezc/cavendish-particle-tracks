@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from napari.layers import Points
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
@@ -20,7 +21,7 @@ from ._analysis import (
 from ._calculate import magnification
 
 if TYPE_CHECKING:
-    from ._widget import ParticleTracksWidget
+    from ._main_widget import ParticleTracksWidget
 
 
 class MagnificationDialog(QDialog):
@@ -39,8 +40,8 @@ class MagnificationDialog(QDialog):
 
         # region UI Setup
         self.ui_setup()
-        self.cal_layer = self.parent.viewer.add_points(
-            name="Points_Calibration"
+        self.cal_layer: Points = self.parent.viewer.add_points(
+            name="Magnification"
         )
 
     def ui_setup(self):
@@ -73,8 +74,8 @@ class MagnificationDialog(QDialog):
         self.btn_add_b1.clicked.connect(self._on_click_add_coords_b1)
         self.btn_add_b2.clicked.connect(self._on_click_add_coords_b2)
         # Calculate magnification button
-        self.btn_mag = QPushButton("Calculate magnification")
-        self.btn_mag.clicked.connect(self._on_click_magnification)
+        self.btn_calculate = QPushButton("Calculate magnification")
+        self.btn_calculate.clicked.connect(self._on_click_magnification)
         # Add table to show the resultant magnification parameter
         self.table = QTableWidget(1, 2)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -117,7 +118,7 @@ class MagnificationDialog(QDialog):
         ):
             self.layout().addWidget(widget, i // 3 + 4, i % 3)
 
-        self.layout().addWidget(self.btn_mag, 6, 0, 1, 3)
+        self.layout().addWidget(self.btn_calculate, 6, 0, 1, 3)
         self.layout().addWidget(
             QLabel("Magnification parameters (M = a + b z)"), 7, 0, 1, 3
         )
@@ -125,7 +126,7 @@ class MagnificationDialog(QDialog):
 
         self.layout().addWidget(self.buttonBox, 9, 0, 1, 3)
 
-        def create_or_retrieve_magnification_layer(self):
+        def create_or_retrieve_magnification_layer(self) -> Points:
             if "Magnification" in self.parent.viewer.layers:
                 return self.parent.viewer.layers["Magnification"]
             return self.parent.viewer.add_points(name="Magnification")
@@ -213,14 +214,14 @@ class MagnificationDialog(QDialog):
         )
 
     def accept(self) -> None:
-        """On accept propagate the calibration information to the main window and remove the points_Calibration layer"""
+        """On accept propagate the calibration information to the main window and remove the Magnification layer"""
 
         print("Propagating magnification to table.")
         self.parent._propagate_magnification(self.a, self.b)
         self._deactivate_calibration_layer()
-        self.parent.cal.setEnabled(True)
+        self.parent.apply_magnification_button.setEnabled(True)
         # self.parent.mag.setEnabled(False)
-        self.parent.btn_magnification.setText("Update magnification")
+        self.parent.magnification_button.setText("Update magnification")
         return super().accept()
 
     def reject(self) -> None:
