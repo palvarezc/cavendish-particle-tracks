@@ -77,7 +77,7 @@ def test_calculate_stereoshift_ui(
     - The textboxes should be updated.
     """
     # need to click "new particle" to add a row to the table
-    cpt_widget.cb.setCurrentIndex(1)
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
     dlg = cpt_widget._on_click_stereoshift()
     if double_click:
