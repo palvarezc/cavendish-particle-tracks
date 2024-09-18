@@ -127,20 +127,24 @@ class ParticleTracksWidget(QWidget):
         If data has been recorded, prompt the user to save it before closing the widget.
         """
         if len(self.data) > 0:
-            message_box = QMessageBox(self)
-            message_box.setIcon(QMessageBox.Warning)
-            message_box.setText(
-                "Closing Cavendish Particle Tracks. Any unsaved data will be lost."
-            )
-            message_box.setInformativeText("Do you want to save your data?")
-            message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-            message_box.setDefaultButton(QMessageBox.Yes)
-            reply = message_box.exec()
-
-            if reply == QMessageBox.Yes:
-                self._on_click_save()
+            self._confirm_save_before_closing()
         self.viewer.window._qt_viewer.layerButtons.show()
         super().hideEvent(event)
+
+    def _confirm_save_before_closing(self):
+        """Prompt the user to save data before closing the widget."""
+        message_box = QMessageBox(self)
+        message_box.setIcon(QMessageBox.Warning)
+        message_box.setText(
+            "Closing Cavendish Particle Tracks. Any unsaved data will be lost."
+        )
+        message_box.setInformativeText("Do you want to save your data?")
+        message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        message_box.setDefaultButton(QMessageBox.Yes)
+        reply = message_box.exec()
+
+        if reply == QMessageBox.Yes:
+            self._on_click_save()
 
     @property
     def camera_center(self):
