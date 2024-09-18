@@ -9,7 +9,7 @@ from pytestqt.qtbot import QtBot
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
-from cavendish_particle_tracks import ParticleTracksWidget
+from cavendish_particle_tracks._main_widget import ParticleTracksWidget
 
 from .conftest import get_dialog
 
