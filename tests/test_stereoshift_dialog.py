@@ -5,10 +5,6 @@ import pytest
 
 from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
 
-# from cavendish_particle_tracks._stereoshift_dialog import StereoshiftDialog
-
-# from cavendish_particle_tracks._widget import ParticleTracksWidget
-
 
 @pytest.mark.parametrize(
     "test_points, expected_fiducial_shift, expected_point_shift, expected_stereoshift, expected_depth, double_click",
