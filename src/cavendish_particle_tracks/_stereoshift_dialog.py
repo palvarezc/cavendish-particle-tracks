@@ -16,7 +16,7 @@ from ._analysis import Fiducial
 from ._calculate import depth, length, stereoshift
 
 if TYPE_CHECKING:
-    from ._widget import ParticleTracksWidget
+    from ._main_widget import ParticleTracksWidget
 
 
 class StereoshiftDialog(QDialog):
