@@ -104,8 +104,6 @@ class ParticleTracksWidget(QWidget):
         # self.viewer.events.mouse_press(self._on_mouse_click)
 
         # layout
-        self.viewer.window._qt_viewer.layerButtons.hide()  # This will break in napari 0.6.0
-
         self.intro_text = QLabel(
             r"""
    _____                          _ _     _       _____           _   _      _        _______             _
