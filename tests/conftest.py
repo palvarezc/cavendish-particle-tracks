@@ -5,7 +5,7 @@ import pytest
 from qtpy.QtCore import QTimer
 from qtpy.QtWidgets import QApplication, QDialog
 
-from cavendish_particle_tracks._widget import ParticleTracksWidget
+from cavendish_particle_tracks._main_widget import ParticleTracksWidget
 
 
 @pytest.fixture

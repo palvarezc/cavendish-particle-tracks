@@ -2,7 +2,7 @@
 # launch_napari.py
 from napari import Viewer, run
 
-from cavendish_particle_tracks._widget import ParticleTracksWidget
+from cavendish_particle_tracks._main_widget import ParticleTracksWidget
 
 viewer = Viewer()
 plugin_docking_area = "bottom"
