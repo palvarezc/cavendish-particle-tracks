@@ -81,7 +81,7 @@ class StereoshiftDialog(QDialog):
         self.parent.viewer.layers.selection.active = self.layer_fiducials
         self.layer_fiducials.mode = "select"
         self.layer_points.mode = "select"
-        self.parent.viewer.dims.events.connect(self._on_event_changed)
+        # self.parent.viewer.dims.events.connect(self._on_event_changed)
 
     def _setup_fiducial_layer(
         self, origin_x, origin_y, zoom_level, current_event
@@ -263,15 +263,15 @@ class StereoshiftDialog(QDialog):
         if layer_name in self.parent.viewer.layers:
             return self.parent.viewer.layers[layer_name]
         if layer_name == "Stereo_Fiducials":
-            return _setup_fiducial_layer(
+            return self._setup_fiducial_layer(
                 origin_x, origin_y, zoom_level, current_event
             )
         elif layer_name == "Stereo_Points":
-            return _setup_points_layer(
+            return self._setup_points_layer(
                 origin_x, origin_y, zoom_level, current_event
             )
         # elif layer_name == "Stereo_shift_lines":
-        #    return _setup_shapes_layer()
+        #    return self._setup_shapes_layer()
         else:
             raise Exception(
                 "Unexpected layer name encountered. Something has really went wrong."
@@ -360,7 +360,9 @@ class StereoshiftDialog(QDialog):
         """Access a point by: [ (event=), (view=1,2)]"""
         name = f"Point View {view}"
         return Fiducial(
-            name, self.layer_points[view][0], self.layer_points[view][1]
+            name,
+            self.layer_points.data[view][0],
+            self.layer_points.data[view][1],
         )
 
     def _activate_stereoshift_layers(self):

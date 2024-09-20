@@ -7,7 +7,7 @@ dock_widget, plugin_widget = viewer.window.add_plugin_dock_widget(
     "cavendish-particle-tracks",
 )
 
-viewer.window.add_dock_widget(dock_widget, area="bottom")
+# viewer.window.add_dock_widget(dock_widget, area="bottom")
 # Optional steps to setup your plugin to a state of failure
 # E.g. plugin_widget.parameter_name.value = "some value"
 # E.g. plugin_widget.button.click()
