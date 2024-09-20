@@ -27,6 +27,7 @@ from qtpy.QtWidgets import (
     QRadioButton,
     QTableWidget,
     QTableWidgetItem,
+    QVBoxLayout,
     QWidget,
 )
 
@@ -50,10 +51,15 @@ class ParticleTracksWidget(QWidget):
         self,
         napari_viewer: napari.viewer.Viewer,
         bypass_load_screen: bool = False,
+        docking_area: str = "right",
     ):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
         self.bypass_load_screen = bypass_load_screen
+        self.docking_area = docking_area
+        if self.docking_area != "bottom":
+            self.bypass_load_screen = True
+
         # define QtWidgets
         self.btn_load = QPushButton("Load data")
         self.btn_load.width = 200
@@ -99,20 +105,7 @@ class ParticleTracksWidget(QWidget):
 
         # layout
         self.viewer.window._qt_viewer.layerButtons.hide()  # This will break in napari 0.6.0
-        self.buttonbox = QGridLayout()
-        self.buttonbox.addWidget(self.btn_load, 0, 0)
-        self.buttonbox.addWidget(self.cmb_add_particle, 1, 0)
-        self.buttonbox.addWidget(self.btn_delete_particle, 1, 1)
-        self.buttonbox.addWidget(self.btn_radius, 2, 0)
-        self.buttonbox.addWidget(self.btn_length, 2, 1)
-        self.buttonbox.addWidget(self.btn_decayangle, 3, 0)
-        self.buttonbox.addWidget(self.btn_stereoshift, 3, 1)
-        self.buttonbox.addWidget(self.btn_magnification, 4, 0)
-        self.buttonbox.addWidget(self.cal, 4, 1)
-        self.buttonbox.addWidget(self.btn_save, 5, 0)
 
-        layout_outer = QHBoxLayout()
-        self.setLayout(layout_outer)
         self.intro_text = QLabel(
             r"""
    _____                          _ _     _       _____           _   _      _        _______             _
@@ -128,15 +121,46 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         print(self.intro_text.text())
         self.intro_text.setFont(QFont("Lucida Console", 5))
         self.intro_text.setTextFormat(Qt.TextFormat.PlainText)
-        self.layout().addWidget(self.intro_text)
-        layout_outer.addLayout(self.buttonbox)
-        self.layout().addWidget(self.table)
+
+        if self.docking_area == "bottom":
+            self.buttonbox = QGridLayout()
+            self.buttonbox.addWidget(self.btn_load, 0, 0)
+            self.buttonbox.addWidget(self.cmb_add_particle, 1, 0)
+            self.buttonbox.addWidget(self.btn_delete_particle, 1, 1)
+            self.buttonbox.addWidget(self.btn_radius, 2, 0)
+            self.buttonbox.addWidget(self.btn_length, 2, 1)
+            self.buttonbox.addWidget(self.btn_decayangle, 3, 0)
+            self.buttonbox.addWidget(self.btn_stereoshift, 3, 1)
+            self.buttonbox.addWidget(self.btn_magnification, 4, 0)
+            self.buttonbox.addWidget(self.cal, 4, 1)
+            self.buttonbox.addWidget(self.btn_save, 5, 0)
+
+            layout_outer = QHBoxLayout()
+            self.setLayout(layout_outer)
+            self.layout().addWidget(self.intro_text)
+            layout_outer.addLayout(self.buttonbox)
+            self.layout().addWidget(self.table)
+
+        else:
+            self.buttonbox = QVBoxLayout()
+            self.buttonbox.addWidget(self.btn_load)
+            self.buttonbox.addWidget(self.cmb_add_particle)
+            self.buttonbox.addWidget(self.btn_delete_particle)
+            self.buttonbox.addWidget(self.btn_radius)
+            self.buttonbox.addWidget(self.btn_length)
+            self.buttonbox.addWidget(self.btn_decayangle)
+            self.buttonbox.addWidget(self.table)
+            self.buttonbox.addWidget(self.cal)
+            self.buttonbox.addWidget(self.btn_stereoshift)
+            self.buttonbox.addWidget(self.btn_magnification)
+            self.buttonbox.addWidget(self.btn_save)
+            self.setLayout(self.buttonbox)
 
         # Disable native napari layer controls - show again on closing this widget (hide).
         # NB: This will break in napari 0.6.0
         self.viewer.window._qt_viewer.layerButtons.hide()
 
-        self.set_UI_image_loaded(False, bypass_load_screen)
+        self.set_UI_image_loaded(False, self.bypass_load_screen)
 
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
@@ -290,6 +314,8 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
         self, loaded: bool, bypass_load_screen: bool
     ) -> None:
         if bypass_load_screen:
+            self.buttonbox.setContentsMargins(0, 0, 0, 0)
+            self.intro_text.hide()
             return
         if loaded:
             # Set margins (left, top, right, bottom)
