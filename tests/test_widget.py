@@ -9,7 +9,7 @@ from pytestqt.qtbot import QtBot
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
-from cavendish_particle_tracks import ParticleTracksWidget
+from cavendish_particle_tracks._main_widget import ParticleTracksWidget
 
 from .conftest import get_dialog
 
@@ -23,7 +23,7 @@ def test_calculate_radius_ui(cpt_widget, capsys):
     - The table should have the correct radius.
     """
     # need to click "new particle" to add a row to the table
-    cpt_widget.cb.setCurrentIndex(1)
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
     # add three points to the points layer and select them
     cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
@@ -55,7 +55,7 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
     """Test the obvious failure modes: if I don't select 3 points, I can't
     calculate a radius so better send a nice message."""
     # need to click "new particle" to add a row to the table
-    cpt_widget.cb.setCurrentIndex(1)
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
@@ -79,7 +79,7 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
 def test_add_new_particle_ui(cpt_widget, capsys):
     assert cpt_widget.table.rowCount() == 0
 
-    cpt_widget.cb.setCurrentIndex(1)
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
     assert cpt_widget.table.rowCount() == 1
     assert len(cpt_widget.data) == 1
@@ -87,7 +87,7 @@ def test_add_new_particle_ui(cpt_widget, capsys):
 
 def test_delete_particle_ui(cpt_widget):
     """Tests the removal of a particle from the table"""
-    cpt_widget.cb.setCurrentIndex(1)
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
     assert cpt_widget.table.rowCount() == 1
     assert len(cpt_widget.data) == 1
@@ -113,7 +113,7 @@ def test_calculate_length_ui(cpt_widget, capsys):
     cpt_widget.viewer.add_image(np.random.random((100, 100)))
 
     # need to click "new particle" to add a row to the table
-    cpt_widget.cb.setCurrentIndex(1)
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
     # add three points to the points layer and select them
     cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
@@ -142,7 +142,7 @@ def test_calculate_length_fails_with_wrong_number_of_points(
     """Test the obvious failure modes: if I don't select 2 points, I can't
     calculate a length so better send a nice message."""
     # need to click "new particle" to add a row to the table
-    cpt_widget.cb.setCurrentIndex(1)
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
@@ -243,22 +243,22 @@ def test_load_data(
 
 def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
     """Test the show/hide buttons"""
-    assert cpt_widget.rad.isEnabled() is False
-    assert cpt_widget.lgth.isEnabled() is False
-    assert cpt_widget.ang.isEnabled() is False
-    cpt_widget.cb.setCurrentIndex(1)
-    assert cpt_widget.rad.isEnabled() is True
-    assert cpt_widget.lgth.isEnabled() is True
-    assert cpt_widget.ang.isEnabled() is False
-    cpt_widget.cb.setCurrentIndex(4)
-    assert cpt_widget.rad.isEnabled() is False
-    assert cpt_widget.lgth.isEnabled() is True
-    assert cpt_widget.ang.isEnabled() is True
+    assert cpt_widget.radius_button.isEnabled() is False
+    assert cpt_widget.length_button.isEnabled() is False
+    assert cpt_widget.decay_angles_button.isEnabled() is False
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+    assert cpt_widget.radius_button.isEnabled() is True
+    assert cpt_widget.length_button.isEnabled() is True
+    assert cpt_widget.decay_angles_button.isEnabled() is False
+    cpt_widget.particle_decays_menu.setCurrentIndex(4)
+    assert cpt_widget.radius_button.isEnabled() is False
+    assert cpt_widget.length_button.isEnabled() is True
+    assert cpt_widget.decay_angles_button.isEnabled() is True
 
 
 def test_close_widget(cpt_widget: ParticleTracksWidget, qtbot: QtBot):
     """Test the close button"""
-    cpt_widget.cb.setCurrentIndex(4)
+    cpt_widget.particle_decays_menu.setCurrentIndex(4)
     cpt_widget.show()  # the function hideEvent is not called if the widget is not shown
 
     def check_dialog_and_click_no(dialog):
