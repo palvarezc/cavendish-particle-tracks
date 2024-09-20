@@ -49,10 +49,18 @@ class MagnificationDialog(QDialog):
     def ui_setup(self):
         self.setWindowTitle("Magnification")
         # Drop-down selection of Fiducials
-        self.cmb_front1 = self._setup_dropdown_fiducials_combobox()
-        self.cmb_front2 = self._setup_dropdown_fiducials_combobox()
-        self.cmb_back1 = self._setup_dropdown_fiducials_combobox(back=True)
-        self.cmb_back2 = self._setup_dropdown_fiducials_combobox(back=True)
+        self.front1_fiducial_combobox = (
+            self._setup_dropdown_fiducials_combobox()
+        )
+        self.front2_fiducial_combobox = (
+            self._setup_dropdown_fiducials_combobox()
+        )
+        self.back1_fiducial_combobox = self._setup_dropdown_fiducials_combobox(
+            back=True
+        )
+        self.back2_fiducial_combobox = self._setup_dropdown_fiducials_combobox(
+            back=True
+        )
         # text boxes indicating the coordinates of the fiducials
         self.txt_f1coord = QLabel(self)  # front fiducial 1
         self.txt_f2coord = QLabel(self)  # front fiducial 2
@@ -99,10 +107,10 @@ class MagnificationDialog(QDialog):
         )
         for i, widget in enumerate(
             [
-                self.cmb_front1,
+                self.front1_fiducial_combobox,
                 self.txt_f1coord,
                 self.add_f1_button,
-                self.cmb_front2,
+                self.front2_fiducial_combobox,
                 self.txt_f2coord,
                 self.add_f2_button,
             ]
@@ -113,10 +121,10 @@ class MagnificationDialog(QDialog):
         )
         for i, widget in enumerate(
             [
-                self.cmb_back1,
+                self.back1_fiducial_combobox,
                 self.txt_b1coord,
                 self.add_b1_button,
-                self.cmb_back2,
+                self.back2_fiducial_combobox,
                 self.txt_b2coord,
                 self.add_b2_button,
             ]
@@ -147,22 +155,22 @@ class MagnificationDialog(QDialog):
 
     def _on_click_add_coords_f1(self) -> None:
         """Add first front fiducial"""
-        self.f1.name = self.cmb_front1.currentText()
+        self.f1.name = self.front1_fiducial_combobox.currentText()
         self.f1.x, self.f1.y = self._add_coords(0)
 
     def _on_click_add_coords_f2(self) -> None:
         """Add second front fiducial"""
-        self.f2.name = self.cmb_front2.currentText()
+        self.f2.name = self.front2_fiducial_combobox.currentText()
         self.f2.x, self.f2.y = self._add_coords(1)
 
     def _on_click_add_coords_b1(self) -> None:
         """Add first back fiducial"""
-        self.b1.name = self.cmb_back1.currentText()
+        self.b1.name = self.back1_fiducial_combobox.currentText()
         self.b1.x, self.b1.y = self._add_coords(2)
 
     def _on_click_add_coords_b2(self) -> None:
         """Add second back fiducial"""
-        self.b2.name = self.cmb_back2.currentText()
+        self.b2.name = self.back2_fiducial_combobox.currentText()
         self.b2.x, self.b2.y = self._add_coords(3)
 
     def _add_coords(self, fiducial: int) -> list[float]:

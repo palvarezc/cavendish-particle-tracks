@@ -62,10 +62,10 @@ def test_magnification_ui(
         back_fiducial2,
     ]
     combo_boxes = [
-        dlg.cmb_front1,
-        dlg.cmb_front2,
-        dlg.cmb_back1,
-        dlg.cmb_back2,
+        dlg.front1_fiducial_combobox,
+        dlg.front2_fiducial_combobox,
+        dlg.back1_fiducial_combobox,
+        dlg.back2_fiducial_combobox,
     ]
     text_boxes = [
         dlg.txt_f1coord,
