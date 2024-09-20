@@ -171,6 +171,7 @@ class ParticleTracksWidget(QWidget):
 
         @self.viewer.layers.events.connect
         def _on_layerlist_changed(event):
+            """When the layer list changes, update the button availability"""
             self.set_button_availability()
 
     def hideEvent(self, event):
@@ -301,11 +302,6 @@ class ParticleTracksWidget(QWidget):
             self.stereoshift_button.setEnabled(False)
             self.magnification_button.setEnabled(False)
             self.save_data_button.setEnabled(False)
-
-    def disable_all_buttons(self) -> None:
-        self.radius_button.setEnabled(False)
-        self.length_button.setEnabled(False)
-        self.decay_angles_button.setEnabled(False)
 
     def set_UI_image_loaded(
         self, loaded: bool, bypass_load_screen: bool
