@@ -298,9 +298,9 @@ class ParticleTracksWidget(QWidget):
             self.radius_button.setEnabled(False)
             self.length_button.setEnabled(False)
             self.decay_angles_button.setEnabled(False)
-            self.apply_magnification_button.setEnabled(False)
+            # self.apply_magnification_button.setEnabled(False)
             self.stereoshift_button.setEnabled(False)
-            self.magnification_button.setEnabled(False)
+            # self.magnification_button.setEnabled(False)
             self.save_data_button.setEnabled(False)
 
     def set_UI_image_loaded(
