@@ -15,6 +15,21 @@ from cavendish_particle_tracks._main_widget import ParticleTracksWidget
 from .conftest import get_dialog
 
 
+@pytest.mark.parametrize("bypass_load_screen", [True, False])
+@pytest.mark.parametrize("docking_area", ["left", "bottom"])
+def test_open_widget(make_napari_viewer, bypass_load_screen, docking_area):
+    """Test the opening of the widget"""
+    viewer = make_napari_viewer()
+    widget = ParticleTracksWidget(
+        napari_viewer=viewer,
+        bypass_load_screen=bypass_load_screen,
+        docking_area=docking_area,
+    )
+    assert widget.isVisible() is False
+    widget.show()
+    assert widget.isVisible() is True
+
+
 def test_calculate_radius_ui(
     cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
 ):
