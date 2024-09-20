@@ -99,7 +99,7 @@ def test_calculate_stereoshift_ui(
     assert dlg.tdepth.text() == str(expected_depth)
 
     # check save to table
-    dlg._on_click_save_to_table()
+    dlg.accept()
     assert cpt_widget.data[0].spoints.all() == dlg.spoints.all()
     assert cpt_widget.data[0].shift_fiducial == dlg.shift_fiducial
     assert cpt_widget.data[0].shift_point == dlg.shift_point
@@ -114,7 +114,7 @@ def test_stereoshift_save_to_table_fails_with_empty_table(cpt_widget, capsys):
     dlg = cpt_widget._on_click_stereoshift()
 
     # click the save to table button
-    dlg._on_click_save_to_table()
+    dlg.accept()
     captured = capsys.readouterr()
 
     assert "ERROR: There are no particles in the table." in captured.out

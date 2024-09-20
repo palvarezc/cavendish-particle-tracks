@@ -47,6 +47,7 @@ class StereoshiftDialog(QDialog):
         self.spoints = []
 
         self.parent = parent
+        self.parent.stereoshift_isopen = True
         self.setWindowTitle("Stereoshift")
 
         def _setup_fiducial_layer(
@@ -282,7 +283,7 @@ class StereoshiftDialog(QDialog):
             QDialogButtonBox.Save | QDialogButtonBox.Cancel
         )
         self.buttonBox.rejected.connect(self.reject)
-        self.buttonBox.accepted.connect(self._on_click_save_to_table)
+        self.buttonBox.accepted.connect(self.accept)
         # Layout
         # surely there's a nicer way of doing this grid layout stuff.
         # there is: nested layouts are possible https://doc.qt.io/qtforpython-6/overviews/qtwidgets-tutorials-widgets-nestedlayouts-example.html
@@ -375,58 +376,6 @@ class StereoshiftDialog(QDialog):
         # print("self.parent.viewer.cursor.events.position.connect")
         # maybe connect shapes to this instead....
 
-    def _on_click_save_to_table(self) -> None:
-        """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
-        # Propagate to particle
-        selected_row = self.parent._get_selected_row()
-        self.parent.data[selected_row].spoints = self.spoints
-        self.parent.data[selected_row].shift_fiducial = self.shift_fiducial
-        self.parent.data[selected_row].shift_point = self.shift_point
-        self.parent.data[selected_row].stereoshift = self.point_stereoshift
-        self.parent.data[selected_row].depth_cm = self.point_depth
-
-        # Propagate to parent table
-        for i in range(2):
-            self.parent.table.setItem(
-                selected_row,
-                self.parent._get_table_column_index("sf" + str(i + 1)),
-                QTableWidgetItem(str(self.spoints[i])),
-            )
-            self.parent.table.setItem(
-                selected_row,
-                self.parent._get_table_column_index("sp" + str(i + 1)),
-                QTableWidgetItem(str(self.spoints[i + 2])),
-            )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("shift_fiducial"),
-            QTableWidgetItem(str(self.shift_fiducial)),
-        )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("shift_point"),
-            QTableWidgetItem(str(self.shift_point)),
-        )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("stereoshift"),
-            QTableWidgetItem(str(self.point_stereoshift)),
-        )
-        self.parent.table.setItem(
-            selected_row,
-            self.parent._get_table_column_index("depth_cm"),
-            QTableWidgetItem(str(self.point_depth)),
-        )
-
-    def reject(self) -> None:
-        """On cancel remove the points_Stereoshift layer"""
-        # TODO: this is a problem, the layer still exists... not sure how to remove it
-        # TODO: Rework this with the new layer handling.
-        self.parent.viewer.layers.select_previous()
-        self.parent.viewer.layers.remove(self.cal_layer)
-        self.parent.stereoshift_isopen = False
-        return super().reject()
-
     def _on_event_changed(self, event) -> None:
         # this is temporary and will be refactored.
         # TODO add check for whether there are already points in the layer.
@@ -496,6 +445,89 @@ class StereoshiftDialog(QDialog):
         # case (1,2) -> ref, view 2 -> 3
         # case (2,1) -> back, view 1 -> 4
         # case (2,2) -> back, view 2 -> 5
+
+    def _activate_stereoshift_layers(self):
+        """Show the stereoshift layers and move it to the top."""
+        self.layer_fiducials.visible = True
+        self.layer_points.visible = True
+        # move layers to the top
+        self.parent.viewer.layers.move(
+            self.parent.viewer.layers.index(self.layer_points),
+            len(self.parent.viewer.layers),
+        )
+        self.parent.viewer.layers.move(
+            self.parent.viewer.layers.index(self.layer_fiducials),
+            len(self.parent.viewer.layers),
+        )
+        self.parent.viewer.layers.selection.active = self.layer_fiducials
+
+    def _deactivate_stereoshift_layers(self):
+        """Hide the stereoshift layers and move it to the bottom"""
+        self.layer_fiducials.visible = False
+        self.layer_points.visible = False
+        self.parent.viewer.layers.move(
+            self.parent.viewer.layers.index(self.layer_points), 0
+        )
+        self.parent.viewer.layers.move(
+            self.parent.viewer.layers.index(self.layer_fiducials), 0
+        )
+
+    def accept(self) -> None:
+        """When 'Save to table' button is clicked, save the data and close the stereoshift widget."""
+        self._save_to_table()
+        self._deactivate_stereoshift_layers()
+        self.parent.stereoshift_isopen = False
+        return super().accept()
+
+    def _save_to_table(self) -> None:
+        """Saves data to the plugin table."""
+        selected_row = self.parent._get_selected_row()
+        self.parent.data[selected_row].spoints = self.spoints
+        self.parent.data[selected_row].shift_fiducial = self.shift_fiducial
+        self.parent.data[selected_row].shift_point = self.shift_point
+        self.parent.data[selected_row].stereoshift = self.point_stereoshift
+        self.parent.data[selected_row].depth_cm = self.point_depth
+
+        # Propagate to parent table
+        for i in range(2):
+            self.parent.table.setItem(
+                selected_row,
+                self.parent._get_table_column_index("sf" + str(i + 1)),
+                QTableWidgetItem(str(self.spoints[i])),
+            )
+            self.parent.table.setItem(
+                selected_row,
+                self.parent._get_table_column_index("sp" + str(i + 1)),
+                QTableWidgetItem(str(self.spoints[i + 2])),
+            )
+        self.parent.table.setItem(
+            selected_row,
+            self.parent._get_table_column_index("shift_fiducial"),
+            QTableWidgetItem(str(self.shift_fiducial)),
+        )
+        self.parent.table.setItem(
+            selected_row,
+            self.parent._get_table_column_index("shift_point"),
+            QTableWidgetItem(str(self.shift_point)),
+        )
+        self.parent.table.setItem(
+            selected_row,
+            self.parent._get_table_column_index("stereoshift"),
+            QTableWidgetItem(str(self.point_stereoshift)),
+        )
+        self.parent.table.setItem(
+            selected_row,
+            self.parent._get_table_column_index("depth_cm"),
+            QTableWidgetItem(str(self.point_depth)),
+        )
+
+    def reject(self) -> None:
+        """On cancel remove the points_Stereoshift layer"""
+        # TODO: this is a problem, the layer still exists... not sure how to remove it
+        # TODO: Rework this with the new layer handling.
+        self._deactivate_stereoshift_layers()
+        self.parent.stereoshift_isopen = False
+        return super().reject()
 
     # def _on_change_cmb_fiducial etc etc
     # add the label to the point in the view
