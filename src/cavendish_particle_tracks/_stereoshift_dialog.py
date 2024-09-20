@@ -24,6 +24,9 @@ from qtpy.QtWidgets import (
 from ._analysis import FIDUCIAL_BACK, FIDUCIAL_FRONT, Fiducial
 from ._calculate import corrected_shift, depth, stereoshift
 
+FRONT = 0
+BACK = 1
+
 
 class StereoshiftDialog(QDialog):
 
@@ -38,6 +41,10 @@ class StereoshiftDialog(QDialog):
     @property
     def current_event(self):
         return self.parent.current_event
+
+    @property
+    def reference_plane(self):
+        return self.cmb_set_ref_plane.currentIndex
 
     def __init__(self, parent: "ParticleTracksWidget"):
         super().__init__(parent)
@@ -82,17 +89,13 @@ class StereoshiftDialog(QDialog):
         # fmt:off
         points = [      # View 1                                                # View 2
             [origin_x, origin_y, current_event],                [origin_x + 100/zoom_level, origin_y, current_event],                # Front
-            [origin_x, origin_y-100/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-100/zoom_level, current_event],  # Reference
-            [origin_x, origin_y-200/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-200/zoom_level, current_event],  # Rear
+            [origin_x, origin_y-100/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-100/zoom_level, current_event],  # Rear
         ]
         fiducial_labels = ["Front View 1",  "Front View 2",
-                           "Reference View 1", "Reference View 2",
                            "Rear View 2",   "Rear View 2"]
         colors = ["green", "red",
-                  "green", "red",
                   "green", "red",]
         symbols = ["x", "x",
-                   "square", "square",
                    "cross", "cross"]
         # fmt:on
         text = {
@@ -276,28 +279,41 @@ class StereoshiftDialog(QDialog):
 
     def _on_click_calculate(self) -> None:
         """Calculate the stereoshift and populate the results table."""
-        front_1 = self._retrieve_fiducial(0, 0, 1)
-        front_2 = self._retrieve_fiducial(0, 0, 2)
-        back_1 = self._retrieve_fiducial(0, 2, 1)
-        back_2 = self._retrieve_fiducial(0, 2, 2)
+        # I could do a list (front fiducials = [front 1, front 2]) here if desired.
+        # I don't see the point, as it seems clear enough to me.
+        # The way I've laid this out, there are cleverer ways to do this.
+        # But after trying a load of different ways, this is the most readable and maintainable.
+        front_fiducials = [
+            self._retrieve_fiducial(0, FRONT, 1),
+            self._retrieve_fiducial(0, FRONT, 2),
+        ]
+        rear_fiducials = [
+            self._retrieve_fiducial(0, BACK, 1),
+            self._retrieve_fiducial(0, BACK, 2),
+        ]
+        points = [self._retrieve_points(0, 1), self._retrieve_points(0, 2)]
+
+        # We wish to swap whether the front or back points are used for the calculation
+        # depending on the user's choice.
+        if self.reference_plane == FRONT:
+            shifting_fiducials = front_fiducials
+            static_reference_fiducials = rear_fiducials
+        else:
+            shifting_fiducials = rear_fiducials
+            static_reference_fiducials = front_fiducials
 
         self.shift_fiducial = corrected_shift(
-            self.fiducials[fiducial_plane__index],
-            self.fiducials[ref_plane_index],
+            shifting_fiducials, static_reference_fiducials
         )
-        self.shift_point = corrected_shift(
-            self.points[0], self.fiducials[ref_plane_index]
-        )
-        # this is called ratio in the GUI, should I change its name here or there?
+        self.shift_point = corrected_shift(points, static_reference_fiducials)
+        # TODO this is called ratio in the GUI, should I change its name here or there?
         self.point_stereoshift = stereoshift(
             self.shift_fiducial, self.shift_point
         )
         self.point_depth = depth(
-            self.fiducials[fiducial_plane__index][0],
-            self.fiducials[fiducial_plane__index][1],
-            self.points[0][0],
-            self.points[0][1],
+            self.point_stereoshift, bool(self.reference_plane)
         )
+        # TODO what what spoints doing again? check this is correct
         self.spoints = self.layer_fiducials.data[2:]
         # Update the results table
         self.lbl_fiducial_shift.setText(str(self.shift_fiducial))
@@ -316,7 +332,7 @@ class StereoshiftDialog(QDialog):
                 "Stereo shift (shift_p/shift_f = 1 - depth_p/depth_f)"
             )
 
-    def _retrieve_fiducial(self, event, depth_index, view):
+    def _retrieve_fiducial(self, event, depth_index, view) -> Fiducial:
         """Access a fiducial by:
         [ (event=),  (front=0,back=1), (view=1,2)]"""
         # this is written on the assumption the layers are deleted after every use.
@@ -327,8 +343,7 @@ class StereoshiftDialog(QDialog):
         # remember that the layer is set up such that:
         #            points = [      # View 1                                                # View 2
         #      0  [origin_x, origin_y, current_event],                 1  [origin_x + 100/zoom_level, origin_y, current_event],                # Front
-        #      2  [origin_x, origin_y-100/zoom_level, current_event],  3  [origin_x + 100/zoom_level, origin_y-100/zoom_level, current_event],  # Reference
-        #      4  [origin_x, origin_y-200/zoom_level, current_event],  5  [origin_x + 100/zoom_level, origin_y-200/zoom_level, current_event],  # Rear
+        #      2  [origin_x, origin_y-200/zoom_level, current_event],  3  [origin_x + 100/zoom_level, origin_y-200/zoom_level, current_event],  # Rear
         data = self.layer_fiducials.data[depth_index * 2 + (view - 1)]
         # Layer data has a different coordinate order than world data.
         # so even though the axis_labels are event, view, y, x
@@ -340,8 +355,13 @@ class StereoshiftDialog(QDialog):
         # case (0,2) -> front, view 2 -> 1
         # case (1,1) -> ref, view 1 -> 2
         # case (1,2) -> ref, view 2 -> 3
-        # case (2,1) -> back, view 1 -> 4
-        # case (2,2) -> back, view 2 -> 5
+
+    def _retrieve_points(self, event, view) -> Fiducial:
+        """Access a point by: [ (event=), (view=1,2)]"""
+        name = f"Point View {view}"
+        return Fiducial(
+            name, self.layer_points[view][0], self.layer_points[view][1]
+        )
 
     def _activate_stereoshift_layers(self):
         """Show the stereoshift layers and move it to the top."""

@@ -35,7 +35,7 @@ def length(a: Point, b: Point) -> float:
     return np.linalg.norm(pa - pb)
 
 
-def corrected_shift(points, offsets) -> float:
+def corrected_shift(points: Fiducial, offsets: Fiducial) -> float:
     """Calculates the distance between two points, correcting for the offset/movement of the plane between two images.
     Points = [[x,y], [x,y]]: The two points to calculate the distance between.
     Offsets =  [[x,y], [x,y]]:: The two points to correct the distance calculation. (A fiducial in the reference plane)
@@ -70,18 +70,15 @@ def magnification(f1: Fiducial, f2: Fiducial, b1: Fiducial, b2: Fiducial):
 
 
 def depth(
-    fa: Fiducial,
-    fb: Fiducial,
-    pa: Fiducial,
-    pb: Fiducial,
+    stereoshift: float,
     reverse: bool = False,
 ):
     if reverse:
         # depth_p = (1 - (Delta p)/(Delta f)) * depth_f
-        return (1 - stereoshift(fa.xy, fb.xy, pa.xy, pb.xy)) * CHAMBER_DEPTH
+        return (1 - stereoshift) * CHAMBER_DEPTH
     else:
         # depth_p = (Delta p)/(Delta f) * depth_f
-        return stereoshift(fa.xy, fb.xy, pa.xy, pb.xy) * CHAMBER_DEPTH
+        return stereoshift * CHAMBER_DEPTH
 
 
 def track_parameters(line):
