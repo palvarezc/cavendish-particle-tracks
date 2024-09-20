@@ -129,6 +129,7 @@ class ParticleTracksWidget(QWidget):
         if len(self.data) > 0:
             self._confirm_save_before_closing()
         self.viewer.window._qt_viewer.layerButtons.show()
+        self.viewer.window._qt_viewer.viewerButtons.show()
         super().hideEvent(event)
 
     def _confirm_save_before_closing(self):
