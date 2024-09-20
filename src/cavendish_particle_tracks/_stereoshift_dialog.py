@@ -281,7 +281,7 @@ class StereoshiftDialog(QDialog):
         self.buttonBox = QDialogButtonBox(
             QDialogButtonBox.Save | QDialogButtonBox.Cancel
         )
-        self.buttonBox.rejected.connect(self._on_click_cancel)
+        self.buttonBox.rejected.connect(self.reject)
         self.buttonBox.accepted.connect(self._on_click_save_to_table)
         # Layout
         # surely there's a nicer way of doing this grid layout stuff.
@@ -418,14 +418,14 @@ class StereoshiftDialog(QDialog):
             QTableWidgetItem(str(self.point_depth)),
         )
 
-    def _on_click_cancel(self) -> None:
+    def reject(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
         # TODO: this is a problem, the layer still exists... not sure how to remove it
         # TODO: Rework this with the new layer handling.
         self.parent.viewer.layers.select_previous()
-        self.parent.viewer.layers.remove(self.layer_fiducials)
-        self.parent.viewer.layers.remove(self.layer_points)
-        return super().accept()
+        self.parent.viewer.layers.remove(self.cal_layer)
+        self.parent.stereoshift_isopen = False
+        return super().reject()
 
     def _on_event_changed(self, event) -> None:
         # this is temporary and will be refactored.

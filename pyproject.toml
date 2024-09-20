@@ -20,16 +20,16 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Image Processing",
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "imagecodecs",           # for opening tiff images on macos
-    "napari>=0.5.2, <0.6.0", # need to be able to open as stack (https://github.com/napari/napari/issues/7165)
+    "imagecodecs",    # for opening tiff images on macos
+    "napari >= 0.5.2, < 0.6.0", # need >= 0.5.2 to be able to open as stack (https://github.com/napari/napari/issues/7165) and < 0.6.0 to hide layers controls
     "numpy",
     "dask-image",     # for image loading
 ]
@@ -40,9 +40,9 @@ file = "README.md"
 content-type = "text/markdown"
 
 [project.urls]
-Homepage = "https://github.com/samcunliffe/cavendish-particle-tracks"
+Homepage = "https://palvarezc.github.io/cavendish-particle-tracks/"
 "Bug Tracker" = "https://github.com/samcunliffe/cavendish-particle-tracks/issues"
-Documentation = "https://github.com/samcunliffe/cavendish-particle-tracks#readme"
+Documentation = "https://palvarezc.github.io/cavendish-particle-tracks/user-manual.html"
 "Source Code" = "https://github.com/samcunliffe/cavendish-particle-tracks"
 "User Support" = "https://github.com/samcunliffe/cavendish-particle-tracks/issues"
 
@@ -143,12 +143,11 @@ exclude = [
 legacy_tox_ini = """
 
 [tox]
-envlist = py{38,39,310,311}-{linux,macos,windows}
+envlist = py{39,310,311,312}-{linux,macos,windows}
 isolated_build=true
 
 [gh-actions]
 python =
-    3.8: py38
     3.9: py39
     3.10: py310
     3.11: py311
@@ -187,6 +186,10 @@ extensions = [
     'sphinx.ext.autodoc',
     'myst_parser',
 ]
+
+html_theme_options = { icon_links = [
+    { name = "GitHub", url = "https://github.com/samcunliffe/cavendish-particle-tracks", icon = "fa-brands fa-github" },
+] }
 
 # remove the primary sidebar on all pages
 # https://pydata-sphinx-theme.readthedocs.io/en/stable/user_guide/layout.html#primary-sidebar-left

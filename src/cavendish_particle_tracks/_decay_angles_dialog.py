@@ -11,10 +11,6 @@ from qtpy.QtWidgets import (
 
 from ._calculate import angle, track_parameters
 
-# from ._widget import ParticleTracksWidget
-
-# from ._widget import ParticleTracksWidget
-
 
 class DecayAnglesDialog(QDialog):
     def __init__(self, parent=None):
@@ -43,7 +39,7 @@ class DecayAnglesDialog(QDialog):
         bap.clicked.connect(self._on_click_save_to_table)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
-        self.buttonBox.clicked.connect(self.cancel)
+        self.buttonBox.clicked.connect(self.reject)
 
         # layout
         self.setLayout(QGridLayout())
@@ -84,6 +80,8 @@ class DecayAnglesDialog(QDialog):
 
     def _setup_decayangles_layer(self):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
+
+        # If layer already exists, then assume it was set up previously.
         if "Decay Angles Tool" in self.parent.viewer.layers:
             return self.parent.viewer.layers["Decay Angles Tool"]
         origin_x = self.parent.camera_center[0]
@@ -191,10 +189,11 @@ class DecayAnglesDialog(QDialog):
                 QTableWidgetItem(str(self.phi_pion)),
             )
 
-    def cancel(self) -> None:
+    def reject(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
 
         # TODO: this is a problem, the layer still exists... not sure how to remove it
         self.parent.viewer.layers.select_previous()
         self.parent.viewer.layers.remove(self.cal_layer)
-        return super().accept()
+        self.parent.decay_angles_is_open = False
+        return super().reject()

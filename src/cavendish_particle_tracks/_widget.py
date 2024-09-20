@@ -151,13 +151,51 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 
         self.set_UI_image_loaded(False)
 
-        # TODO: include self.stsh in the logic, depending on what it actually ends up doing
+        self.layout().addWidget(self.cal)
+        self.layout().addWidget(self.btn_stereoshift)
+        self.layout().addWidget(self.btn_magnificationmag)
+        self.layout().addWidget(self.btn_save)
+
+        # Disable native napari layer controls - show again on closing this widget (hide).
+        # NB: This will break in napari 0.6.0
+        self.viewer.window._qt_viewer.layerButtons.hide()
 
         # Data analysis
         self.data: list[NewParticle] = []
         # might not need this eventually
         self.mag_a = -1.0e6
         self.mag_b = -1.0e6
+
+        # Dialog pointers to reuse
+        self.mag_dlg: MagnificationDialog | None = None
+        self.stereoshift_dlg: StereoshiftDialog | None = None
+        self.stereoshift_isopen = False
+        self.decay_angles_dlg: DecayAnglesDialog | None = None
+        self.decay_angles_isopen = False
+
+    def hideEvent(self, event):
+        """When the widget is 'closed' (napari just hides it), show the layer buttons again.
+        If data has been recorded, prompt the user to save it before closing the widget.
+        """
+        if len(self.data) > 0:
+            self._confirm_save_before_closing()
+        self.viewer.window._qt_viewer.layerButtons.show()
+        super().hideEvent(event)
+
+    def _confirm_save_before_closing(self):
+        """Prompt the user to save data before closing the widget."""
+        message_box = QMessageBox(self)
+        message_box.setIcon(QMessageBox.Warning)
+        message_box.setText(
+            "Closing Cavendish Particle Tracks. Any unsaved data will be lost."
+        )
+        message_box.setInformativeText("Do you want to save your data?")
+        message_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        message_box.setDefaultButton(QMessageBox.Yes)
+        reply = message_box.exec()
+
+        if reply == QMessageBox.Yes:
+            self._on_click_save()
 
         @self.viewer.layers.events.connect
         def _on_layerlist_changed(event):
@@ -430,31 +468,32 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 
     def _on_click_decay_angles(self) -> DecayAnglesDialog:
         """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
-        # for widget in QApplication.topLevelWidgets():
-        ##    if isinstance(widget, DecayAnglesDialog):
-        ##        napari.utils.notifications.show_error(
-        ##            "Decay Angles dialog already open"
-        ##        )
-        #        return widget
-        dlg = DecayAnglesDialog(self)
-        dlg.show()
+        if (self.decay_angles_dlg is not None) and (
+            self.decay_angles_isopen is True
+        ):
+            self.decay_angles_dlg.raise_()
+            return self.decay_angles_dlg
+        self.decay_angles_dlg = DecayAnglesDialog(self)
+        self.decay_angles_dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        dlg.move(point)
-        return dlg
+        self.decay_angles_dlg.move(point)
+        self.decay_angles_isopen = True
+        return self.decay_angles_dlg
 
     def _on_click_stereoshift(self) -> StereoshiftDialog:
         """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
-        # for widget in QApplication.topLevelWidgets():
-        #    if isinstance(widget, StereoshiftDialog):
-        #        napari.utils.notifications.show_error(
-        #            "Stereoshift dialog already open"
-        #        )
-        #        return widget
-        dlg = StereoshiftDialog(self)
-        dlg.show()
+        # Different behaviour to the Magnification dialog, waiting for the definition of the stereoshift layer structure
+        if (self.stereoshift_dlg is not None) and (
+            self.stereoshift_isopen is True
+        ):
+            self.stereoshift_dlg.raise_()
+            return self.stereoshift_dlg
+        self.stereoshift_dlg = StereoshiftDialog(self)
+        self.stereoshift_dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        dlg.move(point)
-        return dlg
+        self.stereoshift_dlg.move(point)
+        self.stereoshift_isopen = True
+        return self.stereoshift_dlg
 
     def _on_click_load_data(self) -> None:
         """When the 'Load data' button is clicked, a dialog opens to select the folder containing the data.
@@ -537,6 +576,9 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
                 border_width_is_relative=False,
             )
 
+        # Disable the load button after loading the data (interim solution until we can move to bottom-docked UI)
+        self.load.setEnabled(False)
+
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
         the table and select the first cell ready to recieve the first point.
@@ -596,18 +638,16 @@ Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garve
 
     def _on_click_magnification(self) -> MagnificationDialog:
         """When the 'Calculate magnification' button is clicked, open the magnification dialog"""
-        # TODO disabled until fix found.
-        # for widget in QApplication.topLevelWidgets():
-        #    if isinstance(widget, MagnificationDialog):
-        #        napari.utils.notifications.show_error(
-        #            "Magnification dialog already open"
-        #        )
-        #        return widget
-        dlg = MagnificationDialog(self)
-        dlg.show()
+        if self.mag_dlg is not None:
+            self.mag_dlg.show()
+            self.mag_dlg.raise_()
+            self.mag_dlg._activate_calibration_layer()
+            return self.mag_dlg
+        self.mag_dlg = MagnificationDialog(self)
+        self.mag_dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        dlg.move(point)
-        return dlg
+        self.mag_dlg.move(point)
+        return self.mag_dlg
 
     def _propagate_magnification(self, a: float, b: float) -> None:
         """Assigns a and b to the class magnification parameters and to each of the particles in data"""
