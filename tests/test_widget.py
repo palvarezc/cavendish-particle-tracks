@@ -29,6 +29,14 @@ def test_open_widget(make_napari_viewer, bypass_load_screen, docking_area):
     widget.show()
     assert widget.isVisible() is True
 
+    # Check the widget behavior before and after loading the data
+    if docking_area == "bottom" and bypass_load_screen is False:
+        assert widget.intro_text.isVisible() is True
+        widget.viewer.add_image(
+            np.random.random((100, 100)), name="Particle Tracks"
+        )
+        assert widget.intro_text.isVisible() is False
+
 
 def test_calculate_radius_ui(
     cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
