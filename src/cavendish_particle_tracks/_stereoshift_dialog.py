@@ -179,11 +179,6 @@ class StereoshiftDialog(QDialog):
         # Textboxes for the output of point coordinates
         self.fiducial_textboxes = [QLabel(self) for _ in range(6)]
         self.point_textboxes = [QLabel(self) for _ in range(2)]
-        # Comboboxes for selecting which fiducial the point corresponds to
-        self.cmb_front1 = self._setup_dropdown_fiducials_combobox()
-        self.cmb_front2 = self._setup_dropdown_fiducials_combobox()
-        self.cmb_back1 = self._setup_dropdown_fiducials_combobox(back=True)
-        self.cmb_back2 = self._setup_dropdown_fiducials_combobox(back=True)
         # Texbox with calculation formula
         self.label_stereoshift = QLabel(
             "Stereo shift (shift_p/shift_f = depth_p/depth_f)"
@@ -204,11 +199,7 @@ class StereoshiftDialog(QDialog):
             self.fiducial_textboxes + self.results + self.point_textboxes
         ):  # possibly another way of implementing this without creaing an unnecessary list that isn't referenced again
             textbox.setMinimumWidth(50)
-        # Add magnification results table
-        # TODO again I'd like to change this once functionality complete
-        self.table = QTableWidget(1, 2)
-        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.table.setHorizontalHeaderLabels(["a", "b"])
+
         # Control Buttons
         btn_calculate = QPushButton("Calculate")
         btn_calculate.clicked.connect(self._on_click_calculate)
@@ -218,12 +209,6 @@ class StereoshiftDialog(QDialog):
         self.buttonBox.rejected.connect(self.reject)
         self.buttonBox.accepted.connect(self.accept)
         # Layout
-        # surely there's a nicer way of doing this grid layout stuff.
-        # there is: nested layouts are possible https://doc.qt.io/qtforpython-6/overviews/qtwidgets-tutorials-widgets-nestedlayouts-example.html
-        # That said, is it really that much of an improvement?
-        # actually yes it is
-        # when you need to insert into grid style layouts
-        # the problem is you now need to update all the points after it
         layout_outer = QVBoxLayout()
         layout_refplane = QHBoxLayout()
         layout_refplane.addWidget(lbl_ref_plane)
@@ -231,23 +216,19 @@ class StereoshiftDialog(QDialog):
         layout_outer.addLayout(layout_refplane)
         layout_fiducials = QGridLayout(margin=10)
         layout_fiducials.addWidget(lbl_front1, 0, 0)
-        layout_fiducials.addWidget(self.cmb_front1, 0, 1)
         layout_fiducials.addWidget(lbl_front1_view1, 0, 2)
         layout_fiducials.addWidget(self.fiducial_textboxes[0], 0, 3)
         layout_fiducials.addWidget(lbl_front1_view2, 0, 4)
         layout_fiducials.addWidget(self.fiducial_textboxes[1], 0, 5)
         layout_fiducials.addWidget(lbl_front2, 1, 0)
-        layout_fiducials.addWidget(self.cmb_front2, 1, 1)
         layout_fiducials.addWidget(lbl_front2_view1, 1, 2)
         layout_fiducials.addWidget(self.fiducial_textboxes[2], 1, 3)
         layout_fiducials.addWidget(lbl_back1, 2, 0)
-        layout_fiducials.addWidget(self.cmb_back1, 2, 1)
         layout_fiducials.addWidget(lbl_back1_view1, 2, 2)
         layout_fiducials.addWidget(self.fiducial_textboxes[3], 2, 3)
         layout_fiducials.addWidget(lbl_back1_view2, 2, 4)
         layout_fiducials.addWidget(self.fiducial_textboxes[4], 2, 5)
         layout_fiducials.addWidget(lbl_back2, 3, 0)
-        layout_fiducials.addWidget(self.cmb_back2, 3, 1)
         layout_fiducials.addWidget(lbl_back2_view1, 3, 2)
         layout_fiducials.addWidget(self.fiducial_textboxes[5], 3, 3)
         layout_fiducials.addWidget(lbl_point_coords, 4, 0)
@@ -270,20 +251,8 @@ class StereoshiftDialog(QDialog):
         layout_results.addWidget(QLabel("Point depth (cm)"), 3, 0)
         layout_results.addWidget(self.lbl_point_depth, 3, 1)
         layout_outer.addLayout(layout_results)
-        layout_outer.addWidget(self.table)
         layout_outer.addWidget(self.buttonBox)
         self.setLayout(layout_outer)
-
-    def _setup_dropdown_fiducials_combobox(self, back=False):
-        """Sets up a drop-down list of fiducials for the `back` or front (`back=False`)."""
-        combobox = QComboBox()
-        if back:
-            combobox.addItems(FIDUCIAL_BACK.keys())
-        else:
-            combobox.addItems(FIDUCIAL_FRONT.keys())
-        # TODO fix
-        # combobox.currentIndexChanged.connect(self._on_click_fiducial)
-        return combobox
 
     def _create_retrieve_layer(
         self, layer_name: str, origin_x, origin_y, zoom_level, current_event
@@ -346,16 +315,6 @@ class StereoshiftDialog(QDialog):
             self.label_stereoshift.setText(
                 "Stereo shift (shift_p/shift_f = 1 - depth_p/depth_f)"
             )
-
-    def _update_UI(self):
-        for i in range(self.layer_fiducials.data):
-            print("Test")
-            # what will this look like in 4D...?
-
-    def _set_new_event_fiducial_locations(self):
-        i = 1
-        # print("self.parent.viewer.cursor.events.position.connect")
-        # maybe connect shapes to this instead....
 
     def _retrieve_fiducial(self, event, depth_index, view):
         """Access a fiducial by:
