@@ -25,12 +25,9 @@ if TYPE_CHECKING:
 
 
 class MagnificationDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)  # Call QDialog constructor
-        self.parent: ParticleTracksWidget = (
-            parent  # Assign Napari viewer as parent.
-        )
-
+        self.parent: ParticleTracksWidget = parent
         self.setWindowTitle("Magnification")
 
         self.f1 = Fiducial()
@@ -40,7 +37,9 @@ class MagnificationDialog(QDialog):
 
         # region UI Setup
         self.ui_setup()
-        self.cal_layer = self.create_or_retrieve_magnification_layer()
+        self.magnification_layer = (
+            self.create_or_retrieve_magnification_layer()
+        )
 
     def create_or_retrieve_magnification_layer(self) -> Points:
         if "Magnification" in self.parent.viewer.layers:
@@ -68,17 +67,20 @@ class MagnificationDialog(QDialog):
         for txt in self.txboxes:
             txt.setMinimumWidth(200)
         # Add selected fiducial buttons
-        self.btn_add_f1 = QPushButton("Add")
-        self.btn_add_f2 = QPushButton("Add")
-        self.btn_add_b1 = QPushButton("Add")
-        self.btn_add_b2 = QPushButton("Add")
-        self.btn_add_f1.clicked.connect(self._on_click_add_coords_f1)
-        self.btn_add_f2.clicked.connect(self._on_click_add_coords_f2)
-        self.btn_add_b1.clicked.connect(self._on_click_add_coords_b1)
-        self.btn_add_b2.clicked.connect(self._on_click_add_coords_b2)
-        # Calculate magnification button
-        self.btn_calculate = QPushButton("Calculate magnification")
-        self.btn_calculate.clicked.connect(self._on_click_magnification)
+        self.add_f1_button = QPushButton("Add")
+        self.add_f2_button = QPushButton("Add")
+        self.add_b1_button = QPushButton("Add")
+        self.add_b2_button = QPushButton("Add")
+        self.add_f1_button.clicked.connect(self._on_click_add_coords_f1)
+        self.add_f2_button.clicked.connect(self._on_click_add_coords_f2)
+        self.add_b1_button.clicked.connect(self._on_click_add_coords_b1)
+        self.add_b2_button.clicked.connect(self._on_click_add_coords_b2)
+        self.calculate_magnification_button = QPushButton(
+            "Calculate magnification"
+        )
+        self.calculate_magnification_button.clicked.connect(
+            self._on_click_magnification
+        )
         # Add table to show the resultant magnification parameter
         self.table = QTableWidget(1, 2)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -99,10 +101,10 @@ class MagnificationDialog(QDialog):
             [
                 self.cmb_front1,
                 self.txt_f1coord,
-                self.btn_add_f1,
+                self.add_f1_button,
                 self.cmb_front2,
                 self.txt_f2coord,
-                self.btn_add_f2,
+                self.add_f2_button,
             ]
         ):
             self.layout().addWidget(widget, i // 3 + 1, i % 3)
@@ -113,15 +115,17 @@ class MagnificationDialog(QDialog):
             [
                 self.cmb_back1,
                 self.txt_b1coord,
-                self.btn_add_b1,
+                self.add_b1_button,
                 self.cmb_back2,
                 self.txt_b2coord,
-                self.btn_add_b2,
+                self.add_b2_button,
             ]
         ):
             self.layout().addWidget(widget, i // 3 + 4, i % 3)
 
-        self.layout().addWidget(self.btn_calculate, 6, 0, 1, 3)
+        self.layout().addWidget(
+            self.calculate_magnification_button, 6, 0, 1, 3
+        )
         self.layout().addWidget(
             QLabel("Magnification parameters (M = a + b z)"), 7, 0, 1, 3
         )
@@ -193,21 +197,21 @@ class MagnificationDialog(QDialog):
 
     def _activate_calibration_layer(self):
         """Show the calibration layer and move it to the top"""
-        self.cal_layer.visible = True
+        self.magnification_layer.visible = True
         # Move the calibration layer to the top
         self.parent.viewer.layers.move(
-            self.parent.viewer.layers.index(self.cal_layer),
+            self.parent.viewer.layers.index(self.magnification_layer),
             len(self.parent.viewer.layers),
         )
-        self.parent.viewer.layers.selection.active = self.cal_layer
+        self.parent.viewer.layers.selection.active = self.magnification_layer
 
     def _deactivate_calibration_layer(self):
         """Hide the calibration layer and move it to the bottom"""
         # self.parent.viewer.layers.select_previous()
-        self.cal_layer.visible = False
+        self.magnification_layer.visible = False
         # Move the calibration layer to the bottom
         self.parent.viewer.layers.move(
-            self.parent.viewer.layers.index(self.cal_layer), 0
+            self.parent.viewer.layers.index(self.magnification_layer), 0
         )
 
     def accept(self) -> None:
