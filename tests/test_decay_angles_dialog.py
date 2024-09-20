@@ -11,7 +11,7 @@ from pytestqt.qtbot import QtBot
 )
 def test_decay_angles_dialog(cpt_widget, qtbot: QtBot, click_twice: bool):
     """Smoke test for the DecayAnglesDialog."""
-    cpt_widget.cmb_add_particle.setCurrentIndex(4)
+    cpt_widget.particle_decays_menu.setCurrentIndex(4)
 
     # The user clicks the button (also test fringe case that they click the button again).
     if click_twice:

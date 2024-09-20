@@ -61,8 +61,18 @@ def test_magnification_ui(
         back_fiducial1,
         back_fiducial2,
     ]
-    combo_boxes = [dlg.cbf1, dlg.cbf2, dlg.cbb1, dlg.cbb2]
-    text_boxes = [dlg.txf1, dlg.txf2, dlg.txb1, dlg.txb2]
+    combo_boxes = [
+        dlg.front1_fiducial_combobox,
+        dlg.front2_fiducial_combobox,
+        dlg.back1_fiducial_combobox,
+        dlg.back2_fiducial_combobox,
+    ]
+    text_boxes = [
+        dlg.txt_f1coord,
+        dlg.txt_f2coord,
+        dlg.txt_b1coord,
+        dlg.txt_b2coord,
+    ]
     add_fiducial_funcs = [
         dlg._on_click_add_coords_f1,
         dlg._on_click_add_coords_f2,
@@ -79,8 +89,10 @@ def test_magnification_ui(
         recorded_fiducials,
     ):
         cb.setCurrentIndex(cb.findText(fiducial.name))
-        dlg.cal_layer.add(fiducial.xy)
-        dlg.cal_layer.selected_data = {len(dlg.cal_layer.data) - 1}
+        dlg.magnification_layer.add(fiducial.xy)
+        dlg.magnification_layer.selected_data = {
+            len(dlg.magnification_layer.data) - 1
+        }
         add_fiducial_func()
         assert recorded_fiducial == fiducial
         # TODO: check text box

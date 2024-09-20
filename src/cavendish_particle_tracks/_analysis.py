@@ -47,10 +47,10 @@ class Fiducial:
         self.y = point[1]
 
 
-# Idea is to save a list of NewParticles as we go along, and then pandas.DataFrame(list_of_new_particles) does all the magic
+# Idea is to save a list of ParticleDecays as we go along, and then pandas.DataFrame(list_of_particles) does all the magic
 @dataclass
-class NewParticle:
-    Name: str = ""
+class ParticleDecay:
+    name: str = ""
     index: int = 0
     r1: list[float] = field(default_factory=list)
     r2: list[float] = field(default_factory=list)

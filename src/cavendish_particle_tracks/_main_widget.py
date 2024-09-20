@@ -1,10 +1,9 @@
 """
-This module is an example of a barebones QWidget plugin for napari
+This module contains the main Cavendish Particle Tracks widget.
 
-It implements the Widget specification.
-see: https://napari.org/stable/plugins/guides.html?#widgets
-
-Replace code below according to your needs.
+It's the students' home widget, that contains the table of particle decays, and
+the buttons to perform all analysis calculations, and to export (save) the data
+for further analysis.
 """
 
 import glob
@@ -31,11 +30,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from ._analysis import (
-    EXPECTED_PARTICLES,
-    VIEW_NAMES,
-    NewParticle,
-)
+from ._analysis import EXPECTED_PARTICLES, VIEW_NAMES, ParticleDecay
 from ._calculate import length, radius
 from ._decay_angles_dialog import DecayAnglesDialog
 from ._magnification_dialog import MagnificationDialog
@@ -61,21 +56,21 @@ class ParticleTracksWidget(QWidget):
             self.bypass_load_screen = True
 
         # define QtWidgets
-        self.btn_load = QPushButton("Load data")
-        self.btn_load.width = 200
-        self.cmb_add_particle = QComboBox()
-        self.cmb_add_particle.addItems(EXPECTED_PARTICLES)
-        self.cmb_add_particle.setCurrentIndex(0)
-        self.cmb_add_particle.currentIndexChanged.connect(
+        self.load_button = QPushButton("Load data")
+        self.particle_decays_menu = QComboBox()
+        self.particle_decays_menu.addItems(EXPECTED_PARTICLES)
+        self.particle_decays_menu.setCurrentIndex(0)
+        self.particle_decays_menu.currentIndexChanged.connect(
             self._on_click_new_particle
         )
-        self.btn_delete_particle = QPushButton("Delete particle")
-        self.btn_radius = QPushButton("Calculate radius")
-        self.btn_length = QPushButton("Calculate length")
-        self.btn_decayangle = QPushButton("Calculate decay angles")
-        self.btn_stereoshift = QPushButton("Stereoshift")
-        self.btn_save = QPushButton("Save")
-        self.btn_magnification = QPushButton("Magnification")
+        self.radius_button = QPushButton("Calculate radius")
+        self.delete_particle = QPushButton("Delete particle")
+        self.length_button = QPushButton("Calculate length")
+        self.decay_angles_button = QPushButton("Calculate decay angles")
+        self.stereoshift_button = QPushButton("Stereoshift")
+        self.magnification_button = QPushButton("Magnification")
+        self.save_data_button = QPushButton("Save")
+
         # setup particle table
         self.table = self._set_up_table()
         self._set_table_visible_vars(False)
@@ -83,21 +78,22 @@ class ParticleTracksWidget(QWidget):
             self._on_row_selection_changed
         )
         # Apply magnification disabled until the magnification parameters are computed
-        self.cal = QRadioButton("Apply magnification")
-        self.cal.setEnabled(False)
+        self.apply_magnification_button = QRadioButton("Apply magnification")
+        self.apply_magnification_button.setEnabled(False)
 
         # connect callbacks
-        self.btn_load.clicked.connect(self._on_click_load_data)
-        self.btn_delete_particle.clicked.connect(
-            self._on_click_delete_particle
+        self.load_button.clicked.connect(self._on_click_load_data)
+        self.delete_particle.clicked.connect(self._on_click_delete_particle)
+        self.radius_button.clicked.connect(self._on_click_radius)
+        self.length_button.clicked.connect(self._on_click_length)
+        self.decay_angles_button.clicked.connect(self._on_click_decay_angles)
+        self.stereoshift_button.clicked.connect(self._on_click_stereoshift)
+        self.apply_magnification_button.toggled.connect(
+            self._on_click_apply_magnification
         )
-        self.btn_radius.clicked.connect(self._on_click_radius)
-        self.btn_length.clicked.connect(self._on_click_length)
-        self.btn_decayangle.clicked.connect(self._on_click_decay_angles)
-        self.btn_stereoshift.clicked.connect(self._on_click_stereoshift)
-        self.cal.toggled.connect(self._on_click_apply_magnification)
-        self.btn_save.clicked.connect(self._on_click_save)
-        self.btn_magnification.clicked.connect(self._on_click_magnification)
+        self.save_data_button.clicked.connect(self._on_click_save)
+
+        self.magnification_button.clicked.connect(self._on_click_magnification)
         # TODO: find which of thsese works
         # https://napari.org/stable/gallery/custom_mouse_functions.html
         # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
@@ -122,14 +118,14 @@ class ParticleTracksWidget(QWidget):
             self.buttonbox = QGridLayout()
             self.buttonbox.addWidget(self.btn_load, 0, 0)
             self.buttonbox.addWidget(self.cmb_add_particle, 1, 0)
-            self.buttonbox.addWidget(self.btn_delete_particle, 1, 1)
-            self.buttonbox.addWidget(self.btn_radius, 2, 0)
-            self.buttonbox.addWidget(self.btn_length, 2, 1)
-            self.buttonbox.addWidget(self.btn_decayangle, 3, 0)
-            self.buttonbox.addWidget(self.btn_stereoshift, 3, 1)
-            self.buttonbox.addWidget(self.btn_magnification, 4, 0)
+            self.buttonbox.addWidget(self.delete_particle, 1, 1)
+            self.buttonbox.addWidget(self.radius_button, 2, 0)
+            self.buttonbox.addWidget(self.length_button, 2, 1)
+            self.buttonbox.addWidget(self.decay_angles_button, 3, 0)
+            self.buttonbox.addWidget(self.stereoshift_button, 3, 1)
+            self.buttonbox.addWidget(self.magnification_button, 4, 0)
             self.buttonbox.addWidget(self.cal, 4, 1)
-            self.buttonbox.addWidget(self.btn_save, 5, 0)
+            self.buttonbox.addWidget(self.save_data_button, 5, 0)
 
             layout_outer = QHBoxLayout()
             self.setLayout(layout_outer)
@@ -139,17 +135,17 @@ class ParticleTracksWidget(QWidget):
 
         else:
             self.buttonbox = QVBoxLayout()
-            self.buttonbox.addWidget(self.btn_load)
-            self.buttonbox.addWidget(self.cmb_add_particle)
-            self.buttonbox.addWidget(self.btn_delete_particle)
-            self.buttonbox.addWidget(self.btn_radius)
-            self.buttonbox.addWidget(self.btn_length)
-            self.buttonbox.addWidget(self.btn_decayangle)
+            self.buttonbox.addWidget(self.load_button)
+            self.buttonbox.addWidget(self.particle_decays_menu)
+            self.buttonbox.addWidget(self.delete_particle)
+            self.buttonbox.addWidget(self.radius_button)
+            self.buttonbox.addWidget(self.length_button)
+            self.buttonbox.addWidget(self.decay_angles_button)
             self.buttonbox.addWidget(self.table)
-            self.buttonbox.addWidget(self.cal)
-            self.buttonbox.addWidget(self.btn_stereoshift)
-            self.buttonbox.addWidget(self.btn_magnification)
-            self.buttonbox.addWidget(self.btn_save)
+            self.buttonbox.addWidget(self.apply_magnification_button)
+            self.buttonbox.addWidget(self.stereoshift_button)
+            self.buttonbox.addWidget(self.magnification_button)
+            self.buttonbox.addWidget(self.save_data_button)
             self.setLayout(self.buttonbox)
 
         # Disable native napari layer controls - show again on closing this widget (hide).
@@ -161,7 +157,7 @@ class ParticleTracksWidget(QWidget):
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
         # Data analysis
-        self.data: list[NewParticle] = []
+        self.data: list[ParticleDecay] = []
         # might not need this eventually
         self.mag_a = -1.0e6
         self.mag_b = -1.0e6
@@ -232,7 +228,7 @@ class ParticleTracksWidget(QWidget):
         """Initial setup of the QTableWidget with one row and columns for each
         point and the calculated radius.
         """
-        np = NewParticle()
+        np = ParticleDecay()
         self.columns = list(np.__dict__.keys())
         self.columns += ["magnification"]
         self.columns_show_calibrated = np._vars_to_show(True)
@@ -281,30 +277,35 @@ class ParticleTracksWidget(QWidget):
         self.set_UI_image_loaded(images_imported, self.bypass_load_screen)
         try:
             selected_row = self._get_selected_row()
-            self.btn_save.setEnabled(True)
-            self.btn_delete_particle.setEnabled(True)
+            self.save_data_button.setEnabled(True)
+            self.delete_particle.setEnabled(True)
             ## think about these two + cal once done.
-            self.btn_magnification.setEnabled(True)
-            self.btn_stereoshift.setEnabled(True)
+            self.magnification_button.setEnabled(True)
+            self.stereoshift_button.setEnabled(True)
             if self.data[selected_row].index < 4:
-                self.btn_radius.setEnabled(True)
-                self.btn_length.setEnabled(True)
-                self.btn_decayangle.setEnabled(False)
+                self.radius_button.setEnabled(True)
+                self.length_button.setEnabled(True)
+                self.decay_angles_button.setEnabled(False)
                 return
             elif self.data[selected_row].index == 4:
-                self.btn_radius.setEnabled(False)
-                self.btn_length.setEnabled(True)
-                self.btn_decayangle.setEnabled(True)
+                self.radius_button.setEnabled(False)
+                self.length_button.setEnabled(True)
+                self.decay_angles_button.setEnabled(True)
                 return
         except IndexError:
-            self.btn_delete_particle.setEnabled(False)
-            self.btn_radius.setEnabled(False)
-            self.btn_length.setEnabled(False)
-            self.btn_decayangle.setEnabled(False)
-            self.cal.setEnabled(False)
-            self.btn_stereoshift.setEnabled(False)
-            self.btn_magnification.setEnabled(False)
-            self.btn_save.setEnabled(False)
+            self.delete_particle.setEnabled(False)
+            self.radius_button.setEnabled(False)
+            self.length_button.setEnabled(False)
+            self.decay_angles_button.setEnabled(False)
+            self.apply_magnification_button.setEnabled(False)
+            self.stereoshift_button.setEnabled(False)
+            self.magnification_button.setEnabled(False)
+            self.save_data_button.setEnabled(False)
+
+    def disable_all_buttons(self) -> None:
+        self.radius_button.setEnabled(False)
+        self.length_button.setEnabled(False)
+        self.decay_angles_button.setEnabled(False)
 
     def set_UI_image_loaded(
         self, loaded: bool, bypass_load_screen: bool
@@ -317,32 +318,32 @@ class ParticleTracksWidget(QWidget):
             # Set margins (left, top, right, bottom)
             self.buttonbox.setContentsMargins(0, 0, 0, 0)
             self.intro_text.hide()
-            self.btn_load.hide()
-            self.cmb_add_particle.show()
-            self.btn_delete_particle.show()
-            self.btn_radius.show()
-            self.btn_length.show()
-            self.btn_decayangle.show()
-            self.btn_stereoshift.show()
-            self.btn_save.show()
-            self.btn_magnification.show()
+            self.load_button.hide()
+            self.particle_decays_menu.show()
+            self.delete_particle.show()
+            self.radius_button.show()
+            self.length_button.show()
+            self.decay_angles_button.show()
+            self.stereoshift_button.show()
+            self.save_data_button.show()
+            self.magnification_button.show()
             self.table.show()
-            self.cal.show()
+            self.apply_magnification_button.show()
         else:
             # Set margins (left, top, right, bottom)
             self.buttonbox.setContentsMargins(200, 0, 200, 0)
             self.intro_text.show()
             self.btn_load.show()
             self.cmb_add_particle.hide()
-            self.btn_delete_particle.hide()
-            self.btn_radius.hide()
-            self.btn_length.hide()
-            self.btn_decayangle.hide()
-            self.btn_stereoshift.hide()
-            self.btn_save.hide()
-            self.btn_magnification.hide()
+            self.delete_particle.hide()
+            self.radius_button.hide()
+            self.length_button.hide()
+            self.decay_angles_button.hide()
+            self.stereoshift_button.hide()
+            self.save_data_button.hide()
+            self.magnification_button.hide()
             self.table.hide()
-            self.cal.hide()
+            self.apply_magnification_button.hide()
 
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
@@ -587,20 +588,23 @@ class ParticleTracksWidget(QWidget):
                 border_width_is_relative=False,
             )
 
+        # Disable the load button after loading the data (interim solution until we can move to bottom-docked UI)
+        self.load_button.setEnabled(False)
+
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
         the table and select the first cell ready to recieve the first point.
         """
-        if self.cmb_add_particle.currentIndex() < 1:
+        if self.particle_decays_menu.currentIndex() < 1:
             return
 
-        # add new particle to data
-        np = NewParticle()
-        np.Name = self.cmb_add_particle.currentText()
-        np.index = self.cmb_add_particle.currentIndex()
-        np.magnification_a = self.mag_a
-        np.magnification_b = self.mag_b
-        self.data += [np]
+        # add a new particle to data
+        new_particle = ParticleDecay()
+        new_particle.name = self.particle_decays_menu.currentText()
+        new_particle.index = self.particle_decays_menu.currentIndex()
+        new_particle.magnification_a = self.mag_a
+        new_particle.magnification_b = self.mag_b
+        self.data += [new_particle]
 
         # add particle (== new row) to the table and select it
         self.table.insertRow(self.table.rowCount())
@@ -608,21 +612,21 @@ class ParticleTracksWidget(QWidget):
         self.table.setItem(
             self.table.rowCount() - 1,
             self._get_table_column_index("index"),
-            QTableWidgetItem(np.index),
+            QTableWidgetItem(new_particle.index),
         )
         self.table.setItem(
             self.table.rowCount() - 1,
             self._get_table_column_index("Name"),
-            QTableWidgetItem(np.Name),
+            QTableWidgetItem(new_particle.name),
         )
         self.table.setItem(
             self.table.rowCount() - 1,
             self._get_table_column_index("magnification"),
-            QTableWidgetItem(str(np.magnification)),
+            QTableWidgetItem(str(new_particle.magnification)),
         )
 
         print(self.data[-1])
-        self.cmb_add_particle.setCurrentIndex(0)
+        self.particle_decays_menu.setCurrentIndex(0)
 
     def _on_click_delete_particle(self) -> None:
         """Delete particle from table and data"""
@@ -633,14 +637,16 @@ class ParticleTracksWidget(QWidget):
                 "There are no particles in the table."
             )
         else:
-            msgBox = QMessageBox()
-            msgBox.setText("Deleting selected particle")
-            msgBox.setInformativeText("Do you want to continue?")
-            msgBox.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-            msgBox.setDefaultButton(QMessageBox.Cancel)
-            ret = msgBox.exec()
+            confirmation_dialog = QMessageBox()
+            confirmation_dialog.setText("Deleting selected particle")
+            confirmation_dialog.setInformativeText("Do you want to continue?")
+            confirmation_dialog.setStandardButtons(
+                QMessageBox.Yes | QMessageBox.Cancel
+            )
+            confirmation_dialog.setDefaultButton(QMessageBox.Cancel)
+            return_code = confirmation_dialog.exec()
 
-            if ret == QMessageBox.Yes:
+            if return_code == QMessageBox.Yes:
                 del self.data[selected_row]
                 self.table.removeRow(selected_row)
 
@@ -667,9 +673,11 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_apply_magnification(self) -> None:
         """Changes the visualisation of the table to show calibrated values for radius and decay_length"""
-        if self.cal.isChecked():
+        if self.apply_magnification_button.isChecked():
             self._apply_magnification()
-        self._set_table_visible_vars(self.cal.isChecked())
+        self._set_table_visible_vars(
+            self.apply_magnification_button.isChecked()
+        )
 
     def _apply_magnification(self) -> None:
         """Calculates magnification and calibrated radius and length for each particle in data"""
