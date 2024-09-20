@@ -1,6 +1,6 @@
 import pytest
 
-from cavendish_particle_tracks._widget import ParticleTracksWidget
+from cavendish_particle_tracks._main_widget import ParticleTracksWidget
 
 
 @pytest.fixture

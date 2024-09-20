@@ -3,7 +3,7 @@ display_name: Cavendish Particle Tracks Analysis Plugin
 contributions:
   commands:
     - id: cavendish-particle-tracks.make_qwidget
-      python_name: cavendish_particle_tracks._widget:ParticleTracksWidget
+      python_name: cavendish_particle_tracks._main_widget:ParticleTracksWidget
       title: Make example QWidget
 
   widgets:

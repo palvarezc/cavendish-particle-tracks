@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ._widget import ParticleTracksWidget
+    from ._main_widget import ParticleTracksWidget
 
 import numpy as np
 from napari.layers import Layer, Points, Shapes
