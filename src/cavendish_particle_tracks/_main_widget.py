@@ -101,9 +101,10 @@ class ParticleTracksWidget(QWidget):
         self.layout().addWidget(save_data_button)
 
         # Disable native napari layer controls - show again on closing this widget (hide).
-        # NB: This will break in napari 0.6.0
+        # NB: Both of these will break in napari 0.6.0
         self.viewer.window._qt_viewer.layerButtons.hide()
-
+        # Disable viewer buttons, prevents accidental crash due to viewing image stack side on.
+        self.viewer.window._qt_viewer.viewerButtons.hide()
         # disable all calculation buttons
         self.disable_all_buttons()
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
