@@ -115,10 +115,8 @@ class ParticleTracksWidget(QWidget):
  | |___| (_| |\ V /  __/ | | | (_| | \__ \ | | | | |  | (_| | |  | |_| | (__| |  __/    | | | | (_| | (__|   <\__ \
   \_____\__,_| \_/ \___|_| |_|\__,_|_|___/_| |_| |_|   \__,_|_|   \__|_|\___|_|\___|    |_|_|  \__,_|\___|_|\_\___/
 
-Copyright (c) 2023-24 Sam Cunliffe and Paula Álvarez Cartelle 2024 Joseph Garvey under the MIT License.
 """
         )
-        print(self.intro_text.text())
         self.intro_text.setFont(QFont("Lucida Console", 5))
         self.intro_text.setTextFormat(Qt.TextFormat.PlainText)
 
