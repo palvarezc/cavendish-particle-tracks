@@ -44,7 +44,7 @@ class ParticleTracksWidget(QWidget):
 
     def __init__(
         self,
-        napari_viewer: napari.viewer.Viewer,
+        napari_viewer: napari.Viewer,
         bypass_load_screen: bool = False,
         docking_area: str = "right",
     ):
@@ -149,11 +149,11 @@ class ParticleTracksWidget(QWidget):
             self.setLayout(self.buttonbox)
 
         # Disable native napari layer controls - show again on closing this widget (hide).
-        # NB: This will break in napari 0.6.0
+        # NB: Both of these will break in napari 0.6.0
         self.viewer.window._qt_viewer.layerButtons.hide()
-
+        # Disable viewer buttons, prevents accidental crash due to viewing image stack side on.
+        self.viewer.window._qt_viewer.viewerButtons.hide()
         self.set_UI_image_loaded(False, self.bypass_load_screen)
-
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
         # Data analysis
@@ -181,6 +181,7 @@ class ParticleTracksWidget(QWidget):
         if len(self.data) > 0:
             self._confirm_save_before_closing()
         self.viewer.window._qt_viewer.layerButtons.show()
+        self.viewer.window._qt_viewer.viewerButtons.show()
         super().hideEvent(event)
 
     def _confirm_save_before_closing(self):
@@ -612,7 +613,7 @@ class ParticleTracksWidget(QWidget):
         )
         self.table.setItem(
             self.table.rowCount() - 1,
-            self._get_table_column_index("Name"),
+            self._get_table_column_index("name"),
             QTableWidgetItem(new_particle.name),
         )
         self.table.setItem(
