@@ -79,7 +79,7 @@ class ParticleDecay:
     def _vars_to_show(self, calibrated=False):
         if calibrated:
             return [
-                "Name",
+                "name",
                 "radius_cm",
                 "decay_length_cm",
                 "depth_cm",
@@ -89,7 +89,7 @@ class ParticleDecay:
             ]
         else:
             return [
-                "Name",
+                "name",
                 "radius_px",
                 "decay_length_px",
                 "depth_cm",

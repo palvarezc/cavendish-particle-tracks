@@ -508,7 +508,7 @@ class ParticleTracksWidget(QWidget):
         )
         self.table.setItem(
             self.table.rowCount() - 1,
-            self._get_table_column_index("Name"),
+            self._get_table_column_index("name"),
             QTableWidgetItem(new_particle.name),
         )
         self.table.setItem(
