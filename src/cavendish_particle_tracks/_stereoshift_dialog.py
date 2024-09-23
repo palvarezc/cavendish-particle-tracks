@@ -162,21 +162,20 @@ class StereoshiftDialog(QDialog):
             self._on_change_cmb_set_ref_plane
         )
         # Labels for the points' coordinates
-        lbl_front1 = QLabel("Front Fiducial 1")
+        lbl_front1 = QLabel("Front Fiducial")
         lbl_front1_view1 = QLabel("View 1")
         lbl_front1_view2 = QLabel("View 2")
-        lbl_front2 = QLabel("Front Fiducial 2")
-        lbl_front2_view1 = QLabel("View 1")
-        lbl_back1 = QLabel("Rear Fiducial 1")
+
+        lbl_back1 = QLabel("Rear Fiducial")
         lbl_back1_view1 = QLabel("View 1")
         lbl_back1_view2 = QLabel("View 2")
-        lbl_back2 = QLabel("Rear Fiducial 2")
-        lbl_back2_view1 = QLabel("View 1")
+
         lbl_point_coords = QLabel("Point coordinates")
         lbl_point_view1 = QLabel("View 1")
         lbl_point_view2 = QLabel("View 2")
+
         # Textboxes for the output of point coordinates
-        self.fiducial_textboxes = [QLabel(self) for _ in range(6)]
+        self.fiducial_textboxes = [QLabel(self) for _ in range(4)]
         self.point_textboxes = [QLabel(self) for _ in range(2)]
         # Texbox with calculation formula
         self.label_stereoshift = QLabel(
@@ -209,37 +208,30 @@ class StereoshiftDialog(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         # Layout
         layout_outer = QVBoxLayout()
+
         layout_refplane = QHBoxLayout()
         layout_refplane.addWidget(lbl_ref_plane)
         layout_refplane.addWidget(self.cmb_set_ref_plane)
         layout_outer.addLayout(layout_refplane)
-        layout_fiducials = QGridLayout(margin=10)
-        layout_fiducials.addWidget(lbl_front1, 0, 0)
-        layout_fiducials.addWidget(lbl_front1_view1, 0, 2)
-        layout_fiducials.addWidget(self.fiducial_textboxes[0], 0, 3)
-        layout_fiducials.addWidget(lbl_front1_view2, 0, 4)
-        layout_fiducials.addWidget(self.fiducial_textboxes[1], 0, 5)
-        layout_fiducials.addWidget(lbl_front2, 1, 0)
-        layout_fiducials.addWidget(lbl_front2_view1, 1, 2)
-        layout_fiducials.addWidget(self.fiducial_textboxes[2], 1, 3)
-        layout_fiducials.addWidget(lbl_back1, 2, 0)
-        layout_fiducials.addWidget(lbl_back1_view1, 2, 2)
-        layout_fiducials.addWidget(self.fiducial_textboxes[3], 2, 3)
-        layout_fiducials.addWidget(lbl_back1_view2, 2, 4)
-        layout_fiducials.addWidget(self.fiducial_textboxes[4], 2, 5)
-        layout_fiducials.addWidget(lbl_back2, 3, 0)
-        layout_fiducials.addWidget(lbl_back2_view1, 3, 2)
-        layout_fiducials.addWidget(self.fiducial_textboxes[5], 3, 3)
-        layout_fiducials.addWidget(lbl_point_coords, 4, 0)
-        layout_fiducials.addWidget(lbl_point_view1, 4, 2)
-        layout_fiducials.addWidget(self.point_textboxes[0], 4, 3)
-        layout_fiducials.addWidget(lbl_point_view2, 4, 4)
-        layout_fiducials.addWidget(self.point_textboxes[1], 4, 5)
-        layout_outer.addLayout(layout_fiducials)
+
+        self.setup_fiducial_coords_UI(
+            lbl_front1,
+            lbl_front1_view1,
+            lbl_front1_view2,
+            lbl_back1,
+            lbl_back1_view1,
+            lbl_back1_view2,
+            lbl_point_coords,
+            lbl_point_view1,
+            lbl_point_view2,
+            layout_outer,
+        )
+
         layout_stereoshift = QHBoxLayout()
         layout_stereoshift.addWidget(self.label_stereoshift)
         layout_stereoshift.addWidget(btn_calculate)
         layout_outer.addLayout(layout_stereoshift)
+
         layout_results = QGridLayout(margin=10)
         layout_results.addWidget(QLabel("Fiducial shift"), 0, 0)
         layout_results.addWidget(self.lbl_fiducial_shift, 0, 1)
@@ -250,8 +242,50 @@ class StereoshiftDialog(QDialog):
         layout_results.addWidget(QLabel("Point depth (cm)"), 3, 0)
         layout_results.addWidget(self.lbl_point_depth, 3, 1)
         layout_outer.addLayout(layout_results)
+
         layout_outer.addWidget(self.buttonBox)
         self.setLayout(layout_outer)
+
+    def setup_fiducial_coords_UI(
+        self,
+        lbl_front1,
+        lbl_front1_view1,
+        lbl_front1_view2,
+        lbl_back1,
+        lbl_back1_view1,
+        lbl_back1_view2,
+        lbl_point_coords,
+        lbl_point_view1,
+        lbl_point_view2,
+        layout_outer,
+    ):
+        layout_fiducials = QVBoxLayout(margin=10)
+
+        layout_frontfiducials = QHBoxLayout()
+        layout_frontfiducials.addWidget(lbl_front1)
+        layout_frontfiducials.addWidget(lbl_front1_view1)
+        layout_frontfiducials.addWidget(self.fiducial_textboxes[0])
+        layout_frontfiducials.addWidget(lbl_front1_view2)
+        layout_frontfiducials.addWidget(self.fiducial_textboxes[1])
+        layout_fiducials.addWidget(layout_frontfiducials)
+
+        layout_backfiducials = QHBoxLayout()
+        layout_backfiducials.addWidget(lbl_back1)
+        layout_backfiducials.addWidget(lbl_back1_view1)
+        layout_backfiducials.addWidget(self.fiducial_textboxes[2])
+        layout_backfiducials.addWidget(lbl_back1_view2)
+        layout_backfiducials.addWidget(self.fiducial_textboxes[3])
+        layout_fiducials.addWidget(layout_backfiducials)
+
+        layout_pointcoords = QHBoxLayout()
+        layout_pointcoords.addWidget(lbl_point_coords)
+        layout_pointcoords.addWidget(lbl_point_view1)
+        layout_pointcoords.addWidget(self.point_textboxes[0])
+        layout_pointcoords.addWidget(lbl_point_view2)
+        layout_pointcoords.addWidget(self.point_textboxes[1])
+        layout_fiducials.addWidget(layout_pointcoords)
+
+        layout_outer.addLayout(layout_fiducials)
 
     def _create_retrieve_layer(
         self, layer_name: str, origin_x, origin_y, zoom_level, current_event
