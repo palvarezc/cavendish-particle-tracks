@@ -107,7 +107,7 @@ class StereoshiftDialog(QDialog):
             size=20,
             border_width=7,
             border_width_is_relative=False,
-            edge_color=colors,
+            border_color=colors,
             face_color=colors,
             symbol=symbols,
         )
@@ -143,7 +143,7 @@ class StereoshiftDialog(QDialog):
             size=20,
             border_width=7,
             border_width_is_relative=False,
-            edge_color=colors,
+            border_color=colors,
             face_color=colors,
             symbol=symbols,
         )
