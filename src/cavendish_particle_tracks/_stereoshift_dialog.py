@@ -51,7 +51,6 @@ class StereoshiftDialog(QDialog):
         self.spoints = []
 
         self.parent: "ParticleTracksWidget" = parent  # noqa: UP037
-        self.parent.stereoshift_isopen = True
         self.setWindowTitle("Stereoshift")
 
         # First, check if the layers already exist, if not, create them.
@@ -267,7 +266,7 @@ class StereoshiftDialog(QDialog):
         layout_frontfiducials.addWidget(self.fiducial_textboxes[0])
         layout_frontfiducials.addWidget(lbl_front1_view2)
         layout_frontfiducials.addWidget(self.fiducial_textboxes[1])
-        layout_fiducials.addWidget(layout_frontfiducials)
+        layout_fiducials.addLayout(layout_frontfiducials)
 
         layout_backfiducials = QHBoxLayout()
         layout_backfiducials.addWidget(lbl_back1)
@@ -275,7 +274,7 @@ class StereoshiftDialog(QDialog):
         layout_backfiducials.addWidget(self.fiducial_textboxes[2])
         layout_backfiducials.addWidget(lbl_back1_view2)
         layout_backfiducials.addWidget(self.fiducial_textboxes[3])
-        layout_fiducials.addWidget(layout_backfiducials)
+        layout_fiducials.addLayout(layout_backfiducials)
 
         layout_pointcoords = QHBoxLayout()
         layout_pointcoords.addWidget(lbl_point_coords)
@@ -283,7 +282,7 @@ class StereoshiftDialog(QDialog):
         layout_pointcoords.addWidget(self.point_textboxes[0])
         layout_pointcoords.addWidget(lbl_point_view2)
         layout_pointcoords.addWidget(self.point_textboxes[1])
-        layout_fiducials.addWidget(layout_pointcoords)
+        layout_fiducials.addLayout(layout_pointcoords)
 
         layout_outer.addLayout(layout_fiducials)
 
