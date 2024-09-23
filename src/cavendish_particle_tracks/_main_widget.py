@@ -44,7 +44,6 @@ class ParticleTracksWidget(QWidget):
 
     @property
     def camera_center(self):
-        # update for 4d implementation as appropriate.
         return (self.viewer.camera.center[1], self.viewer.camera.center[2])
 
     @property
