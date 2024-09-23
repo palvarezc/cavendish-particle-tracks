@@ -215,7 +215,7 @@ class MagnificationDialog(QDialog):
 
     def _deactivate_calibration_layer(self):
         """Hide the calibration layer and move it to the bottom"""
-        # self.parent.viewer.layers.select_previous()
+        self.parent.viewer.layers.select_previous()
         self.magnification_layer.visible = False
         # Move the calibration layer to the bottom
         self.parent.viewer.layers.move(
