@@ -4,11 +4,8 @@ if TYPE_CHECKING:
     from ._main_widget import ParticleTracksWidget
 
 import numpy as np
-from napari.layers import Layer, Points, Shapes
-from napari.utils.notifications import show_error
-from napari.viewer import Viewer
+from napari.layers import Layer, Points
 from qtpy.QtWidgets import (
-    QAbstractItemView,
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -16,12 +13,11 @@ from qtpy.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
-    QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
 )
 
-from ._analysis import FIDUCIAL_BACK, FIDUCIAL_FRONT, Fiducial
+from ._analysis import Fiducial
 from ._calculate import corrected_shift, depth, stereoshift
 
 FRONT = 0
@@ -54,7 +50,7 @@ class StereoshiftDialog(QDialog):
         self.point_depth: float = -1.0
         self.spoints = []
 
-        self.parent: "ParticleTracksWidget" = parent
+        self.parent: "ParticleTracksWidget" = parent  # noqa: UP037
         self.parent.stereoshift_isopen = True
         self.setWindowTitle("Stereoshift")
 
