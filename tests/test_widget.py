@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
 from random import random
 
 import numpy as np
@@ -15,32 +14,7 @@ from cavendish_particle_tracks._main_widget import ParticleTracksWidget
 from .conftest import get_dialog
 
 
-@pytest.mark.parametrize("bypass_load_screen", [True, False])
-@pytest.mark.parametrize("docking_area", ["left", "bottom"])
-def test_open_widget(make_napari_viewer, bypass_load_screen, docking_area):
-    """Test the opening of the widget"""
-    viewer = make_napari_viewer()
-    widget = ParticleTracksWidget(
-        napari_viewer=viewer,
-        bypass_load_screen=bypass_load_screen,
-        docking_area=docking_area,
-    )
-    assert widget.isVisible() is False
-    widget.show()
-    assert widget.isVisible() is True
-
-    # Check the widget behavior before and after loading the data
-    if docking_area == "bottom" and bypass_load_screen is False:
-        assert widget.intro_text.isVisible() is True
-        widget.viewer.add_image(
-            np.random.random((100, 100)), name="Particle Tracks"
-        )
-        assert widget.intro_text.isVisible() is False
-
-
-def test_calculate_radius_ui(
-    cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
-):
+def test_calculate_radius_ui(cpt_widget, capsys):
     """Test the expected behavior from the expected workflow:
 
     - Add a particle.
@@ -76,9 +50,7 @@ def test_calculate_radius_ui(
 
 @pytest.mark.parametrize("npoints", [1, 2, 4, 5])
 def test_calculate_radius_fails_with_wrong_number_of_points(
-    cpt_widget: ParticleTracksWidget,
-    capsys: pytest.CaptureFixture[str],
-    npoints,
+    cpt_widget, capsys, npoints
 ):
     """Test the obvious failure modes: if I don't select 3 points, I can't
     calculate a radius so better send a nice message."""
@@ -104,7 +76,7 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
     )
 
 
-def test_add_new_particle_ui(cpt_widget: ParticleTracksWidget):
+def test_add_new_particle_ui(cpt_widget, capsys):
     assert cpt_widget.table.rowCount() == 0
 
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
@@ -113,7 +85,7 @@ def test_add_new_particle_ui(cpt_widget: ParticleTracksWidget):
     assert len(cpt_widget.data) == 1
 
 
-def test_delete_particle_ui(cpt_widget: ParticleTracksWidget):
+def test_delete_particle_ui(cpt_widget):
     """Tests the removal of a particle from the table"""
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
@@ -136,9 +108,7 @@ def test_delete_particle_ui(cpt_widget: ParticleTracksWidget):
     assert len(cpt_widget.data) == 0
 
 
-def test_calculate_length_ui(
-    cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
-):
+def test_calculate_length_ui(cpt_widget, capsys):
     # add a random image to the napari viewer
     cpt_widget.viewer.add_image(np.random.random((100, 100)))
 
@@ -167,9 +137,7 @@ def test_calculate_length_ui(
 
 @pytest.mark.parametrize("npoints", [1, 3, 4, 5])
 def test_calculate_length_fails_with_wrong_number_of_points(
-    cpt_widget: ParticleTracksWidget,
-    capsys: pytest.CaptureFixture[str],
-    npoints,
+    cpt_widget, capsys, npoints
 ):
     """Test the obvious failure modes: if I don't select 2 points, I can't
     calculate a length so better send a nice message."""
@@ -207,12 +175,12 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 )
 def test_load_data(
     cpt_widget: ParticleTracksWidget,
-    tmp_path: Path,
+    tmp_path,
     qtbot: QtBot,
-    data_subdirs: list[str],
-    image_count: list[int],
-    expect_data_loaded: bool,
-    reload: bool,
+    data_subdirs,
+    image_count,
+    expect_data_loaded,
+    reload,
 ):
     """Test loading of images in a folder as 4D image layer with width, height, event, view dimensions."""
 
@@ -275,23 +243,14 @@ def test_load_data(
 
 def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
     """Test the show/hide buttons"""
-    cpt_widget.viewer.add_image(
-        np.random.random((100, 100)), name="Particle Tracks"
-    )
-    # ideally would like to test isVisible instead of isEnabled, but that requires showing the widget
-    # need to think about how to do that, or if it's worth it
-    assert cpt_widget.particle_decays_menu.isEnabled() is True
-    assert cpt_widget.delete_particle.isEnabled() is False
     assert cpt_widget.radius_button.isEnabled() is False
     assert cpt_widget.length_button.isEnabled() is False
     assert cpt_widget.decay_angles_button.isEnabled() is False
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
-    assert cpt_widget.delete_particle.isEnabled() is True
     assert cpt_widget.radius_button.isEnabled() is True
     assert cpt_widget.length_button.isEnabled() is True
     assert cpt_widget.decay_angles_button.isEnabled() is False
     cpt_widget.particle_decays_menu.setCurrentIndex(4)
-    assert cpt_widget.delete_particle.isEnabled() is True
     assert cpt_widget.radius_button.isEnabled() is False
     assert cpt_widget.length_button.isEnabled() is True
     assert cpt_widget.decay_angles_button.isEnabled() is True
