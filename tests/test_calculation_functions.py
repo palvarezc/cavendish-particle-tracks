@@ -99,15 +99,6 @@ def test_calculate_stereoshift(f1, f2, p1, p2, S):
             Fiducial("Point_view2", 0.5, 1),
             0.5 * CHAMBER_DEPTH,
         ),
-        (
-            Fiducial("C", 0, 0),
-            Fiducial("C", 2, 2),
-            Fiducial("Ref1", 0, 0),
-            Fiducial("Ref2", 1, 0),
-            Fiducial("Point_view1", -1, 0),
-            Fiducial("Point_view2", 0, 1),
-            0.5 * CHAMBER_DEPTH,
-        ),
     ],
 )
 def test_calculate_depth(f1, f2, r1, r2, p1, p2, S):

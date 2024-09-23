@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 from random import random
-from typing import Callable
 
 import numpy as np
 import pytest
 import tifffile as tf
 from pytestqt.qtbot import QtBot
-from qtpy.QtCore import Qt, QTimer
-from qtpy.QtWidgets import QApplication, QDialog, QDialogButtonBox, QMessageBox
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
 from cavendish_particle_tracks._main_widget import ParticleTracksWidget
 
