@@ -165,11 +165,6 @@ class ParticleTracksWidget(QWidget):
         if reply == QMessageBox.Yes:
             self._on_click_save()
 
-    @property
-    def camera_center(self):
-        # update for 4d implementation as appropriate.
-        return (self.viewer.camera.center[1], self.viewer.camera.center[2])
-
     def _get_selected_points(self, layer_name="Radii and Lengths") -> np.array:
         """Returns array of selected points in the viewer"""
 

@@ -35,13 +35,12 @@ def length(a: Point, b: Point) -> float:
     return np.linalg.norm(pa - pb)
 
 
-def corrected_shift(points: Fiducial, offsets: Fiducial) -> float:
+def corrected_shift(points: list[Fiducial], offsets: list[Fiducial]) -> float:
     """Calculates the distance between two points, correcting for the offset/movement of the plane between two images.
+    #TODO fix docstring
     Points = [[x,y], [x,y]]: The two points to calculate the distance between.
     Offsets =  [[x,y], [x,y]]:: The two points to correct the distance calculation. (A fiducial in the reference plane)
     """
-    # TODO: Improve docstring here.
-    # Bodge a fix here till we come up with a better approach
     for i in range(len(points)):
         points[i].x -= offsets[i].x
         points[i].y -= offsets[i].y

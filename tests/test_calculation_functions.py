@@ -4,16 +4,17 @@ import numpy as np
 import pytest
 
 from cavendish_particle_tracks._analysis import Fiducial
-from cavendish_particle_tracks._calculate import CHAMBER_DEPTH as CD
-from cavendish_particle_tracks._calculate import FIDUCIAL_BACK as FB
-from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
 from cavendish_particle_tracks._calculate import (
+    CHAMBER_DEPTH,
+    corrected_shift,
     depth,
     length,
     magnification,
     radius,
     stereoshift,
 )
+from cavendish_particle_tracks._calculate import FIDUCIAL_BACK as FB
+from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
 
 
 @pytest.mark.parametrize(
@@ -60,8 +61,8 @@ def test_calculate_length(a, b, L):
         (
             Fiducial("C'", *np.multiply(2, FF["C'"])),
             Fiducial("F'", *np.multiply(2, FF["F'"])),
-            Fiducial("C", *np.divide(FB["C"], 0.5 + 0.3 * CD)),
-            Fiducial("F", *np.divide(FB["F"], 0.5 + 0.3 * CD)),
+            Fiducial("C", *np.divide(FB["C"], 0.5 + 0.3 * CHAMBER_DEPTH)),
+            Fiducial("F", *np.divide(FB["F"], 0.5 + 0.3 * CHAMBER_DEPTH)),
             (0.5, 0.3),
         ),
     ],
@@ -84,24 +85,31 @@ def test_calculate_stereoshift(f1, f2, p1, p2, S):
 
 
 @pytest.mark.parametrize(
-    "f1, f2, p1, p2, S",
+    "f1, f2, p1, p2, r1, r2, S",
     [
         (
             Fiducial("C", 0, 1),
             Fiducial("C", 1, 0),
+            Fiducial("Ref1", 2, 3),
+            Fiducial("Ref2", -1, 2),
             Fiducial("Point_view1", 0, 0.5),
             Fiducial("Point_view2", 0.5, 0),
-            0.5 * CD,
+            0.5 * CHAMBER_DEPTH,
         ),
         (
             Fiducial("C", 0, 0),
             Fiducial("C", 2, 2),
+            Fiducial("Ref1", 4, 3),
+            Fiducial("Ref2", -1, 2),
             Fiducial("Point_view1", -1, 0),
             Fiducial("Point_view2", 0, -1),
-            0.5 * CD,
+            0.5 * CHAMBER_DEPTH,
         ),
     ],
 )
-def test_calculate_depth(f1, f2, p1, p2, S):
-    assert depth(f1, f2, p1, p2) == pytest.approx(S, rel=1e-3)
-    assert depth(f1, f2, p1, p2, reverse=True) == pytest.approx(S, rel=1e-3)
+def test_calculate_depth(f1, f2, r1, r2, p1, p2, S):
+    fiducial_shift = corrected_shift([f1, f2], [r1, r2])
+    point_shift = corrected_shift([p1, p2], [r1, r2])
+    shift = stereoshift(fiducial_shift, point_shift)
+    assert depth(shift) == pytest.approx(S, rel=1e-3)
+    assert depth(shift, reverse=True) == pytest.approx(S, rel=1e-3)
