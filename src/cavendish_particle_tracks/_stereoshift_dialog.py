@@ -411,8 +411,8 @@ class StereoshiftDialog(QDialog):
 
     def _deactivate_stereoshift_layers(self):
         """Hide the stereoshift layers and move it to the bottom"""
-        self.parent.viewer.layers.remove[self.layer_fiducials.name]
-        self.parent.viewer.layers.remove[self.layer_points.name]
+        self.parent.viewer.layers.remove(self.layer_fiducials.name)
+        self.parent.viewer.layers.remove(self.layer_points.name)
         # TODO update this once ability to handle multiple measurements is added.
         # self.layer_fiducials.visible = False
         # self.layer_points.visible = False
