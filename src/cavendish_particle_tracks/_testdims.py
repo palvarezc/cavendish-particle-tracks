@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from skimage import data
 
 if TYPE_CHECKING:
-    from ._widget import ParticleTracksWidget
+    from ._main_widget import ParticleTracksWidget
 
 from qtpy.QtWidgets import QDialog
 

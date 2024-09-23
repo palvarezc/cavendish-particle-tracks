@@ -76,33 +76,36 @@ def test_calculate_magnification(f1, f2, b1, b2, M):
 @pytest.mark.parametrize(
     "f1, f2, p1, p2, S",
     [
-        ((0, 1), (1, 0), (0, 0.5), (0.5, 0), 0.5),
-        ((0, 0), (2, 2), (-1, 0), (0, -1), 0.5),
+        ((0.0, 1.0), (1.0, 0.0), (0.0, 0.5), (0.5, 0.0), 0.5),
+        ((0.0, 0.0), (2.0, 2.0), (-1.0, 0.0), (0.0, -1.0), 0.5),
     ],
 )
 def test_calculate_stereoshift(f1, f2, p1, p2, S):
-    assert stereoshift(f1, f2, p1, p2) == pytest.approx(S, rel=1e-3)
+    fiducial_shift = length(f1, f2)
+    point_shift = length(p1, p2)
+    shift = stereoshift(fiducial_shift, point_shift)
+    assert shift == pytest.approx(S, rel=1e-3)
 
 
 @pytest.mark.parametrize(
-    "f1, f2, p1, p2, r1, r2, S",
+    "f1, f2, r1, r2, p1, p2, S",
     [
         (
             Fiducial("C", 0, 1),
-            Fiducial("C", 1, 0),
-            Fiducial("Ref1", 2, 3),
-            Fiducial("Ref2", -1, 2),
+            Fiducial("C", 1, 1),
+            Fiducial("Ref1", 2, 0),
+            Fiducial("Ref2", 2, 1),
             Fiducial("Point_view1", 0, 0.5),
-            Fiducial("Point_view2", 0.5, 0),
+            Fiducial("Point_view2", 0.5, 1),
             0.5 * CHAMBER_DEPTH,
         ),
         (
             Fiducial("C", 0, 0),
             Fiducial("C", 2, 2),
-            Fiducial("Ref1", 4, 3),
-            Fiducial("Ref2", -1, 2),
+            Fiducial("Ref1", 0, 0),
+            Fiducial("Ref2", 1, 0),
             Fiducial("Point_view1", -1, 0),
-            Fiducial("Point_view2", 0, -1),
+            Fiducial("Point_view2", 0, 1),
             0.5 * CHAMBER_DEPTH,
         ),
     ],

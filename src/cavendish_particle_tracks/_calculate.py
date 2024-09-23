@@ -50,7 +50,7 @@ def corrected_shift(points: list[Fiducial], offsets: list[Fiducial]) -> float:
 
 
 def stereoshift(fiducial_shift, point_shift):
-    return fiducial_shift / point_shift
+    return point_shift / fiducial_shift
 
 
 def magnification(f1: Fiducial, f2: Fiducial, b1: Fiducial, b2: Fiducial):
