@@ -75,21 +75,23 @@ class DecayAnglesDialog(QDialog):
         self.phi_pion = 0.0
         self.alines = []
 
-        @self.cal_layer.events.data.connect
-        def enforce_points_coincident(event: Event) -> None:
+        @self.cal_layer.mouse_drag_callbacks.append
+        def enforce_points_coincident(object, event: Event) -> None:
             # event.dataindicies says what shape was changed
             # action says what was done to the shape
             # data doesn't get set till user lets go, mouse drag might be better
-            match event.index:
-                case 0:
-                    self.cal_layer.data[1][0] = self.cal_layer.data[0][1]
-                    self.cal_layer.data[2][0] = self.cal_layer.data[0][1]
-                case 1:
-                    self.cal_layer.data[0][1] = self.cal_layer.data[1][0]
-                    self.cal_layer.data[2][0] = self.cal_layer.data[1][0]
-                case 2:
-                    self.cal_layer.data[0][1] = self.cal_layer.data[2][0]
-                    self.cal_layer.data[1][0] = self.cal_layer.data[2][0]
+            data = self.cal_layer.data
+            # match event.index:
+            #    case 0:
+            #        data[1][0] = self.cal_layer.data[0][1]
+            #        data[2][0] = self.cal_layer.data[0][1]
+            #    case 1:
+            #        data[0][1] = self.cal_layer.data[1][0]
+            #        data[2][0] = self.cal_layer.data[1][0]
+            #    case 2:
+            #        data[0][1] = self.cal_layer.data[2][0]
+            #        data[1][0] = self.cal_layer.data[2][0]
+            self.cal_layer.data = data
             # self.cal_layer.refresh() for some reason calling layer refresh actually stops it refreshing
 
     def _setup_decayangles_layer(self):
