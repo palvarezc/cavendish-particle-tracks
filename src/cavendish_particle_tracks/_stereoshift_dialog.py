@@ -22,6 +22,8 @@ from ._calculate import corrected_shift, depth, stereoshift
 
 FRONT = 0
 BACK = 1
+NO_FIDUCIALS_PER_EVENT = 4
+NO_POINTS_PER_EVENT = 2
 
 
 class StereoshiftDialog(QDialog):
@@ -42,6 +44,22 @@ class StereoshiftDialog(QDialog):
     def reference_plane(self):
         return self.cmb_set_ref_plane.currentIndex
 
+    @property
+    def no_events(self):
+        return self.parent.no_events
+
+    @property
+    def current_event_fiducials(self):
+        slice_start = self.current_event * NO_FIDUCIALS_PER_EVENT
+        slice_end = slice_start + NO_FIDUCIALS_PER_EVENT
+        return self.layer_fiducials.data[slice_start:slice_end]
+
+    @property
+    def current_event_points(self):
+        slice_start = self.current_event * NO_POINTS_PER_EVENT
+        slice_end = slice_start + NO_POINTS_PER_EVENT
+        return self.layer_points.data[slice_start:slice_end]
+
     def __init__(self, parent: "ParticleTracksWidget"):
         super().__init__(parent)
         self.shift_fiducial: float = 0.0
@@ -59,14 +77,12 @@ class StereoshiftDialog(QDialog):
             self.camera_center[0],
             self.camera_center[1],
             self.zoom_level,
-            self.current_event,
         )
         self.layer_points: Points = self._create_retrieve_layer(
             "Stereo_Points",
             self.camera_center[0],
             self.camera_center[1],
             self.zoom_level,
-            self.current_event,
         )
 
         # Setup the window UI
@@ -76,22 +92,33 @@ class StereoshiftDialog(QDialog):
         self.parent.viewer.layers.selection.active = self.layer_fiducials
         self.layer_fiducials.mode = "select"
         self.layer_points.mode = "select"
-        # self.parent.viewer.dims.events.connect(self._on_event_changed)
+        self.parent.viewer.dims.events.connect(self._move_points_new_event)
 
-    def _setup_fiducial_layer(
-        self, origin_x, origin_y, zoom_level, current_event
-    ) -> Points:
-        # fmt:off
-        points = [      # View 1                                                # View 2
-            [origin_x, origin_y, current_event],                [origin_x + 100/zoom_level, origin_y, current_event],                # Front
-            [origin_x, origin_y-100/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-100/zoom_level, current_event],  # Rear
-        ]
-        fiducial_labels = ["Front View 1",  "Front View 2",
-                           "Rear View 2",   "Rear View 2"]
-        colors = ["green", "red",
-                  "green", "red",]
-        symbols = ["x", "x",
-                   "cross", "cross"]
+        self.event_viewed = [False] * self.no_events
+        self.event_viewed[self.current_event] = True
+
+    def _setup_fiducial_layer(self, origin_x, origin_y, zoom_level) -> Points:
+        points = []
+        fiducial_labels = []
+        colors = []
+        symbols = []
+
+        for event in range(self.no_events):
+            # fmt:off
+            points.append(
+                        # View 1                                                # View 2
+                [origin_x, origin_y, event],                    [origin_x + 100 / zoom_level,origin_y, event,],  # Front
+                [origin_x, origin_y - 100 / zoom_level, event], [origin_x + 100 / zoom_level, origin_y - 100 / zoom_level, event,],  # Rear
+            )
+            fiducial_labels.append(
+                "Front View 1", "Front View 2", 
+                "Rear View 2", "Rear View 2"
+            )
+            colors.append = [
+                "green","red",
+                "green","red",
+            ]
+            symbols.append = ["x", "x", "cross", "cross"]
         # fmt:on
         text = {
             "string": fiducial_labels,
@@ -112,23 +139,23 @@ class StereoshiftDialog(QDialog):
         )
         return layer_fiducials
 
-    def _setup_points_layer(
-        self, origin_x, origin_y, zoom_level, current_event
-    ) -> Points:
+    def _setup_points_layer(self, origin_x, origin_y, zoom_level) -> Points:
         # TODO since this is mostly the same as setup fiducial layer, this code can be cleaned up as a parent and two child methods
         # TODO implment the layer attributes stuff see if i can integrate it with the existing napari stuff
-        points = [
-            [origin_x, origin_y - 100 / zoom_level, current_event],
-            [
-                origin_x - 100 / zoom_level,
-                origin_y + 100 / zoom_level,
-                current_event,
-            ],  # Rear Fiducial
-        ]
-        point_labels = ["Point View 1", "Point View 2"]
-        # fmt:on
-        colors = ["green", "red"]
-        symbols = ["diamond", "diamond"]
+        points = []
+        point_labels = []
+        colors = []
+        symbols = []
+        for event in range(self.no_events):
+            points.append(
+                # fmt:off
+                [origin_x, origin_y - 100 / zoom_level, event], # view 1
+                [origin_x - 100 / zoom_level, origin_y + 100 / zoom_level, event],  # view 2
+            )
+            point_labels = ["Point View 1", "Point View 2"]
+            # fmt:on
+            colors = ["green", "red"]
+            symbols = ["diamond", "diamond"]
         text = {
             "string": point_labels,
             "size": 20,
@@ -287,18 +314,14 @@ class StereoshiftDialog(QDialog):
         layout_outer.addLayout(layout_fiducials)
 
     def _create_retrieve_layer(
-        self, layer_name: str, origin_x, origin_y, zoom_level, current_event
+        self, layer_name: str, origin_x, origin_y, zoom_level
     ) -> Layer:
         if layer_name in self.parent.viewer.layers:
             return self.parent.viewer.layers[layer_name]
         if layer_name == "Stereo_Fiducials":
-            return self._setup_fiducial_layer(
-                origin_x, origin_y, zoom_level, current_event
-            )
+            return self._setup_fiducial_layer(origin_x, origin_y, zoom_level)
         elif layer_name == "Stereo_Points":
-            return self._setup_points_layer(
-                origin_x, origin_y, zoom_level, current_event
-            )
+            return self._setup_points_layer(origin_x, origin_y, zoom_level)
         # elif layer_name == "Stereo_shift_lines":
         #    return self._setup_shapes_layer()
         else:
@@ -313,14 +336,17 @@ class StereoshiftDialog(QDialog):
         # The way I've laid this out, there are cleverer ways to do this.
         # But after trying a load of different ways, this is the most readable and maintainable.
         front_fiducials = [
-            self._retrieve_fiducial(0, FRONT, 1),
-            self._retrieve_fiducial(0, FRONT, 2),
+            self._retrieve_fiducial(self.current_event, FRONT, view=1),
+            self._retrieve_fiducial(self.current_event, FRONT, view=2),
         ]
         rear_fiducials = [
-            self._retrieve_fiducial(0, BACK, 1),
-            self._retrieve_fiducial(0, BACK, 2),
+            self._retrieve_fiducial(self.current_event, BACK, view=1),
+            self._retrieve_fiducial(self.current_event, BACK, view=2),
         ]
-        points = [self._retrieve_points(0, 1), self._retrieve_points(0, 2)]
+        points = [
+            self._retrieve_points(self.current_event, view=1),
+            self._retrieve_points(self.current_event, view=2),
+        ]
 
         # We wish to swap whether the front or back points are used for the calculation
         # depending on the user's choice.
@@ -364,21 +390,28 @@ class StereoshiftDialog(QDialog):
     def _retrieve_fiducial(self, event, depth_index, view) -> Fiducial:
         """Access a fiducial by:
         [ (event=),  (front=0,back=1), (view=1,2)]"""
-        # this is written on the assumption the layers are deleted after every use.
-        # this will be updated to work for many layers in the next PR
-        # filter down a subset of the points using the above criteria.
-        # in this temp mode, we already know the order of the data in the layer so can access directly
-        # will need to filter view by the text, as viewpoints persist across multiple view layers.
         # remember that the layer is set up such that:
         #            points = [      # View 1                                                # View 2
         #      0  [origin_x, origin_y, current_event],                 1  [origin_x + 100/zoom_level, origin_y, current_event],                # Front
         #      2  [origin_x, origin_y-200/zoom_level, current_event],  3  [origin_x + 100/zoom_level, origin_y-200/zoom_level, current_event],  # Rear
-        data = self.layer_fiducials.data[depth_index * 2 + (view - 1)]
+        # and that this is a list is repeated, indexable by event number.
+        name = []
+        if depth_index == 0:
+            name = f"Front View {view}"
+        else:
+            name = f"Rear View {view}"
+
+        index_start_of_event_fiducials = event * NO_FIDUCIALS_PER_EVENT
+        # account for depth
+        index_within_event = depth_index * 2 + (view - 1)
+        data = self.layer_fiducials.data[
+            index_start_of_event_fiducials + index_within_event
+        ]
         # Layer data has a different coordinate order than world data.
         # so even though the axis_labels are event, view, y, x
         # these remain as they were intialised.
         # so [x,y,event] is the correct order, as above.
-        return Fiducial("", data[0], data[1])
+        return Fiducial(name, data[0], data[1])
         # depth,view
         # case (0,1) -> front, view 1 -> 0
         # case (0,2) -> front, view 2 -> 1
@@ -387,11 +420,15 @@ class StereoshiftDialog(QDialog):
 
     def _retrieve_points(self, event, view) -> Fiducial:
         """Access a point by: [ (event=), (view=1,2)]"""
+        # see comments under _retrieve_fiducials to see how this works.
         name = f"Point View {view}"
+        index_start_of_event_points = event * NO_POINTS_PER_EVENT
+        # view = 1 or 2, but indexes start at 0
+        data = self.layer_points.data[index_start_of_event_points + (view - 1)]
         return Fiducial(
             name,
-            self.layer_points.data[view][0],
-            self.layer_points.data[view][1],
+            data[0],
+            data[1],
         )
 
     def _activate_stereoshift_layers(self):
@@ -408,6 +445,7 @@ class StereoshiftDialog(QDialog):
             len(self.parent.viewer.layers),
         )
         self.parent.viewer.layers.selection.active = self.layer_fiducials
+        self._move_points_new_event()
 
     def _deactivate_stereoshift_layers(self):
         """Hide the stereoshift layers and move it to the bottom"""
@@ -422,6 +460,40 @@ class StereoshiftDialog(QDialog):
         # self.parent.viewer.layers.move(
         #    self.parent.viewer.layers.index(self.layer_fiducials), 0
         # )
+
+    def _move_points_new_event(self):
+        """Create new points for the next event at the viewpoint centre."""
+        if self.event_viewed[self.current_event]:
+            return
+        event_fiducials = self.current_event_fiducials
+        event_points = self.current_event_points
+        origin_x = self.camera_center[0]
+        origin_y = self.camera_center[1]
+        current_event = self.current_event
+        zoom_level = self.zoom_level
+        # fmt:off
+        event_fiducials = [                     # View 1                                                # View 2
+            [origin_x, origin_y, current_event],                [origin_x + 100/zoom_level, origin_y, current_event],                # Front
+            [origin_x, origin_y-100/zoom_level, current_event], [origin_x + 100/zoom_level, origin_y-100/zoom_level, current_event],  # Rear
+        ]
+        event_points = [                     # View 1                                                # View 2
+                            [origin_x-100/zoom_level, origin_y, current_event],   [origin_x - 100/zoom_level, origin_y+100/zoom_level, current_event]
+        ]
+        # fmt:on
+        # trickery to get napari to recognise that the fiducials have updated.
+        # you have to reset the entire dataset.
+        # napari devs may fix this in the future, but not anytime soon.
+        fiducial_data = self.layer_fiducials.data
+        slice_start = self.current_event * NO_FIDUCIALS_PER_EVENT
+        slice_end = slice_start + NO_FIDUCIALS_PER_EVENT
+        fiducial_data[slice_start:slice_end] = event_fiducials
+        self.layer_fiducials.data = fiducial_data
+
+        point_data = self.layer_points.data
+        slice_start = self.current_event * NO_POINTS_PER_EVENT
+        slice_end = slice_start + NO_POINTS_PER_EVENT
+        point_data[slice_start:slice_end] = event_points
+        self.layer_points.data = point_data
 
     def accept(self) -> None:
         """When 'Save to table' button is clicked, save the data and close the stereoshift widget."""
