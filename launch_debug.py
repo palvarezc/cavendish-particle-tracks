@@ -2,11 +2,19 @@
 # launch_napari.py
 from napari import Viewer, run
 
+from cavendish_particle_tracks import ParticleTracksWidget
+
 viewer = Viewer()
-dock_widget, plugin_widget = viewer.window.add_plugin_dock_widget(
-    "cavendish-particle-tracks", "Cavendish Particle Tracks Analysis"
+plugin_docking_area = "bottom"
+
+# Create the plugin
+plugin_widget = ParticleTracksWidget(
+    viewer, bypass_load_screen=False, docking_area=plugin_docking_area
 )
-# Optional steps to setup your plugin to a state of failure
-# E.g. plugin_widget.parameter_name.value = "some value"
-# E.g. plugin_widget.button.click()
+
+# Add plugin to the viewer
+dock_widget = viewer.window.add_dock_widget(
+    plugin_widget, name="cavendish-particle-tracks", area=plugin_docking_area
+)
+
 run()

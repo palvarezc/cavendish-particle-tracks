@@ -11,7 +11,7 @@ Presumably also with the testing dependencies:
     python -m pip install -e ".[testing]"
 
 
-Tests are run with [tox] across python 3.9, 3.10 and 3.11.
+Tests are run with [tox] across python 3.9, 3.10, 3.11 and 3.12.
 You can also check quickly with `pytest` if you installed the `testing` extras.
 Please ensure the coverage at least stays the same before you submit a pull request.
 
@@ -20,8 +20,20 @@ We also use `pre-commit` to ensure uniform code style.
     python -m pip install pre-commit
     pre-commit run # before committing
 
-Open PRs without a reviewer can be treated as a draft. When a reviewer is added this counts as ready for review.
-(When open source we'll use proper drafts.)
-
-
 [tox]: https://tox.readthedocs.io/en/latest/
+
+## Contributing documentation
+We are using the [myst](https://myst-parser.readthedocs.io/en/latest/index.html) markdown parser.
+
+To test contributions to the documentation, this can be built locally following:
+
+    python -m pip install ".[docs]"
+    sphinx-build -W -b html docs docs/_build/html
+
+Python's built in http server can be then used to serve the page:
+
+    cd docs/_build/html
+    python -m http.server
+
+> [!NOTE]
+> On macOS you can directly do `open _build/html/index.html` to open the documentation in your browser.
