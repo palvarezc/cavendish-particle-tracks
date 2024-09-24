@@ -15,7 +15,7 @@ def test_save_single_particle(cpt_widget, tmp_path):
     chdir(tmp_path)  # change to the tmp_path
 
     # start napari and the particle widget, add a single particle
-    cpt_widget.cmb_add_particle.setCurrentIndex(1)  # select the Σ
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)  # select the Σ
     assert len(cpt_widget.data) == 1, "Expecting one particle in the table"
 
     # click the save button

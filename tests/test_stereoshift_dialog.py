@@ -5,13 +5,9 @@ import pytest
 
 from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
 
-# from cavendish_particle_tracks._stereoshift_dialog import StereoshiftDialog
-
-# from cavendish_particle_tracks._widget import ParticleTracksWidget
-
 
 @pytest.mark.parametrize(
-    "test_points, expected_fiducial_shift, expected_point_shift, expected_stereoshift, expected_depth",
+    "test_points, expected_fiducial_shift, expected_point_shift, expected_stereoshift, expected_depth, double_click",
     [
         (
             [
@@ -26,6 +22,7 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
             sqrt(2),
             0.5,
             0.5 * CHAMBER_DEPTH,
+            True,
         ),
         (
             [
@@ -40,6 +37,7 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
             1.0,
             1 / sqrt(8),
             1 / sqrt(8) * CHAMBER_DEPTH,
+            False,
         ),
         (
             [
@@ -54,6 +52,7 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
             sqrt(0),
             0.0,
             0.0 * CHAMBER_DEPTH,
+            False,
         ),
     ],
 )
@@ -64,6 +63,7 @@ def test_calculate_stereoshift_ui(
     expected_point_shift,
     expected_stereoshift,
     expected_depth,
+    double_click,
 ):
     """Test the expected behavior from the expected workflow:
 
@@ -73,9 +73,11 @@ def test_calculate_stereoshift_ui(
     - The textboxes should be updated.
     """
     # need to click "new particle" to add a row to the table
-    cpt_widget.cmb_add_particle.setCurrentIndex(1)
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
     dlg = cpt_widget._on_click_stereoshift()
+    if double_click:
+        dlg = cpt_widget._on_click_stereoshift()
 
     # move points to parameterised positions
     for i in range(len(test_points)):
