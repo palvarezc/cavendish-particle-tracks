@@ -580,6 +580,7 @@ class ParticleTracksWidget(QWidget):
         if not measurement_layer_present:
             self.layer_measurements = self.viewer.add_points(
                 name="Radii and Lengths",
+                ndim=4,
                 size=20,
                 border_width=7,
                 border_width_is_relative=False,
