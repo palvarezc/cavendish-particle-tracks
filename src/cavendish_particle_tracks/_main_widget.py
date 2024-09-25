@@ -47,6 +47,7 @@ class ParticleTracksWidget(QWidget):
         napari_viewer: napari.Viewer,
         bypass_load_screen: bool = False,
         docking_area: str = "right",
+        shuffling_seed: int = 1,
     ):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
@@ -54,6 +55,7 @@ class ParticleTracksWidget(QWidget):
         self.docking_area = docking_area
         if self.docking_area != "bottom":
             self.bypass_load_screen = True
+        self.shuffling_seed = shuffling_seed
 
         # define QtWidgets
         self.load_button = QPushButton("Load data")
@@ -535,9 +537,9 @@ class ParticleTracksWidget(QWidget):
             for view in VIEW_NAMES
         )
         # Checks that each subdirectory contains the same number of images.
+        image_count_first = len(glob.glob(folder_subdirs[0] + "/*"))
         same_image_count = all(
-            len(glob.glob(subdir + "/*"))
-            == len(glob.glob(folder_subdirs[0] + "/*"))
+            len(glob.glob(subdir + "/*")) == image_count_first
             for subdir in folder_subdirs
         )
         # If all checks are passed, load the images where the event number is a
@@ -564,16 +566,26 @@ class ParticleTracksWidget(QWidget):
             magic_number_smallest_view_pixels = -8377
             return array[:, :, magic_number_smallest_view_pixels:, :]
 
+        # Shuffle the images to avoid bias in the order of the events
+        shuffling_indices = np.random.RandomState(
+            self.shuffling_seed
+        ).permutation(image_count_first)
+
         stacks = []
         for subdir in folder_subdirs:
             stack: dask.array.Array = imread(subdir + "/*")
             stack = crop(stack)
+            # Shuffle each view stack in the same way
+            stack = stack[shuffling_indices]
             stacks.append(stack)
 
         # Concatenate stacks along new spatial dimension such that we have a view, and event slider
         concatenated_stack = dask.array.stack(stacks, axis=0)
         self.viewer.add_image(concatenated_stack, name="Particle Tracks")
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
+
+        # Move to the first event in the series
+        self.viewer.dims.set_current_step(1, 0)
 
         measurement_layer_present = "Radii and Lengths" in self.viewer.layers
 
@@ -601,6 +613,14 @@ class ParticleTracksWidget(QWidget):
         new_particle.index = self.particle_decays_menu.currentIndex()
         new_particle.magnification_a = self.mag_a
         new_particle.magnification_b = self.mag_b
+
+        # Record the event and view number if the data has been loaded
+        # Potentially this could be used to check the measurements are done in the right event
+        data_has_been_loaded = "Particle Tracks" in self.viewer.layers
+        if data_has_been_loaded:
+            new_particle.event_number = self.viewer.dims.current_step[1]
+            new_particle.view_number = self.viewer.dims.current_step[0]
+
         self.data += [new_particle]
 
         # add particle (== new row) to the table and select it
