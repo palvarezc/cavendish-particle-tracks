@@ -5,11 +5,11 @@ from napari import Viewer, run
 from cavendish_particle_tracks import ParticleTracksWidget
 
 viewer = Viewer()
-plugin_docking_area = "bottom"
+plugin_docking_area = "right"
 
 # Create the plugin
 plugin_widget = ParticleTracksWidget(
-    viewer, bypass_load_screen=False, docking_area=plugin_docking_area
+    viewer, bypass_load_screen=True, docking_area=plugin_docking_area
 )
 
 # Add plugin to the viewer

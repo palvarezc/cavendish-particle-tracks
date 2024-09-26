@@ -231,10 +231,10 @@ class ParticleTracksWidget(QWidget):
         point and the calculated radius.
         """
         np = ParticleDecay()
-        self.columns = list(np.__dict__.keys())
+        self.columns = list(np.vars_to_save())
         self.columns += ["magnification"]
-        self.columns_show_calibrated = np._vars_to_show(True)
-        self.columns_show_uncalibrated = np._vars_to_show(False)
+        self.columns_show_calibrated = np.vars_to_show(True)
+        self.columns_show_uncalibrated = np.vars_to_show(False)
         out = QTableWidget(0, len(self.columns))
         out.setHorizontalHeaderLabels(self.columns)
         out.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -741,7 +741,7 @@ class ParticleTracksWidget(QWidget):
 
         with open(file_name, "w", encoding="UTF8", newline="") as f:
             # write the header
-            f.write(",".join(self.data[0]._vars_to_save()) + "\n")
+            f.write(",".join(self.data[0].vars_to_save()) + "\n")
 
             # write the data
             f.writelines([particle.to_csv() for particle in self.data])
