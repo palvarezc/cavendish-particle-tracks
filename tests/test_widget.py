@@ -269,7 +269,7 @@ def test_load_data(
         assert isinstance(msgbox, QMessageBox)
         assert msgbox.icon() == QMessageBox.Warning
         assert msgbox.text() == (
-            "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
+            "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number (>1) of images."
         )
 
 

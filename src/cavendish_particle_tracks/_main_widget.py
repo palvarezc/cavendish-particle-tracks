@@ -538,6 +538,7 @@ class ParticleTracksWidget(QWidget):
         )
         # Checks that each subdirectory contains the same number of images.
         image_count_first = len(glob.glob(folder_subdirs[0] + "/*"))
+        more_than_one_image = image_count_first > 1
         same_image_count = all(
             len(glob.glob(subdir + "/*")) == image_count_first
             for subdir in folder_subdirs
@@ -548,13 +549,14 @@ class ParticleTracksWidget(QWidget):
             three_subdirectories
             and subdir_names_contain_views
             and same_image_count
+            and more_than_one_image
         ):
             self.msg = QMessageBox()
             self.msg.setIcon(QMessageBox.Warning)
             self.msg.setWindowTitle("Data folder structure error")
             self.msg.setStandardButtons(QMessageBox.Ok)
             self.msg.setText(
-                "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number of images."
+                "The data folder must contain three subfolders, one for each view, and each subfolder must contain the same number (>1) of images."
             )
             self.msg.show()
             return
