@@ -6,6 +6,7 @@ import pytest
 from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
 
 
+@pytest.mark.parametrize("vertex", ["origin", "decay"])
 @pytest.mark.parametrize(
     "test_points, expected_fiducial_shift, expected_point_shift, expected_stereoshift, expected_depth, double_click",
     [
@@ -58,6 +59,7 @@ from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
 )
 def test_calculate_stereoshift_ui(
     cpt_widget,
+    vertex,
     test_points,
     expected_fiducial_shift,
     expected_point_shift,
@@ -78,6 +80,11 @@ def test_calculate_stereoshift_ui(
     dlg = cpt_widget._on_click_stereoshift()
     if double_click:
         dlg = cpt_widget._on_click_stereoshift()
+
+    if vertex == "origin":
+        dlg.vertex_combobox.setCurrentIndex(0)
+    else:
+        dlg.vertex_combobox.setCurrentIndex(1)
 
     # move points to parameterised positions
     for i in range(len(test_points)):
@@ -100,12 +107,19 @@ def test_calculate_stereoshift_ui(
 
     # check save to table
     dlg._on_click_save_to_table()
-    assert cpt_widget.data[0].spoints.all() == dlg.spoints.all()
-    assert cpt_widget.data[0].shift_fiducial == dlg.shift_fiducial
-    assert cpt_widget.data[0].shift_point == dlg.shift_point
-    assert cpt_widget.data[0].stereoshift == dlg.point_stereoshift
+
+    # select the right vertex
+    if vertex == "origin":
+        data = cpt_widget.data[0].origin_vertex_stereoshift_info
+    else:
+        data = cpt_widget.data[0].decay_vertex_stereoshift_info
+
+    assert (data.spoints == dlg.stereoshift_info.spoints).all()
+    assert data.shift_fiducial == dlg.stereoshift_info.shift_fiducial
+    assert data.shift_point == dlg.stereoshift_info.shift_point
+    assert data.stereoshift == dlg.stereoshift_info.stereoshift
     # these names should be more consistent between different parts of the program
-    assert cpt_widget.data[0].depth_cm == dlg.point_depth
+    assert data.depth_cm == dlg.stereoshift_info.depth_cm
 
 
 def test_stereoshift_save_to_table_fails_with_empty_table(cpt_widget, capsys):
