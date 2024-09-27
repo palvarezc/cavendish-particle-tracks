@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from random import random
 
 import numpy as np
 import pytest
@@ -38,8 +37,19 @@ def test_open_widget(make_napari_viewer, bypass_load_screen, docking_area):
         assert widget.intro_text.isVisible() is False
 
 
+@pytest.mark.parametrize(
+    "three_points, rad",
+    [
+        ([[0, 1], [1, 0], [0, -1]], 1),
+        ([[-6, 3], [-3, 2], [0, 3]], 5),
+        ([[1, 1], [2, 2], [3, 4]], 5.7),
+    ],
+)
 def test_calculate_radius_ui(
-    cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
+    cpt_widget: ParticleTracksWidget,
+    capsys: pytest.CaptureFixture[str],
+    three_points,
+    rad,
 ):
     """Test the expected behavior from the expected workflow:
 
@@ -53,8 +63,8 @@ def test_calculate_radius_ui(
 
     layer_measurements = cpt_widget._setup_measurement_layer()
 
-    # add three points to the points layer and select them
-    layer_measurements.add([(0, 0, 0, 1), (0, 0, 1, 0), (0, 0, 0, -1)])
+    # add three points (view, event, y, x) to the points layer and select them
+    layer_measurements.add([[0, 0] + point for point in three_points])
     layer_measurements.selected_data = {0, 1, 2}
 
     # click the calculate radius button
@@ -66,12 +76,12 @@ def test_calculate_radius_ui(
     for expected in expected_lines:
         assert expected in captured.out
 
-    assert cpt_widget.table.item(0, 1)
     assert cpt_widget.table.item(0, 2)
     assert cpt_widget.table.item(0, 3)
     assert cpt_widget.table.item(0, 4)
+    assert cpt_widget.table.item(0, 5)
 
-    assert cpt_widget.data[0].radius_px == 1.0
+    assert cpt_widget.data[0].radius_px == pytest.approx(rad, rel=1e-3)
 
 
 @pytest.mark.parametrize("npoints", [1, 2, 4, 5])
@@ -85,14 +95,12 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
     # need to click "new particle" to add a row to the table
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
-    # add six random points to the points layer
-    points = [(random(), random()) for _ in range(6)]
-    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        points, name="Radii and Lengths"
-    )
+    layer_measurements = cpt_widget._setup_measurement_layer()
 
-    # select the wrong number of points
-    cpt_widget.layer_measurements.selected_data = set(range(npoints))
+    # add wrong number of points (view, event, y, x) to the points layer and select them
+    points = np.random.random((npoints, 2))
+    layer_measurements.add([np.append([0, 0], point) for point in points])
+    layer_measurements.selected_data = set(range(npoints))
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
@@ -139,17 +147,16 @@ def test_delete_particle_ui(cpt_widget: ParticleTracksWidget):
 def test_calculate_length_ui(
     cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
 ):
-    # add a random image to the napari viewer
-    cpt_widget.viewer.add_image(np.random.random((100, 100)))
 
     # need to click "new particle" to add a row to the table
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
-    # add three points to the points layer and select them
-    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        [(0, 1), (0, 0)], name="Radii and Lengths"
-    )
-    cpt_widget.layer_measurements.selected_data = {0, 1}
+    # create measurements layer
+    layer_measurements = cpt_widget._setup_measurement_layer()
+
+    # add two points (view, event, y, x) to the points layer and select them
+    layer_measurements.add([(0, 0, 0, 1), (0, 0, 0, 0)])
+    layer_measurements.selected_data = {0, 1}
 
     # click the calculate decay length button
     cpt_widget._on_click_length()
@@ -173,17 +180,14 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 ):
     """Test the obvious failure modes: if I don't select 2 points, I can't
     calculate a length so better send a nice message."""
-    # need to click "new particle" to add a row to the table
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
-    # add six random points to the points layer
-    points = [(random(), random()) for _ in range(6)]
-    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        points, name="Radii and Lengths"
-    )
+    layer_measurements = cpt_widget._setup_measurement_layer()
 
-    # select the wrong number of points
-    cpt_widget.layer_measurements.selected_data = set(range(npoints))
+    # add wrong number of points (view, event, y, x) to the points layer and select them
+    points = np.random.random((npoints, 2))
+    layer_measurements.add([np.append([0, 0], point) for point in points])
+    layer_measurements.selected_data = set(range(npoints))
 
     # click the calculate decay length button
     cpt_widget._on_click_length()

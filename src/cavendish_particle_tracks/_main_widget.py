@@ -361,9 +361,8 @@ class ParticleTracksWidget(QWidget):
             )
             return
         else:
-            napari.utils.notifications.show_info(
-                f"Adding points to the table: {selected_points}"
-            )
+            selected_points_xy = [point[2:] for point in selected_points]
+
         try:
             selected_row = self._get_selected_row()
         except IndexError:
@@ -371,19 +370,22 @@ class ParticleTracksWidget(QWidget):
                 "There are no particles in the table."
             )
         else:
+            napari.utils.notifications.show_info(
+                f"Adding points to the table: {selected_points_xy}"
+            )
             # Assigns the points and radius to the selected row
             for i in range(3):
-                point = selected_points[i]
+                point = selected_points_xy[i]
                 self.table.setItem(
                     selected_row,
                     self._get_table_column_index("r" + str(i + 1)),
                     QTableWidgetItem(str(point)),
                 )
 
-            self.data[selected_row].rpoints = selected_points
+            self.data[selected_row].rpoints = selected_points_xy
 
             print("calculating radius!")
-            rad = radius(*selected_points)
+            rad = radius(*selected_points_xy)
 
             self.table.setItem(
                 selected_row,
@@ -426,9 +428,7 @@ class ParticleTracksWidget(QWidget):
             )
             return
         else:
-            napari.utils.notifications.show_info(
-                f"Adding points to the table: {selected_points}"
-            )
+            selected_points_xy = [point[2:] for point in selected_points]
 
         # Forcing only 2 points
         if len(selected_points) != 2:
@@ -443,17 +443,20 @@ class ParticleTracksWidget(QWidget):
                 "There are no particles in the table."
             )
         else:
+            napari.utils.notifications.show_info(
+                f"Adding points to the table: {selected_points_xy}"
+            )
             for i in range(2):
-                point = selected_points[i]
+                point = selected_points_xy[i]
                 self.table.setItem(
                     selected_row,
                     self._get_table_column_index("d" + str(i + 1)),
                     QTableWidgetItem(str(point)),
                 )
-            self.data[selected_row].dpoints = selected_points
+            self.data[selected_row].dpoints = selected_points_xy
 
             print("calculating decay length!")
-            declen = length(*selected_points)
+            declen = length(*selected_points_xy)
             self.table.setItem(
                 selected_row,
                 self._get_table_column_index("decay_length_px"),
