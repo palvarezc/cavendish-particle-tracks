@@ -69,30 +69,47 @@ class DecayAnglesDialog(QDialog):
         # Setup shapes layer
         self.join_coordinates = [200, 300]
         self.cal_layer: Shapes = self._setup_decayangles_layer()
+        self.cal_layer.events.data.connect(self._enforce_points_coincident)
 
         # Decay Angles related parameters
         self.phi_proton = 0.0
         self.phi_pion = 0.0
         self.alines = []
 
-        @self.cal_layer.mouse_drag_callbacks.append
-        def enforce_points_coincident(object, event: Event) -> None:
-            # event.dataindicies says what shape was changed
-            # action says what was done to the shape
-            # data doesn't get set till user lets go, mouse drag might be better
+    def _enforce_points_coincident(self, event: Event) -> None:
+        # event.data_indices says what shape was changed
+        # action says what was done to the shape
+        # data doesn't get set till user lets go, mouse drag might be better, but not sure how to implement it
+        # Maybe the long term solution is to have a custom shape?
+        if event.action == "changed":
+            shapes_modified = event.data_indices
             data = self.cal_layer.data
-            # match event.index:
-            #    case 0:
-            #        data[1][0] = self.cal_layer.data[0][1]
-            #        data[2][0] = self.cal_layer.data[0][1]
-            #    case 1:
-            #        data[0][1] = self.cal_layer.data[1][0]
-            #        data[2][0] = self.cal_layer.data[1][0]
-            #    case 2:
-            #        data[0][1] = self.cal_layer.data[2][0]
-            #        data[1][0] = self.cal_layer.data[2][0]
-            self.cal_layer.data = data
-            # self.cal_layer.refresh() for some reason calling layer refresh actually stops it refreshing
+            if len(shapes_modified) == 3:
+                # if all shapes were modified, this must be a translation of the three shapes
+                # do nothing.
+                return
+            elif len(shapes_modified) == 2:
+                # if two of them have been moved, move the third one (if it has not been moved already)
+                for i in range(3):
+                    if (i not in shapes_modified) and (
+                        self.cal_layer.data[i][0]
+                        != self.cal_layer.data[shapes_modified[0]][0]
+                    ).any():
+                        data[i][0] = self.cal_layer.data[shapes_modified[0]][0]
+                        self.cal_layer.data = data
+            elif len(shapes_modified) == 1:
+                # if only one has been moved, move the other two (if they have not been moved already)
+                for i in range(3):
+                    if (i not in shapes_modified) and (
+                        self.cal_layer.data[i][0]
+                        != self.cal_layer.data[shapes_modified[0]][0]
+                    ).any():
+                        data[i][0] = self.cal_layer.data[shapes_modified[0]][0]
+                        self.cal_layer.data = data
+            else:
+                # nothing moved, or more shapes have been added
+                # do nothing
+                return
 
     def _setup_decayangles_layer(self):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
@@ -109,8 +126,8 @@ class DecayAnglesDialog(QDialog):
         # Scale offsets by the inverse of the zoom factor
         lambda_line = np.array(
             [
-                [origin_x + -100 / zoom_factor, origin_y + -100 / zoom_factor],
                 [origin_x + 100 / zoom_factor, origin_y + 200 / zoom_factor],
+                [origin_x + -100 / zoom_factor, origin_y + -100 / zoom_factor],
             ]
         )
         proton_line = np.array(
