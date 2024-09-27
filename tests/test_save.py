@@ -58,5 +58,5 @@ def test_save_single_particle(
         assert isinstance(msgbox, QMessageBox)
         assert msgbox.icon() == QMessageBox.Warning
         assert msgbox.text() == (
-            "The file must be a CSV file. Please try again."
+            "The file must be a CSV (*.csv) or Pickle (*pkl) file. Please try again."
         )
