@@ -575,19 +575,25 @@ class ParticleTracksWidget(QWidget):
         self.viewer.add_image(concatenated_stack, name="Particle Tracks")
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
 
-        measurement_layer_present = "Radii and Lengths" in self.viewer.layers
+        # Create measurements layer if not already there
+        self.layer_measurements = self._setup_measurement_layer()
 
-        if not measurement_layer_present:
-            self.layer_measurements = self.viewer.add_points(
+        # Disable the load button after loading the data (interim solution until we can move to bottom-docked UI)
+        self.load_button.setEnabled(False)
+
+    def _setup_measurement_layer(self):
+        """Create a Points layer for the measurement of the radii and lengths."""
+
+        if "Radii and Lengths" in self.viewer.layers:
+            return self.viewer.layers["Radii and Lengths"]
+        else:
+            return self.viewer.add_points(
                 name="Radii and Lengths",
                 ndim=4,
                 size=20,
                 border_width=7,
                 border_width_is_relative=False,
             )
-
-        # Disable the load button after loading the data (interim solution until we can move to bottom-docked UI)
-        self.load_button.setEnabled(False)
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to

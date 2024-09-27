@@ -51,11 +51,11 @@ def test_calculate_radius_ui(
     # need to click "new particle" to add a row to the table
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
 
+    layer_measurements = cpt_widget._setup_measurement_layer()
+
     # add three points to the points layer and select them
-    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        [(0, 1), (1, 0), (0, -1)], name="Radii and Lengths"
-    )
-    cpt_widget.layer_measurements.selected_data = {0, 1, 2}
+    layer_measurements.add([(0, 0, 0, 1), (0, 0, 1, 0), (0, 0, 0, -1)])
+    layer_measurements.selected_data = {0, 1, 2}
 
     # click the calculate radius button
     cpt_widget._on_click_radius()
