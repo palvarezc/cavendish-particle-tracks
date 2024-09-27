@@ -191,9 +191,5 @@ class DecayAnglesDialog(QDialog):
 
     def reject(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
-
-        # TODO: this is a problem, the layer still exists... not sure how to remove it
-        self.parent.viewer.layers.select_previous()
-        self.parent.viewer.layers.remove(self.cal_layer)
-        self.parent.decay_angles_isopen = False
+        self.parent._deactivate_calibration_layer(self.cal_layer)
         return super().reject()
