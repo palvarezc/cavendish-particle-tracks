@@ -96,9 +96,10 @@ class ParticleDecay:
     decay_vertex_stereoshift_info: StereoshiftInfo = field(
         default_factory=StereoshiftInfo
     )
-    event_number: int = -1
     phi_proton: float = -100
     phi_pion: float = -100
+    event_number: int = -1
+    view_number: int = -1
 
     def vars_to_show(self, calibrated=False):
         if calibrated:
