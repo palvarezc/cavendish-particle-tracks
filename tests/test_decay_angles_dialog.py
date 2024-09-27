@@ -33,9 +33,8 @@ def test_decay_vertex_update(cpt_widget):
     cpt_widget.particle_decays_menu.setCurrentIndex(4)
     dialog = cpt_widget._on_click_decay_angles()
 
+    # Move the decay vertex of the Lambda
     data = dialog.cal_layer.data
-
-    # Move the decay vertex
     old_value = data[0][0][0]
     data[0][0][0] = old_value + 50
     dialog.cal_layer.data = (
@@ -48,14 +47,27 @@ def test_decay_vertex_update(cpt_widget):
     assert (dialog.cal_layer.data[1][0] == data[0][0]).all()
     assert (dialog.cal_layer.data[2][0] == data[0][0]).all()
 
+    # Move two tracks simultaneously
+    data = dialog.cal_layer.data
+    old_value = data[0][0][0]
+    data[1][0][0] = old_value + 50
+    data[2][0][0] = old_value + 50
+    dialog.cal_layer.data = (
+        data  # For some reason, this doesn't trigger the change event
+    )
+    dialog.cal_layer.events.data(action="changed", data_indices=(1, 2))
+
+    # Check that the decay vertex has been updated
+    assert dialog.cal_layer.data[0][0][0] == old_value + 50
+
 
 @pytest.mark.parametrize(
     "Lambda_track, p_track, pi_track, phi_proton, phi_pion",
     [
         (
-            [[0, 0], [-1, 1]],
-            [[0, 0], [1, 0]],
-            [[0, 0], [0, -1]],
+            [[0, 0], [-1, 0]],
+            [[0, 0], [1, 1]],
+            [[0, 0], [1, -1]],
             np.pi / 4,
             -1 * np.pi / 4,
         ),
