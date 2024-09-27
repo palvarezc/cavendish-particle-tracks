@@ -198,7 +198,7 @@ def test_calculate_length_fails_with_wrong_number_of_points(
 @pytest.mark.parametrize(
     "data_subdirs, image_count, expect_data_loaded, reload",
     [
-        (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True, False),
+        (["my_view1", "my_view2", "my_view3"], [5, 5, 5], True, False),
         (["my_view1", "my_view2", "my_view3"], [2, 2, 2], True, True),
         (["my_view1", "my_view2"], [2, 2], False, False),
         (["my_view1", "my_view2", "my_view3"], [1, 2, 2], False, False),
@@ -254,6 +254,7 @@ def test_load_data(
             == "Particle Tracks"
         )
         assert cpt_widget.viewer.layers[data_layer_index].ndim == 4
+        assert cpt_widget.viewer.dims.current_step[1] == 0
     else:
         # def capture_msgbox():
         #    for widget in QApplication.topLevelWidgets():
