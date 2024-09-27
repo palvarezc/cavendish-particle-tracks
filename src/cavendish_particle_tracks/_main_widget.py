@@ -7,6 +7,7 @@ for further analysis.
 """
 
 import glob
+import os
 
 import dask.array
 import napari
@@ -47,7 +48,6 @@ class ParticleTracksWidget(QWidget):
         napari_viewer: napari.Viewer,
         bypass_load_screen: bool = False,
         docking_area: str = "right",
-        shuffling_seed: int = 1,
     ):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
@@ -55,7 +55,17 @@ class ParticleTracksWidget(QWidget):
         self.docking_area = docking_area
         if self.docking_area != "bottom":
             self.bypass_load_screen = True
-        self.shuffling_seed = shuffling_seed
+        self.shuffling_seed = 1
+
+        if os.getenv("CPT_SHUFFLING_SEED") is not None:
+            try:
+                seed = int(os.environ["CPT_SHUFFLING_SEED"])
+            except ValueError:
+                print(
+                    "Warning: Invalid value for CPT_SHUFFLING_SEED. Using default seed value of 1."
+                )
+            else:
+                self.shuffling_seed = seed
 
         # define QtWidgets
         self.load_button = QPushButton("Load data")
