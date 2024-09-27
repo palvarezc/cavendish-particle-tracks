@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from pytestqt.qtbot import QtBot
 
@@ -46,3 +47,41 @@ def test_decay_vertex_update(cpt_widget):
     assert dialog.cal_layer.data[0][0][0] == old_value + 50
     assert (dialog.cal_layer.data[1][0] == data[0][0]).all()
     assert (dialog.cal_layer.data[2][0] == data[0][0]).all()
+
+
+@pytest.mark.parametrize(
+    "Lambda_track, p_track, pi_track, phi_proton, phi_pion",
+    [
+        (
+            [[0, 0], [-1, 1]],
+            [[0, 0], [1, 0]],
+            [[0, 0], [0, -1]],
+            np.pi / 4,
+            -1 * np.pi / 4,
+        ),
+    ],
+)
+def test_calculate_decay_angles_ui(
+    cpt_widget, Lambda_track, p_track, pi_track, phi_proton, phi_pion
+):
+    cpt_widget.particle_decays_menu.setCurrentIndex(4)
+    dialog = cpt_widget._on_click_decay_angles()
+
+    dialog.cal_layer.data = np.array([Lambda_track, p_track, pi_track])
+
+    # Calculate the decay angles
+    dialog._on_click_calculate()
+
+    # Check that the decay angles have been calculated
+    assert dialog.phi_proton == pytest.approx(phi_proton, rel=1e-6)
+    assert dialog.phi_pion == pytest.approx(phi_pion, rel=1e-6)
+
+    dialog.show()
+
+    # Check the values are saved correctly
+    dialog._on_click_save_to_table()
+
+    assert cpt_widget.data[-1].phi_proton == pytest.approx(
+        phi_proton, rel=1e-6
+    )
+    assert cpt_widget.data[-1].phi_pion == pytest.approx(phi_pion, rel=1e-6)
