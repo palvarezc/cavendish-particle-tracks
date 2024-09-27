@@ -72,9 +72,10 @@ class ParticleDecay:
     magnification_a: float = -1.0
     magnification_b: float = 0.0
     # magnification: float = -1.0
-    event_number: int = -1
     phi_proton: float = -100
     phi_pion: float = -100
+    event_number: int = -1
+    view_number: int = -1
 
     def _vars_to_show(self, calibrated=False):
         if calibrated:

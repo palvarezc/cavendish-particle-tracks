@@ -7,6 +7,12 @@ from cavendish_particle_tracks._calculate import FIDUCIAL_BACK as FB
 from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
 
 
+def test_show_magnification_dialog(cpt_widget):
+    """Tests the magnification dialog is shown when the button is clicked."""
+    cpt_widget._on_click_magnification()
+    assert cpt_widget.mag_dlg.isVisible()
+
+
 @pytest.mark.parametrize("click_twice", [True, False])
 @pytest.mark.parametrize(
     "front_fiducial1, front_fiducial2, back_fiducial1, back_fiducial2, expected_magnification_params",
