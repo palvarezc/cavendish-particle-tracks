@@ -13,12 +13,12 @@ from qtpy.QtWidgets import (
     QTableWidgetItem,
 )
 
-from ._analysis import (
+from ._calculate import magnification
+from .analysis import (
     FIDUCIAL_BACK,
     FIDUCIAL_FRONT,
     Fiducial,
 )
-from ._calculate import magnification
 
 if TYPE_CHECKING:
     from ._main_widget import ParticleTracksWidget
@@ -203,31 +203,12 @@ class MagnificationDialog(QDialog):
         self.table.setItem(0, 0, QTableWidgetItem(str(self.a)))
         self.table.setItem(0, 1, QTableWidgetItem(str(self.b)))
 
-    def _activate_calibration_layer(self):
-        """Show the calibration layer and move it to the top"""
-        self.magnification_layer.visible = True
-        # Move the calibration layer to the top
-        self.parent.viewer.layers.move(
-            self.parent.viewer.layers.index(self.magnification_layer),
-            len(self.parent.viewer.layers),
-        )
-        self.parent.viewer.layers.selection.active = self.magnification_layer
-
-    def _deactivate_calibration_layer(self):
-        """Hide the calibration layer and move it to the bottom"""
-        self.parent.viewer.layers.select_previous()
-        self.magnification_layer.visible = False
-        # Move the calibration layer to the bottom
-        self.parent.viewer.layers.move(
-            self.parent.viewer.layers.index(self.magnification_layer), 0
-        )
-
     def accept(self) -> None:
         """On accept propagate the calibration information to the main window and remove the Magnification layer"""
 
         print("Propagating magnification to table.")
         self.parent._propagate_magnification(self.a, self.b)
-        self._deactivate_calibration_layer()
+        self.parent._deactivate_calibration_layer(self.magnification_layer)
         self.parent.apply_magnification_button.setEnabled(True)
         # self.parent.mag.setEnabled(False)
         self.parent.magnification_button.setText("Update magnification")
@@ -236,5 +217,5 @@ class MagnificationDialog(QDialog):
     def reject(self) -> None:
         """On reject remove the magnification layer"""
 
-        self._deactivate_calibration_layer()
+        self.parent._deactivate_calibration_layer(self.magnification_layer)
         return super().reject()

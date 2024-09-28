@@ -10,8 +10,10 @@ from pytestqt.qtbot import QtBot
         False,
     ],
 )
-def test_decay_angles_dialog(cpt_widget, qtbot: QtBot, click_twice: bool):
-    """Smoke test for the DecayAnglesDialog."""
+def test_open_and_close_decay_angles_dialog(
+    cpt_widget, qtbot: QtBot, click_twice: bool
+):
+    """Test the expected behavior from the expected workflow:"""
     cpt_widget.particle_decays_menu.setCurrentIndex(4)
 
     # The user clicks the button (also test fringe case that they click the button again).
@@ -26,6 +28,22 @@ def test_decay_angles_dialog(cpt_widget, qtbot: QtBot, click_twice: bool):
         dialog.show()
     dialog.close()
     qtbot.waitSignals([dialog.rejected], timeout=5000)
+
+    assert not cpt_widget.decay_angles_dlg.isVisible()
+    assert "Decay Angles Tool" in cpt_widget.viewer.layers
+    assert not cpt_widget.decay_angles_dlg.cal_layer.visible
+
+    # Click again to test that the dialog opens again
+    cpt_widget._on_click_decay_angles()
+    assert cpt_widget.decay_angles_dlg.isVisible()
+    assert "Decay Angles Tool" in cpt_widget.viewer.layers
+    assert cpt_widget.decay_angles_dlg.cal_layer.visible
+
+    # close the dialog
+    cpt_widget.decay_angles_dlg.reject()
+    assert not cpt_widget.decay_angles_dlg.isVisible()
+    assert "Decay Angles Tool" in cpt_widget.viewer.layers
+    assert not cpt_widget.decay_angles_dlg.cal_layer.visible
 
 
 def test_decay_vertex_update(cpt_widget):

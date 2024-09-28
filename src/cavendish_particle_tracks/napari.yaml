@@ -1,5 +1,5 @@
 name: cavendish-particle-tracks
-display_name: Cavendish Particle Tracks Analysis Plugin
+display_name: Cavendish Particle Tracks Plugin
 contributions:
   commands:
     - id: cavendish-particle-tracks.make_qwidget
@@ -8,4 +8,4 @@ contributions:
 
   widgets:
     - command: cavendish-particle-tracks.make_qwidget
-      display_name: Cavendish Particle Tracks Analysis
+      display_name: Cavendish Particle Tracks

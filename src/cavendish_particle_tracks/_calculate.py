@@ -1,6 +1,6 @@
 import numpy as np
 
-from ._analysis import (
+from .analysis import (
     CHAMBER_DEPTH,
     FIDUCIAL_BACK,
     FIDUCIAL_FRONT,
