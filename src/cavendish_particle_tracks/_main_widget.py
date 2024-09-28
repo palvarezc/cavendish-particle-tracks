@@ -8,6 +8,7 @@ for further analysis.
 
 import glob
 import os
+import pickle
 
 import dask.array
 import napari
@@ -31,11 +32,11 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from ._analysis import EXPECTED_PARTICLES, VIEW_NAMES, ParticleDecay
 from ._calculate import length, radius
 from ._decay_angles_dialog import DecayAnglesDialog
 from ._magnification_dialog import MagnificationDialog
 from ._stereoshift_dialog import StereoshiftDialog
+from .analysis import EXPECTED_PARTICLES, VIEW_NAMES, ParticleDecay
 
 
 class ParticleTracksWidget(QWidget):
@@ -746,14 +747,14 @@ class ParticleTracksWidget(QWidget):
         # setup UI
         file_dialog = QFileDialog(self)
         file_dialog.setAcceptMode(QFileDialog.AcceptSave)
-        file_dialog.setNameFilter("CSV files (*.csv)")
+        file_dialog.setNameFilter("CSV files (*.csv); Pickle files (*.pkl)")
         file_dialog.setDefaultSuffix("csv")
         # retrieve image folder
         file_name, _ = file_dialog.getSaveFileName(
             self,
             "Save file",
             "./",
-            "CSV files (*.csv)",
+            "CSV files (*.csv);;Pickle files (*.pkl)",
             "CSV files (*.csv)",
             QFileDialog.DontUseNativeDialog,
         )
@@ -761,24 +762,32 @@ class ParticleTracksWidget(QWidget):
         if file_name in {"", None}:
             return
 
-        if not file_name.endswith(".csv"):
-            file_name += ".csv"
+        # Save as pickle if file_name ends with .pkl
+        if file_name.endswith(".pkl"):
+            with open(file_name, "wb") as handle:
+                pickle.dump(
+                    self.data, handle, protocol=pickle.HIGHEST_PROTOCOL
+                )
 
-        if "." in file_name[:-4]:
+        # Save as .csv if file_name ends with .csv
+        elif file_name.endswith(".csv"):
+            with open(file_name, "w", encoding="UTF8", newline="") as f:
+                # write the header
+                f.write(",".join(self.data[0]._vars_to_save()) + "\n")
+
+                # write the data
+                f.writelines([particle.to_csv() for particle in self.data])
+
+        else:
             self.msg = QMessageBox()
             self.msg.setIcon(QMessageBox.Warning)
             self.msg.setWindowTitle("Invalid file type")
             self.msg.setStandardButtons(QMessageBox.Ok)
-            self.msg.setText("The file must be a CSV file. Please try again.")
+            self.msg.setText(
+                "The file must be a CSV (*.csv) or Pickle (*.pkl) file. Please try again."
+            )
             self.msg.show()
             return
-
-        with open(file_name, "w", encoding="UTF8", newline="") as f:
-            # write the header
-            f.write(",".join(self.data[0]._vars_to_save()) + "\n")
-
-            # write the data
-            f.writelines([particle.to_csv() for particle in self.data])
 
         napari.utils.notifications.show_info("Data saved to " + file_name)
 
