@@ -1,3 +1,5 @@
+import logging
+import warnings
 from typing import TYPE_CHECKING
 
 from napari.layers import Points
@@ -180,7 +182,7 @@ class MagnificationDialog(QDialog):
 
         # Forcing only 1 points
         if len(selected_points) != 1:
-            print("Select (only) one point to add fiducial.")
+            warnings.warn("Select (only) one point to add fiducial.")
             return [-1.0e6, -1.0e6]
 
         textbox = self.txboxes[fiducial]
@@ -195,7 +197,7 @@ class MagnificationDialog(QDialog):
         if not (
             self.f1.name and self.f2.name and self.b1.name and self.b2.name
         ):
-            print("Select fiducials to calcuate the magnification")
+            warnings.warn("Select fiducials to calcuate the magnification")
             return
 
         self.a, self.b = magnification(self.f1, self.f2, self.b1, self.b2)
@@ -206,7 +208,7 @@ class MagnificationDialog(QDialog):
     def accept(self) -> None:
         """On accept propagate the calibration information to the main window and remove the Magnification layer"""
 
-        print("Propagating magnification to table.")
+        logging.info("Propagating magnification to table.")
         self.parent._propagate_magnification(self.a, self.b)
         self.parent._deactivate_calibration_layer(self.magnification_layer)
         self.parent.apply_magnification_button.setEnabled(True)

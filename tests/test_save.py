@@ -9,13 +9,11 @@ from qtpy.QtWidgets import QDialogButtonBox, QLineEdit, QMessageBox
 from .conftest import get_dialog
 
 
-def test_cant_save_empty(cpt_widget, capsys):
-    # click the save button
-    cpt_widget._on_click_save()
-
-    # check we see the error info
-    captured = capsys.readouterr()
-    assert "There is no data in the table to save." in captured.out
+def test_try_saving_empty_get_warning(cpt_widget):
+    with pytest.warns(
+        UserWarning, match="There is no data in the table to save."
+    ):
+        cpt_widget._on_click_save()
 
 
 @pytest.mark.parametrize(

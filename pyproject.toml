@@ -28,10 +28,10 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "imagecodecs",    # for opening tiff images on macos
+    "imagecodecs",              # for opening tiff images on macos
     "napari >= 0.5.2, < 0.6.0", # need >= 0.5.2 to be able to open as stack (https://github.com/napari/napari/issues/7165) and < 0.6.0 to hide layers controls
     "numpy",
-    "dask-image",     # for image loading
+    "dask-image",               # for image loading
 ]
 dynamic = ["version"]
 
@@ -110,6 +110,7 @@ select = [
     "SIM", # flake8-simplify
 ]
 ignore = [
+    "B028",   # ignore bugbear about warning stack level:- we're talking to users
     "E501",   # line too long. let black handle this
     "UP006",
     "UP007",  # type annotation. As using magicgui require runtime type annotation then we disable this.
