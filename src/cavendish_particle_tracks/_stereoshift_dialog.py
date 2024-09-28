@@ -136,22 +136,22 @@ class StereoshiftDialog(QDialog):
         points = np.array(
             [
                 [
-                    origin_x + 100 / zoom_factor,
+                    origin_x - 100 / zoom_factor,
                     origin_y - 200 / zoom_factor,
                 ],
-                [origin_x + 100 / zoom_factor, origin_y],
                 [
                     origin_x + 100 / zoom_factor,
-                    origin_y + 200 / zoom_factor,
+                    origin_y - 200 / zoom_factor,
                 ],
                 [origin_x - 100 / zoom_factor, origin_y],
+                [origin_x + 100 / zoom_factor, origin_y],
                 [
                     origin_x - 100 / zoom_factor,
                     origin_y + 200 / zoom_factor,
                 ],
                 [
-                    origin_x - 100 / zoom_factor,
-                    origin_y - 200 / zoom_factor,
+                    origin_x + 100 / zoom_factor,
+                    origin_y + 200 / zoom_factor,
                 ],
             ]
         )
@@ -160,7 +160,8 @@ class StereoshiftDialog(QDialog):
         for item in self._fiducial_views:
             labels += [item.name]
 
-        colors = ["green", "green", "blue", "blue", "red", "red"]
+        colors = ["green", "red", "green", "red", "green", "red"]
+        symbols = ["diamond", "diamond", "cross", "cross", "disc", "disc"]
 
         text = {
             "string": labels,
@@ -181,6 +182,7 @@ class StereoshiftDialog(QDialog):
             border_width_is_relative=False,
             border_color=colors,
             face_color=colors,
+            symbol=symbols,
         )
 
         # set the edge_color mode to colormap
@@ -309,9 +311,5 @@ class StereoshiftDialog(QDialog):
 
     def reject(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
-
-        # TODO: this is a problem, the layer still exists... not sure how to remove it
-        self.parent.viewer.layers.select_previous()
-        self.parent.viewer.layers.remove(self.cal_layer)
-        self.parent.stereoshift_isopen = False
+        self.parent._deactivate_calibration_layer(self.cal_layer)
         return super().reject()

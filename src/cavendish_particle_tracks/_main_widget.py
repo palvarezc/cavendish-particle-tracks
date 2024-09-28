@@ -7,6 +7,7 @@ for further analysis.
 """
 
 import glob
+import os
 import pickle
 
 import dask.array
@@ -48,7 +49,6 @@ class ParticleTracksWidget(QWidget):
         napari_viewer: napari.Viewer,
         bypass_load_screen: bool = False,
         docking_area: str = "right",
-        shuffling_seed: int = 1,
     ):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
@@ -56,7 +56,8 @@ class ParticleTracksWidget(QWidget):
         self.docking_area = docking_area
         if self.docking_area != "bottom":
             self.bypass_load_screen = True
-        self.shuffling_seed = shuffling_seed
+
+        self.shuffling_seed = self._get_shuffling_seed()
 
         # define QtWidgets
         self.load_button = QPushButton("Load data")
@@ -168,9 +169,7 @@ class ParticleTracksWidget(QWidget):
         # Dialog pointers to reuse
         self.mag_dlg: MagnificationDialog | None = None
         self.stereoshift_dlg: StereoshiftDialog | None = None
-        self.stereoshift_isopen = False
         self.decay_angles_dlg: DecayAnglesDialog | None = None
-        self.decay_angles_isopen = False
 
         @self.viewer.layers.events.connect
         def _on_layerlist_changed(event):
@@ -186,6 +185,21 @@ class ParticleTracksWidget(QWidget):
         self.viewer.window._qt_viewer.layerButtons.show()
         self.viewer.window._qt_viewer.viewerButtons.show()
         super().hideEvent(event)
+
+    def _get_shuffling_seed(self, fallback: int = 1) -> int:
+        """Get the shuffling seed from the environment variable.
+
+        This is useful, for example, for each lab computer being seeded differently.
+        """
+        if not os.getenv("CPT_SHUFFLING_SEED"):
+            return fallback
+        try:
+            return int(os.environ["CPT_SHUFFLING_SEED"])
+        except ValueError:
+            print(
+                f"Warning: Invalid value for CPT_SHUFFLING_SEED. Using seed value of {fallback}."
+            )
+            return fallback
 
     def _confirm_save_before_closing(self):
         """Prompt the user to save data before closing the widget."""
@@ -480,31 +494,29 @@ class ParticleTracksWidget(QWidget):
 
     def _on_click_decay_angles(self) -> DecayAnglesDialog:
         """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
-        if (self.decay_angles_dlg is not None) and (
-            self.decay_angles_isopen is True
-        ):
+        if self.decay_angles_dlg is not None:
+            self.decay_angles_dlg.show()
             self.decay_angles_dlg.raise_()
+            self._activate_calibration_layer(self.decay_angles_dlg.cal_layer)
             return self.decay_angles_dlg
         self.decay_angles_dlg = DecayAnglesDialog(self)
         self.decay_angles_dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         self.decay_angles_dlg.move(point)
-        self.decay_angles_isopen = True
         return self.decay_angles_dlg
 
     def _on_click_stereoshift(self) -> StereoshiftDialog:
         """When the 'Calculate stereoshift' button is clicked, open stereoshift dialog."""
         # Different behaviour to the Magnification dialog, waiting for the definition of the stereoshift layer structure
-        if (self.stereoshift_dlg is not None) and (
-            self.stereoshift_isopen is True
-        ):
+        if self.stereoshift_dlg is not None:
+            self.stereoshift_dlg.show()
             self.stereoshift_dlg.raise_()
+            self._activate_calibration_layer(self.stereoshift_dlg.cal_layer)
             return self.stereoshift_dlg
         self.stereoshift_dlg = StereoshiftDialog(self)
         self.stereoshift_dlg.show()
         point = QPoint(self.pos().x() + self.width(), self.pos().y())
         self.stereoshift_dlg.move(point)
-        self.stereoshift_isopen = True
         return self.stereoshift_dlg
 
     def _on_click_load_data(self) -> None:
@@ -675,7 +687,7 @@ class ParticleTracksWidget(QWidget):
         if self.mag_dlg is not None:
             self.mag_dlg.show()
             self.mag_dlg.raise_()
-            self.mag_dlg._activate_calibration_layer()
+            self._activate_calibration_layer(self.mag_dlg.magnification_layer)
             return self.mag_dlg
         self.mag_dlg = MagnificationDialog(self)
         self.mag_dlg.show()
@@ -778,3 +790,20 @@ class ParticleTracksWidget(QWidget):
             return
 
         napari.utils.notifications.show_info("Data saved to " + file_name)
+
+    def _activate_calibration_layer(self, layer):
+        """Show the calibration layer and move it to the top"""
+        layer.visible = True
+        # Move the calibration layer to the top
+        self.viewer.layers.move(
+            self.viewer.layers.index(layer),
+            len(self.viewer.layers),
+        )
+        self.viewer.layers.selection.active = layer
+
+    def _deactivate_calibration_layer(self, layer):
+        """Hide the calibration layer and move it to the bottom"""
+        self.viewer.layers.select_previous()
+        layer.visible = False
+        # Move the calibration layer to the bottom
+        self.viewer.layers.move(self.viewer.layers.index(layer), 0)
