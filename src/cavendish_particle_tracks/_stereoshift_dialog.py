@@ -12,8 +12,8 @@ from qtpy.QtWidgets import (
     QTableWidgetItem,
 )
 
-from ._analysis import Fiducial
 from ._calculate import depth, length, stereoshift
+from .analysis import Fiducial
 
 if TYPE_CHECKING:
     from ._main_widget import ParticleTracksWidget

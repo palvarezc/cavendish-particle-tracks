@@ -13,12 +13,12 @@ from qtpy.QtWidgets import (
     QTableWidgetItem,
 )
 
-from ._analysis import (
+from ._calculate import magnification
+from .analysis import (
     FIDUCIAL_BACK,
     FIDUCIAL_FRONT,
     Fiducial,
 )
-from ._calculate import magnification
 
 if TYPE_CHECKING:
     from ._main_widget import ParticleTracksWidget

@@ -31,11 +31,11 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from ._analysis import EXPECTED_PARTICLES, VIEW_NAMES, ParticleDecay
 from ._calculate import length, radius
 from ._decay_angles_dialog import DecayAnglesDialog
 from ._magnification_dialog import MagnificationDialog
 from ._stereoshift_dialog import StereoshiftDialog
+from .analysis import EXPECTED_PARTICLES, VIEW_NAMES, ParticleDecay
 
 
 class ParticleTracksWidget(QWidget):
