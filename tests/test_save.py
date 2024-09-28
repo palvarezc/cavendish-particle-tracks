@@ -22,6 +22,7 @@ def test_cant_save_empty(cpt_widget, capsys):
     "file_name, expect_data_loaded",
     [
         ("my_file.csv", True),
+        ("my_file.pkl", True),
         ("my_file.pdf", False),
     ],
 )
@@ -49,10 +50,28 @@ def test_save_single_particle(
     )
 
     if expect_data_loaded:
-        # check we have a csv file
         csv_files = glob(str(tmp_path / "*.csv"))
-        assert len(csv_files) == 1, "No csv file found"
-        assert stat(csv_files[0]).st_size != 0, "File is empty"
+        pkl_files = glob(str(tmp_path / "*.pkl"))
+
+        expect_a_csv_and_have_one = (
+            file_name.endswith(".csv") and len(csv_files) == 1
+        )
+        expect_a_pkl_and_have_one = (
+            file_name.endswith(".pkl") and len(pkl_files) == 1
+        )
+        assert (
+            expect_a_csv_and_have_one or expect_a_pkl_and_have_one
+        ), "Unexpected number of data files found"
+
+        saved_file = (csv_files + pkl_files)[
+            0
+        ]  # Only one file if we've passed the above XOR check
+        assert saved_file.endswith(
+            file_name
+        ), f"File name {saved_file} does not match expected name: {file_name}"
+
+        saved_file_is_not_empty = stat(saved_file).st_size != 0
+        assert saved_file_is_not_empty, f"File {file_name} is empty"
     else:
         msgbox = cpt_widget.msg
         assert isinstance(msgbox, QMessageBox)
