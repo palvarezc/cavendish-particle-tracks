@@ -59,8 +59,30 @@ In addition to the properties associated with a specific particle, the tool allo
 Once computed for the first time, the magnification parameters are stored and used to convert all measurements. If you need to recompute the magnification parameters, you can do so by clicking on the `Measure magnification` button again. The tool will remember previously computed magnification parameters, and will allow you to switch between them.
 
 ### Saving the data
-To save the data, click on the `Save to file` button. This will open a file dialog, which will allow you to select the file where you want to save the data. The tool will save the data in a CSV file, which will contain the information about the particles, and their properties, as well as the magnification parameters.
+The data is stored internally as a list of `ParticleDecay` objects, which contain the information about the particles, their properties, as well as the magnification parameters.
 
+To save the data to a file for the analysis, click on the `Save to file` button. This will open a file dialog, which will allow you to select the file where you want to save the data. Two file types are suported: `CSV` and `Pickle`.
+
+`CSV` format is a readable comma-separated file format, which can be opened in a text editor, or a spreadsheet program, or using some other analysis tool like [pandas](https://pandas.pydata.org/). Make sure to import the data as a CSV file with the correct delimiter (`,`) and the correct encoding (`UTF8`) so that the symbols are rendered correctly.
+
+A `Pickle` file is a binary format, which can be open with Python using:
+
+    ```python
+    import pickle
+    with open('filename.pkl', 'rb') as f:
+        data = pickle.load(f)
+    ```
+
+The measurements associated with each particle can be accessed by interrogating the elements of `data`:
+
+    ```python
+    >> print("Decay 0 is: ", data[0].name)
+    Decay 0 is:  Σ⁺ ⇨ n + π⁺
+    >> print("The decay length of Decay 0 is: ", data[0].decay_length_cm, "cm")
+    The decay length of Decay 0 is:  0.55 cm
+    ```
+
+This can be useful if you want to perform the analysis in Python or Jupyter notebooks.
 ## Useful keyboard shortcuts
 Some tips...
 
