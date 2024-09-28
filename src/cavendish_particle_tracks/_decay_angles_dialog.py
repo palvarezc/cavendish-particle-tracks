@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 import numpy as np
 from napari.utils.notifications import show_error
 from qtpy.QtWidgets import (
@@ -11,12 +13,15 @@ from qtpy.QtWidgets import (
 
 from ._calculate import angle, track_parameters
 
+if TYPE_CHECKING:
+    from ._widget import ParticleTracksWidget
+
 
 class DecayAnglesDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.parent = parent
+        self.parent: ParticleTracksWidget = parent
 
         self.setWindowTitle("Decay Angles")
 
@@ -33,7 +38,6 @@ class DecayAnglesDialog(QDialog):
             textbox.setMinimumWidth(200)
 
         bss = QPushButton("Calculate")
-        bss.clicked.connect(self._on_click_calculate)
 
         bap = QPushButton("Save to table")
         bap.clicked.connect(self._on_click_save_to_table)
@@ -77,6 +81,35 @@ class DecayAnglesDialog(QDialog):
         self.phi_proton = 0.0
         self.phi_pion = 0.0
         self.alines = []
+
+        @self.cal_layer.events.data.connect
+        def _calculate(self) -> None:
+            """When 'Calculate' button is clicked, calculate opening angles and populate table"""
+            print("Calculating decay angles")
+            # Compute tracks and angles
+            tracks = [track_parameters(line) for line in self.cal_layer.data]
+
+            self.phi_proton = angle(
+                self.cal_layer.data[0], self.cal_layer.data[1]
+            )
+            self.phi_pion = angle(
+                self.cal_layer.data[0], self.cal_layer.data[2]
+            )
+
+            # # Populate the table
+            for slope, intercept, track in zip(
+                self.textboxes_slope, self.textboxes_intercept, tracks
+            ):
+                slope.setText(str(track[0]))
+                intercept.setText(str(track[1]))
+
+            self.textboxes_phi[0].setText(str(self.phi_proton))
+            self.textboxes_phi[1].setText(str(self.phi_pion))
+
+            # Save points
+            self.alines = self.cal_layer.data
+
+        bss.clicked.connect(self._calculate)
 
     def _setup_decayangles_layer(self):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
@@ -130,28 +163,6 @@ class DecayAnglesDialog(QDialog):
             text=text,
         )
         return shapes_layer
-
-    def _on_click_calculate(self) -> None:
-        """When 'Calculate' button is clicked, calculate opening angles and populate table"""
-
-        # Compute tracks and angles
-        tracks = [track_parameters(line) for line in self.cal_layer.data]
-
-        self.phi_proton = angle(self.cal_layer.data[0], self.cal_layer.data[1])
-        self.phi_pion = angle(self.cal_layer.data[0], self.cal_layer.data[2])
-
-        # # Populate the table
-        for slope, intercept, track in zip(
-            self.textboxes_slope, self.textboxes_intercept, tracks
-        ):
-            slope.setText(str(track[0]))
-            intercept.setText(str(track[1]))
-
-        self.textboxes_phi[0].setText(str(self.phi_proton))
-        self.textboxes_phi[1].setText(str(self.phi_pion))
-
-        # Save points
-        self.alines = self.cal_layer.data
 
     def _on_click_save_to_table(self) -> None:
         """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
