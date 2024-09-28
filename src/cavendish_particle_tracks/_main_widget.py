@@ -187,9 +187,9 @@ class ParticleTracksWidget(QWidget):
         self.viewer.window._qt_viewer.viewerButtons.show()
         super().hideEvent(event)
 
-    def _get_shuffling_seed(self, fallback: int=1) -> int:
+    def _get_shuffling_seed(self, fallback: int = 1) -> int:
         """Get the shuffling seed from the environment variable.
-        
+
         This is useful, for example, for each lab computer being seeded differently.
         """
         if not os.getenv("CPT_SHUFFLING_SEED"):
