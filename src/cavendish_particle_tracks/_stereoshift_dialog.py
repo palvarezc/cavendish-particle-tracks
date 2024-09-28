@@ -136,29 +136,6 @@ class StereoshiftDialog(QDialog):
         points = np.array(
             [
                 [
-                    origin_x + 100 / zoom_factor,
-                    origin_y - 200 / zoom_factor,
-                ],
-                [origin_x + 100 / zoom_factor, origin_y],
-                [
-                    origin_x + 100 / zoom_factor,
-                    origin_y + 200 / zoom_factor,
-                ],
-                [origin_x - 100 / zoom_factor, origin_y],
-                [
-                    origin_x - 100 / zoom_factor,
-                    origin_y + 200 / zoom_factor,
-                ],
-                [
-                    origin_x - 100 / zoom_factor,
-                    origin_y - 200 / zoom_factor,
-                ],
-            ]
-        )
-
-        points = np.array(
-            [
-                [
                     origin_x - 100 / zoom_factor,
                     origin_y - 200 / zoom_factor,
                 ],
