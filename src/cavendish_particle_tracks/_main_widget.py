@@ -772,7 +772,7 @@ class ParticleTracksWidget(QWidget):
             self.msg.setWindowTitle("Invalid file type")
             self.msg.setStandardButtons(QMessageBox.Ok)
             self.msg.setText(
-                "The file must be a CSV (*.csv) or Pickle (*pkl) file. Please try again."
+                "The file must be a CSV (*.csv) or Pickle (*.pkl) file. Please try again."
             )
             self.msg.show()
             return
