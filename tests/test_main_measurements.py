@@ -97,10 +97,10 @@ def test_calculate_radius_fails_data_out_of_sync(
 ):
     """Test that the radius cannot be computed if the data is out of sync."""
     # Add images to the viewer
-    images = np.random.randint(0, 10, (10, 10, 3, 5), "uint8")
+    images = np.random.randint(0, 10, (3, 5, 10, 10), "uint8")
     cpt_widget.viewer.add_image(images, name="Particle Tracks")
-    cpt_widget.viewer.dims.set_current_step(2, 0)  # move to view 0
-    cpt_widget.viewer.dims.set_current_step(3, 0)  # move to event 0
+    cpt_widget.viewer.dims.set_current_step(0, 0)  # move to view 0
+    cpt_widget.viewer.dims.set_current_step(1, 0)  # move to event 0
 
     # Add new particle
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
@@ -110,20 +110,31 @@ def test_calculate_radius_fails_data_out_of_sync(
     layer_measurements.add([[0, 0] + point for point in three_points])
     layer_measurements.selected_data = {0, 1, 2}
 
-    # change the data so that it's out of sync
-    cpt_widget.viewer.dims.set_current_step(3, 1)  # move to event 1
+    # change the data event so that it's out of sync
+    cpt_widget.viewer.dims.set_current_step(1, 1)  # move to event 1
 
-    # click the calculate radius button
+    # click the calculate radius button and check that it fails
     cpt_widget._on_click_radius()
-
-    # # read captured output and check that it's as we expected
-    # captured = capsys.readouterr()
-    # expected_lines = ["Measurement out of current slice"]
-    # for expected in expected_lines:
-    #     assert expected in captured.out
-
+    captured = capsys.readouterr()
     assert (
-        cpt_widget.data[0].radius_px < 0
+        "Measurement points not in current Event. Measurement not completed."
+        in captured.out
+    )
+
+    # change the data view so that it's out of sync
+    cpt_widget.viewer.dims.set_current_step(1, 0)  # move to event 0
+    cpt_widget.viewer.dims.set_current_step(0, 1)  # move to view 1
+
+    # click the calculate radius button and check that it fails
+    cpt_widget._on_click_radius()
+    captured = capsys.readouterr()
+    assert (
+        "Measurement points not in current View. Measurement not completed."
+        in captured.out
+    )
+
+    assert cpt_widget.data[0].radius_px != pytest.approx(
+        rad, rel=1e-3
     ), "The radius should not be calculated"
 
     assert not cpt_widget.table.item(
@@ -136,6 +147,25 @@ def test_calculate_radius_fails_data_out_of_sync(
         0, 4
     ), "The radius points should not be recorded"
     assert not cpt_widget.table.item(0, 5), "The radius should not be recorded"
+
+    # change the data view so that it's in sync
+    cpt_widget.viewer.dims.set_current_step(0, 0)  # move to view 0
+    cpt_widget._on_click_radius()
+
+    assert cpt_widget.data[0].radius_px == pytest.approx(
+        rad, rel=1e-3
+    ), "The radius should have been calculated"
+
+    assert cpt_widget.table.item(
+        0, 2
+    ), "The radius points should have been recorded"
+    assert cpt_widget.table.item(
+        0, 3
+    ), "The radius points should have been recorded"
+    assert cpt_widget.table.item(
+        0, 4
+    ), "The radius points should have been recorded"
+    assert cpt_widget.table.item(0, 5), "The radius should have been recorded"
 
 
 def test_calculate_length_ui(
@@ -158,12 +188,7 @@ def test_calculate_length_ui(
     assert cpt_widget.table.item(
         0, cpt_widget._get_table_column_index("decay_length_px")
     )
-    assert (
-        cpt_widget.table.item(
-            0, cpt_widget._get_table_column_index("decay_length_px")
-        ).text()
-        == "1.0"
-    )
+    assert cpt_widget.data[0].decay_length_px == pytest.approx(1, rel=1e-3)
 
 
 @pytest.mark.parametrize("npoints", [1, 3, 4, 5])
@@ -191,3 +216,62 @@ def test_calculate_length_fails_with_wrong_number_of_points(
         "ERROR: Select two points to calculate the decay length."
         in captured.out
     )
+
+
+def test_calculate_length_fails_data_out_of_sync(
+    cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
+):
+    # Add images to the viewer
+    images = np.random.randint(0, 10, (3, 5, 10, 10), "uint8")
+    cpt_widget.viewer.add_image(images, name="Particle Tracks")
+    cpt_widget.viewer.dims.set_current_step(0, 0)  # move to view 0
+    cpt_widget.viewer.dims.set_current_step(1, 0)  # move to event 0
+
+    # Add new particle
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+
+    # add three points (view, event, y, x) to the points layer and select them
+    layer_measurements = cpt_widget._setup_measurement_layer()
+    layer_measurements.add([(0, 0, 0, 1), (0, 0, 0, 0)])
+    layer_measurements.selected_data = {0, 1}
+
+    # change the data event so that it's out of sync
+    cpt_widget.viewer.dims.set_current_step(1, 1)  # move to event 1
+
+    # click the calculate radius button and check that it fails
+    cpt_widget._on_click_length()
+    captured = capsys.readouterr()
+    assert (
+        "Measurement points not in current Event. Measurement not completed."
+        in captured.out
+    )
+
+    # change the data view so that it's out of sync
+    cpt_widget.viewer.dims.set_current_step(1, 0)  # move to event 0
+    cpt_widget.viewer.dims.set_current_step(0, 1)  # move to view 1
+
+    # click the calculate radius button and check that it fails
+    cpt_widget._on_click_length()
+    captured = capsys.readouterr()
+    assert (
+        "Measurement points not in current View. Measurement not completed."
+        in captured.out
+    )
+
+    assert not cpt_widget.table.item(
+        0, cpt_widget._get_table_column_index("decay_length_px")
+    ), "The decay length should not be recorded"
+    assert cpt_widget.data[0].decay_length_px != pytest.approx(
+        1, rel=1e-3
+    ), "The decay length should not be calculated"
+
+    # change the data view so that it's in sync
+    cpt_widget.viewer.dims.set_current_step(0, 0)  # move to view 0
+    cpt_widget._on_click_length()
+
+    assert cpt_widget.table.item(
+        0, cpt_widget._get_table_column_index("decay_length_px")
+    ), "The decay length should be recorded"
+    assert cpt_widget.data[0].decay_length_px == pytest.approx(
+        1, rel=1e-3
+    ), "The decay length should be calculated"

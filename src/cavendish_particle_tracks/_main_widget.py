@@ -359,6 +359,21 @@ class ParticleTracksWidget(QWidget):
             self.table.hide()
             self.apply_magnification_button.hide()
 
+    def _check_points_in_current_slice(self, selected_points) -> bool:
+        """Check that the selected points are in the current slice of the viewer"""
+        for slice_index, data_slice in enumerate(["View", "Event"]):
+            current_slice = self.viewer.dims.current_step[slice_index]
+            all_points_in_current_slice = all(
+                current_slice == point[slice_index]
+                for point in selected_points
+            )
+            if not all_points_in_current_slice:
+                napari.utils.notifications.show_error(
+                    f"Measurement points not in current {data_slice}. Measurement not completed."
+                )
+                return False
+        return True
+
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
         for the currently selected points and assign it to the currently selected table row.
@@ -378,6 +393,10 @@ class ParticleTracksWidget(QWidget):
             )
             return
         else:
+
+            if not self._check_points_in_current_slice(selected_points):
+                return
+
             selected_points_xy = [point[2:] for point in selected_points]
 
         try:
@@ -445,6 +464,10 @@ class ParticleTracksWidget(QWidget):
             )
             return
         else:
+
+            if not self._check_points_in_current_slice(selected_points):
+                return
+
             selected_points_xy = [point[2:] for point in selected_points]
 
         # Forcing only 2 points
