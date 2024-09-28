@@ -22,6 +22,7 @@ def test_cant_save_empty(cpt_widget, capsys):
     "file_name, expect_data_loaded",
     [
         ("my_file.csv", True),
+        ("my_file.pkl", True),
         ("my_file.pdf", False),
     ],
 )
@@ -49,14 +50,34 @@ def test_save_single_particle(
     )
 
     if expect_data_loaded:
-        # check we have a csv file
+        expected_file_name = (
+            file_name  # Expect the file name to be the one we set
+        )
         csv_files = glob(str(tmp_path / "*.csv"))
-        assert len(csv_files) == 1, "No csv file found"
-        assert stat(csv_files[0]).st_size != 0, "File is empty"
+        pkl_files = glob(str(tmp_path / "*.pkl"))
+
+        expect_a_csv_and_have_one = (
+            expected_file_name.endswith(".csv") and len(csv_files) == 1
+        )
+        expect_a_pkl_and_have_one = (
+            expected_file_name.endswith(".pkl") and len(pkl_files) == 1
+        )
+        assert (
+            expect_a_csv_and_have_one or expect_a_pkl_and_have_one
+        ), "Unexpected number of data files found"
+
+        # Only one file if we've passed the above XOR check
+        saved_file = (csv_files + pkl_files)[0]
+        assert saved_file.endswith(
+            expected_file_name
+        ), f"File name {saved_file} does not match expected name: {expected_file_name}"
+
+        saved_file_is_not_empty = stat(saved_file).st_size != 0
+        assert saved_file_is_not_empty, f"File {saved_file} is empty"
     else:
         msgbox = cpt_widget.msg
         assert isinstance(msgbox, QMessageBox)
         assert msgbox.icon() == QMessageBox.Warning
         assert msgbox.text() == (
-            "The file must be a CSV file. Please try again."
+            "The file must be a CSV (*.csv) or Pickle (*.pkl) file. Please try again."
         )
