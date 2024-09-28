@@ -50,28 +50,30 @@ def test_save_single_particle(
     )
 
     if expect_data_loaded:
+        expected_file_name = (
+            file_name  # Expect the file name to be the one we set
+        )
         csv_files = glob(str(tmp_path / "*.csv"))
         pkl_files = glob(str(tmp_path / "*.pkl"))
 
         expect_a_csv_and_have_one = (
-            file_name.endswith(".csv") and len(csv_files) == 1
+            expected_file_name.endswith(".csv") and len(csv_files) == 1
         )
         expect_a_pkl_and_have_one = (
-            file_name.endswith(".pkl") and len(pkl_files) == 1
+            expected_file_name.endswith(".pkl") and len(pkl_files) == 1
         )
         assert (
             expect_a_csv_and_have_one or expect_a_pkl_and_have_one
         ), "Unexpected number of data files found"
 
-        saved_file = (csv_files + pkl_files)[
-            0
-        ]  # Only one file if we've passed the above XOR check
+        # Only one file if we've passed the above XOR check
+        saved_file = (csv_files + pkl_files)[0]
         assert saved_file.endswith(
-            file_name
-        ), f"File name {saved_file} does not match expected name: {file_name}"
+            expected_file_name
+        ), f"File name {saved_file} does not match expected name: {expected_file_name}"
 
         saved_file_is_not_empty = stat(saved_file).st_size != 0
-        assert saved_file_is_not_empty, f"File {file_name} is empty"
+        assert saved_file_is_not_empty, f"File {saved_file} is empty"
     else:
         msgbox = cpt_widget.msg
         assert isinstance(msgbox, QMessageBox)
