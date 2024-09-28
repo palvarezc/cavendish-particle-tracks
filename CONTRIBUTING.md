@@ -27,7 +27,7 @@ We are using the [myst](https://myst-parser.readthedocs.io/en/latest/index.html)
 
 To test contributions to the documentation, this can be built locally following:
 
-    python -m pip install ".[docs]"
+    python -m pip install -e ".[docs]"
     sphinx-build -W -b html docs docs/_build/html
 
 Python's built in http server can be then used to serve the page:
