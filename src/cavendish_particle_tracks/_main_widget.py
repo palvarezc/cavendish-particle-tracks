@@ -7,6 +7,7 @@ for further analysis.
 """
 
 import glob
+import os
 
 import dask.array
 import napari
@@ -47,7 +48,6 @@ class ParticleTracksWidget(QWidget):
         napari_viewer: napari.Viewer,
         bypass_load_screen: bool = False,
         docking_area: str = "right",
-        shuffling_seed: int = 1,
     ):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
@@ -55,7 +55,8 @@ class ParticleTracksWidget(QWidget):
         self.docking_area = docking_area
         if self.docking_area != "bottom":
             self.bypass_load_screen = True
-        self.shuffling_seed = shuffling_seed
+
+        self.shuffling_seed = self._get_shuffling_seed()
 
         # define QtWidgets
         self.load_button = QPushButton("Load data")
@@ -185,6 +186,21 @@ class ParticleTracksWidget(QWidget):
         self.viewer.window._qt_viewer.layerButtons.show()
         self.viewer.window._qt_viewer.viewerButtons.show()
         super().hideEvent(event)
+
+    def _get_shuffling_seed(self, fallback: int = 1) -> int:
+        """Get the shuffling seed from the environment variable.
+
+        This is useful, for example, for each lab computer being seeded differently.
+        """
+        if not os.getenv("CPT_SHUFFLING_SEED"):
+            return fallback
+        try:
+            return int(os.environ["CPT_SHUFFLING_SEED"])
+        except ValueError:
+            print(
+                f"Warning: Invalid value for CPT_SHUFFLING_SEED. Using seed value of {fallback}."
+            )
+            return fallback
 
     def _confirm_save_before_closing(self):
         """Prompt the user to save data before closing the widget."""
