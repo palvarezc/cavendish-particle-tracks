@@ -55,17 +55,15 @@ class ParticleTracksWidget(QWidget):
         self.docking_area = docking_area
         if self.docking_area != "bottom":
             self.bypass_load_screen = True
-        self.shuffling_seed = 1
 
-        if os.getenv("CPT_SHUFFLING_SEED") is not None:
+        self.shuffling_seed = 1
+        if os.getenv("CPT_SHUFFLING_SEED"):
             try:
-                seed = int(os.environ["CPT_SHUFFLING_SEED"])
+                self.shuffling_seed = int(os.environ["CPT_SHUFFLING_SEED"])
             except ValueError:
                 print(
                     "Warning: Invalid value for CPT_SHUFFLING_SEED. Using default seed value of 1."
                 )
-            else:
-                self.shuffling_seed = seed
 
         # define QtWidgets
         self.load_button = QPushButton("Load data")
