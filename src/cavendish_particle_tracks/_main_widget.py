@@ -56,14 +56,7 @@ class ParticleTracksWidget(QWidget):
         if self.docking_area != "bottom":
             self.bypass_load_screen = True
 
-        self.shuffling_seed = 1
-        if os.getenv("CPT_SHUFFLING_SEED"):
-            try:
-                self.shuffling_seed = int(os.environ["CPT_SHUFFLING_SEED"])
-            except ValueError:
-                print(
-                    "Warning: Invalid value for CPT_SHUFFLING_SEED. Using default seed value of 1."
-                )
+        self.shuffling_seed = self._get_shuffling_seed()
 
         # define QtWidgets
         self.load_button = QPushButton("Load data")
@@ -193,6 +186,17 @@ class ParticleTracksWidget(QWidget):
         self.viewer.window._qt_viewer.layerButtons.show()
         self.viewer.window._qt_viewer.viewerButtons.show()
         super().hideEvent(event)
+
+    def _get_shuffling_seed(self, fallback=1):
+        if not os.getenv("CPT_SHUFFLING_SEED"):
+            return fallback
+        try:
+            return int(os.environ["CPT_SHUFFLING_SEED"])
+        except ValueError:
+            print(
+                f"Warning: Invalid value for CPT_SHUFFLING_SEED. Using seed value of {fallback}."
+            )
+            return fallback
 
     def _confirm_save_before_closing(self):
         """Prompt the user to save data before closing the widget."""
