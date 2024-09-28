@@ -59,7 +59,7 @@ In addition to the properties associated with a specific particle, the tool allo
 Once computed for the first time, the magnification parameters are stored and used to convert all measurements. If you need to recompute the magnification parameters, you can do so by clicking on the `Measure magnification` button again. The tool will remember previously computed magnification parameters, and will allow you to switch between them.
 
 ### Saving the data
-The data is stored internally as a list of `ParticleDecays` objects, which contain the information about the particles, their properties, as well as the magnification parameters.
+The data is stored internally as a list of `ParticleDecay` objects, which contain the information about the particles, their properties, as well as the magnification parameters.
 
 To save the data to a file for the analysis, click on the `Save to file` button. This will open a file dialog, which will allow you to select the file where you want to save the data. Two file types are suported: `CSV` and `Pickle`.
 
