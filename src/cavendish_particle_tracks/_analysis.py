@@ -55,12 +55,12 @@ class ParticleDecay:
     r1: list[float] = field(default_factory=list)
     r2: list[float] = field(default_factory=list)
     r3: list[float] = field(default_factory=list)
-    radius_px: float = 0.0
-    radius_cm: float = 0.0
+    radius_px: float = -1.0
+    radius_cm: float = -1.0
     d1: list[float] = field(default_factory=list)
     d2: list[float] = field(default_factory=list)
-    decay_length_px: float = 0.0
-    decay_length_cm: float = 0.0
+    decay_length_px: float = -1.0
+    decay_length_cm: float = -1.0
     sf1: list[float] = field(default_factory=list)
     sf2: list[float] = field(default_factory=list)
     sp1: list[float] = field(default_factory=list)
@@ -68,9 +68,9 @@ class ParticleDecay:
     shift_fiducial: Fiducial = field(default_factory=Fiducial)
     shift_point: Fiducial = field(default_factory=Fiducial)
     stereoshift: float = -1.0
-    depth_cm: float = 0.0
-    magnification_a: float = -1.0
-    magnification_b: float = 0.0
+    depth_cm: float = -1.0
+    magnification_a: float = -1.0e6
+    magnification_b: float = -1.0e6
     # magnification: float = -1.0
     phi_proton: float = -100
     phi_pion: float = -100
