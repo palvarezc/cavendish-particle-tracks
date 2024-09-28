@@ -63,7 +63,7 @@ The data is stored internally as a list of `ParticleDecay` objects, which contai
 
 To save the data to a file for the analysis, click on the `Save to file` button. This will open a file dialog, which will allow you to select the file where you want to save the data. Two file types are suported: `CSV` and `Pickle`.
 
-The `CSV` file will save the data in a human-readable format, which can be opened in a text editor or a spreadsheet program. Make sure to import the data as a CSV file with the correct delimiter (`,`) and the right encoding (`UTF8`) so that the symbols are rendered correctly.
+`CSV` format is a readable comma-separated file format, which can be opened in a text editor, or a spreadsheet program, or using some other analysis tool like [pandas](https://pandas.pydata.org/). Make sure to import the data as a CSV file with the correct delimiter (`,`) and the correct encoding (`UTF8`) so that the symbols are rendered correctly.
 
 The `Pickle` file will save the data in a binary format, which can be open with Python using:
 
