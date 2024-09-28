@@ -65,7 +65,7 @@ To save the data to a file for the analysis, click on the `Save to file` button.
 
 `CSV` format is a readable comma-separated file format, which can be opened in a text editor, or a spreadsheet program, or using some other analysis tool like [pandas](https://pandas.pydata.org/). Make sure to import the data as a CSV file with the correct delimiter (`,`) and the correct encoding (`UTF8`) so that the symbols are rendered correctly.
 
-The `Pickle` file will save the data in a binary format, which can be open with Python using:
+A `Pickle` file is a binary format, which can be open with Python using:
 
     ```python
     import pickle
