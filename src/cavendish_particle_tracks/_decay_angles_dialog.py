@@ -11,6 +11,8 @@ from qtpy.QtWidgets import (
 
 from ._calculate import angle, track_parameters
 
+ANGLES_LAYER_NAME = "Decay Angles Tool"
+
 
 class DecayAnglesDialog(QDialog):
     def __init__(self, parent=None):
@@ -26,9 +28,7 @@ class DecayAnglesDialog(QDialog):
         self.textboxes_phi = [QLabel(self) for _ in range(2)]
 
         for textbox in (
-            self.textboxes_slope
-            + self.textboxes_intercept
-            + self.textboxes_phi
+            self.textboxes_slope + self.textboxes_intercept + self.textboxes_phi
         ):
             textbox.setMinimumWidth(200)
 
@@ -43,15 +43,17 @@ class DecayAnglesDialog(QDialog):
 
         # layout
         self.setLayout(QGridLayout())
-        self.layout().addWidget(
-            QLabel("Track parameters (y = a x + b)"), 0, 0, 1, 2
-        )
-        for i, widget in enumerate(
+        self.layout().addWidget(QLabel("Track parameters (y = a x + b)"), 0, 0, 1, 2)
+
+        for i, column_title in enumerate([QLabel("Gradient, a"), QLabel("Intercept, b")]):
+            self.layout().addWidget(column_title, 1, i + 1)
+
+        for i, table_datum in enumerate(
             [QLabel("Λ"), QLabel("p"), QLabel("π")]
             + self.textboxes_slope
             + self.textboxes_intercept
         ):
-            self.layout().addWidget(widget, i % 3 + 1, i // 3)
+            self.layout().addWidget(table_datum, i % 3 + 2, i // 3)
 
         self.layout().addWidget(bss, 4, 0, 1, 3)
 
@@ -63,8 +65,7 @@ class DecayAnglesDialog(QDialog):
             3,
         )
         for i, widget in enumerate(
-            [QLabel("ϕ_proton [rad]"), QLabel("ϕ_pion [rad]")]
-            + self.textboxes_phi
+            [QLabel("ϕ_proton [rad]"), QLabel("ϕ_pion [rad]")] + self.textboxes_phi
         ):
             self.layout().addWidget(widget, i % 2 + 6, i // 2 + 1)
         self.layout().addWidget(bap, 8, 0, 1, 3)
@@ -82,8 +83,8 @@ class DecayAnglesDialog(QDialog):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
 
         # If layer already exists, then assume it was set up previously.
-        if "Decay Angles Tool" in self.parent.viewer.layers:
-            return self.parent.viewer.layers["Decay Angles Tool"]
+        if ANGLES_LAYER_NAME in self.parent.viewer.layers:
+            return self.parent.viewer.layers[ANGLES_LAYER_NAME]
         origin_x = self.parent.camera_center[0]
         # note down why this is preferred....
         origin_y = self.parent.camera_center[1]
@@ -122,7 +123,7 @@ class DecayAnglesDialog(QDialog):
 
         shapes_layer = self.parent.viewer.add_shapes(
             lines,
-            name="Decay Angles Tool",
+            name=ANGLES_LAYER_NAME,
             shape_type=["line"] * 3,
             edge_width=5,
             edge_color=colors,

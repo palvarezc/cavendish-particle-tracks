@@ -113,9 +113,7 @@ def test_calculate_stereoshift_ui(
 
     # Check recorded points
     for i in range(4):
-        assert dlg.textboxes[i].text() == str(
-            test_points[i + 2] - test_points[i % 2]
-        )
+        assert dlg.textboxes[i].text() == str(test_points[i + 2] - test_points[i % 2])
 
     # Check calculated values
     assert dlg.tshift_fiducial.text() == str(expected_fiducial_shift)
@@ -125,7 +123,7 @@ def test_calculate_stereoshift_ui(
 
     # check save to table
     dlg._on_click_save_to_table()
-    assert cpt_widget.data[0].spoints.all() == dlg.spoints.all()
+    assert (cpt_widget.data[0].spoints == dlg.spoints).all()
     assert cpt_widget.data[0].shift_fiducial == dlg.shift_fiducial
     assert cpt_widget.data[0].shift_point == dlg.shift_point
     assert cpt_widget.data[0].stereoshift == dlg.point_stereoshift
