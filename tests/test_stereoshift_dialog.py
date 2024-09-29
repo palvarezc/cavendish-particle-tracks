@@ -106,10 +106,7 @@ def test_calculate_stereoshift_ui(
     if double_click:
         dlg = cpt_widget._on_click_stereoshift()
 
-    if vertex == "origin":
-        dlg.vertex_combobox.setCurrentIndex(0)
-    else:
-        dlg.vertex_combobox.setCurrentIndex(1)
+    dlg.vertex_combobox.setCurrentIndex(0 if vertex == "origin" else 1)
 
     # move points to parameterised positions
     for i in range(len(test_points)):
