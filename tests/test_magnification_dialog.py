@@ -111,9 +111,7 @@ def test_magnification_ui(
     ):
         cb.setCurrentIndex(cb.findText(fiducial.name))
         dlg.magnification_layer.add(fiducial.xy)
-        dlg.magnification_layer.selected_data = {
-            len(dlg.magnification_layer.data) - 1
-        }
+        dlg.magnification_layer.selected_data = {len(dlg.magnification_layer.data) - 1}
         add_fiducial_func()
         assert recorded_fiducial == fiducial
         # TODO: check text box

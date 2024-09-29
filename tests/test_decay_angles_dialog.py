@@ -9,9 +9,7 @@ from pytestqt.qtbot import QtBot
         False,
     ],
 )
-def test_open_and_close_decay_angles_dialog(
-    cpt_widget, qtbot: QtBot, click_twice: bool
-):
+def test_open_and_close_decay_angles_dialog(cpt_widget, qtbot: QtBot, click_twice: bool):
     """Test the expected behavior from the expected workflow:"""
     cpt_widget.particle_decays_menu.setCurrentIndex(4)
 

@@ -50,9 +50,7 @@ def test_save_single_particle(
     )
 
     if expect_data_loaded:
-        expected_file_name = (
-            file_name  # Expect the file name to be the one we set
-        )
+        expected_file_name = file_name  # Expect the file name to be the one we set
         csv_files = glob(str(tmp_path / "*.csv"))
         pkl_files = glob(str(tmp_path / "*.pkl"))
 
