@@ -36,6 +36,9 @@ from ._settings import get_shuffling_seed
 from ._stereoshift_dialog import StereoshiftDialog
 from .analysis import EXPECTED_PARTICLES, VIEW_NAMES, ParticleDecay
 
+MEASUREMENTS_LAYER_NAME = "Radii and Lengths"
+IMAGE_LAYER_NAME = "Particle Tracks"
+
 
 class ParticleTracksWidget(QWidget):
     """Widget containing a simple table of points and track radii per image."""
@@ -192,7 +195,7 @@ class ParticleTracksWidget(QWidget):
         # update for 4d implementation as appropriate.
         return (self.viewer.camera.center[1], self.viewer.camera.center[2])
 
-    def _get_selected_points(self, layer_name="Radii and Lengths") -> np.array:
+    def _get_selected_points(self, layer_name=MEASUREMENTS_LAYER_NAME) -> np.array:
         """Returns array of selected points in the viewer"""
 
         # Filtering selected layer (layer names are unique)
@@ -257,7 +260,7 @@ class ParticleTracksWidget(QWidget):
     def set_button_availability(self) -> None:
         images_imported = False
         for layer in self.viewer.layers:
-            if layer.name == "Particle Tracks":
+            if layer.name == IMAGE_LAYER_NAME:
                 images_imported = True
                 break
         self.set_UI_image_loaded(images_imported, self.bypass_force_load_data)
@@ -530,17 +533,17 @@ class ParticleTracksWidget(QWidget):
 
         # Concatenate stacks along new spatial dimension such that we have a view, and event slider
         concatenated_stack = dask.array.stack(stacks, axis=0)
-        self.viewer.add_image(concatenated_stack, name="Particle Tracks")
+        self.viewer.add_image(concatenated_stack, name=IMAGE_LAYER_NAME)
         self.viewer.dims.axis_labels = ("View", "Event", "Y", "X")
 
         # Move to the first event in the series
         self.viewer.dims.set_current_step(1, 0)
 
-        measurement_layer_present = "Radii and Lengths" in self.viewer.layers
+        measurement_layer_present = MEASUREMENTS_LAYER_NAME in self.viewer.layers
 
         if not measurement_layer_present:
             self.layer_measurements = self.viewer.add_points(
-                name="Radii and Lengths",
+                name=MEASUREMENTS_LAYER_NAME,
                 size=20,
                 border_width=7,
                 border_width_is_relative=False,
@@ -565,7 +568,7 @@ class ParticleTracksWidget(QWidget):
 
         # Record the event and view number if the data has been loaded
         # Potentially this could be used to check the measurements are done in the right event
-        data_has_been_loaded = "Particle Tracks" in self.viewer.layers
+        data_has_been_loaded = IMAGE_LAYER_NAME in self.viewer.layers
         if data_has_been_loaded:
             new_particle.event_number = self.viewer.dims.current_step[1]
             new_particle.view_number = self.viewer.dims.current_step[0]
