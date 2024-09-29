@@ -156,7 +156,7 @@ def test_stereoshift_save_to_table_fails_with_empty_table(cpt_widget, capsys):
     assert "ERROR: There are no particles in the table." in captured.out
 
 
-def test_stereoshift_save_preserves_old_data(cpt_widget, capsys):
+def test_stereoshift_save_preserves_old_data(cpt_widget):
     """Test saving a new particle stereoshift does not mess up the previous one."""
     # open the dialog
     dlg = cpt_widget._on_click_stereoshift()
