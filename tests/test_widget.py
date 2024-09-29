@@ -318,3 +318,43 @@ def test_close_widget(cpt_widget: ParticleTracksWidget, qtbot: QtBot):
         dialog_action=check_dialog_and_click_no,
         time_out=5,
     )
+
+
+def test_radius_save_preserves_old_data(cpt_widget):
+    """Test saving a new particle radius does not mess up the previous one."""
+    # setup measurement layer
+    # layer_measurements = cpt_widget._setup_measurement_layer()
+    layer_measurements = cpt_widget.viewer.add_points(
+        name="Radii and Lengths", ndim=2
+    )
+
+    # add a new particle and calculate radius
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+    # layer_measurements.add([[0, 0, 0, 1], [0, 0, 1, 0], [0, 0, 0, -1]]) # 1px radius
+    layer_measurements.add([[0, 1], [1, 0], [0, -1]])  # 1px radius
+    layer_measurements.selected_data = {0, 1, 2}
+    cpt_widget._on_click_radius()
+
+    # create a second particle and calculate radius
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+    # layer_measurements.add([[0, 0, -6, 3], [0, 0, -3, 2], [0, 0, 0, 3]]) # 5px radius
+    layer_measurements.add([[-6, 3], [-3, 2], [0, 3]])  # 5px radius
+    layer_measurements.selected_data = {3, 4, 5}
+    cpt_widget._on_click_radius()
+
+    # check the radius information is different
+    assert (
+        cpt_widget.data[0].radius_px != cpt_widget.data[1].radius_px
+    ), "The radii should be different"
+    assert (
+        cpt_widget.data[0].radius_cm != cpt_widget.data[1].radius_cm
+    ), "The radii should be different"
+    assert all(
+        cpt_widget.data[0].r1 != cpt_widget.data[1].r1
+    ), "The radius points should be different"
+    assert all(
+        cpt_widget.data[0].r2 != cpt_widget.data[1].r2
+    ), "The radius points should be different"
+    assert all(
+        cpt_widget.data[0].r3 != cpt_widget.data[1].r3
+    ), "The radius points should be different"
