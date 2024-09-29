@@ -14,15 +14,13 @@ import dask.array
 import napari
 import numpy as np
 from dask_image.imread import imread
-from qtpy.QtCore import QPoint, Qt
-from qtpy.QtGui import QFont
+from qtpy.QtCore import QPoint
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QFileDialog,
     QGridLayout,
     QHBoxLayout,
-    QLabel,
     QMessageBox,
     QPushButton,
     QRadioButton,
@@ -54,8 +52,6 @@ class ParticleTracksWidget(QWidget):
         self.viewer: napari.Viewer = napari_viewer
         self.bypass_load_screen = bypass_load_screen
         self.docking_area = docking_area
-        if self.docking_area != "bottom":
-            self.bypass_load_screen = True
 
         self.shuffling_seed = self._get_shuffling_seed()
 
@@ -103,21 +99,6 @@ class ParticleTracksWidget(QWidget):
         # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
         # self.viewer.events.mouse_press(self._on_mouse_click)
 
-        # layout
-        self.intro_text = QLabel(
-            r"""
-   _____                          _ _     _       _____           _   _      _        _______             _
-  / ____|                        | (_)   | |     |  __ \         | | (_)    | |      |__   __|           | |
- | |     __ ___   _____ _ __   __| |_ ___| |__   | |__) |_ _ _ __| |_ _  ___| | ___     | |_ __ __ _  ___| | _____
- | |    / _` \ \ / / _ \ '_ \ / _` | / __| '_ \  |  ___/ _` | '__| __| |/ __| |/ _ \    | | '__/ _` |/ __| |/ / __|
- | |___| (_| |\ V /  __/ | | | (_| | \__ \ | | | | |  | (_| | |  | |_| | (__| |  __/    | | | | (_| | (__|   <\__ \
-  \_____\__,_| \_/ \___|_| |_|\__,_|_|___/_| |_| |_|   \__,_|_|   \__|_|\___|_|\___|    |_|_|  \__,_|\___|_|\_\___/
-
-"""
-        )
-        self.intro_text.setFont(QFont("Lucida Console", 5))
-        self.intro_text.setTextFormat(Qt.TextFormat.PlainText)
-
         if self.docking_area == "bottom":
             self.buttonbox = QGridLayout()
             self.buttonbox.addWidget(self.load_button, 0, 0)
@@ -133,7 +114,6 @@ class ParticleTracksWidget(QWidget):
 
             layout_outer = QHBoxLayout()
             self.setLayout(layout_outer)
-            self.layout().addWidget(self.intro_text)
             layout_outer.addLayout(self.buttonbox)
             self.layout().addWidget(self.table)
 
@@ -326,12 +306,10 @@ class ParticleTracksWidget(QWidget):
     ) -> None:
         if bypass_load_screen:
             self.buttonbox.setContentsMargins(0, 0, 0, 0)
-            self.intro_text.hide()
             return
         if loaded:
             # Set margins (left, top, right, bottom)
             self.buttonbox.setContentsMargins(0, 0, 0, 0)
-            self.intro_text.hide()
             self.load_button.hide()
             self.particle_decays_menu.show()
             self.delete_particle.show()
@@ -346,7 +324,6 @@ class ParticleTracksWidget(QWidget):
         else:
             # Set margins (left, top, right, bottom)
             self.buttonbox.setContentsMargins(200, 0, 200, 0)
-            self.intro_text.show()
             self.load_button.show()
             self.particle_decays_menu.hide()
             self.delete_particle.hide()
