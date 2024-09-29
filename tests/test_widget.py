@@ -15,27 +15,43 @@ from cavendish_particle_tracks._main_widget import ParticleTracksWidget
 from .conftest import get_dialog
 
 
-@pytest.mark.parametrize("bypass_load_screen", [True, False])
+@pytest.mark.parametrize("bypass", [True, False])
 @pytest.mark.parametrize("docking_area", ["left", "bottom"])
-def test_open_widget(make_napari_viewer, bypass_load_screen, docking_area):
+def test_open_widget(make_napari_viewer, bypass, docking_area):
     """Test the opening of the widget"""
     viewer = make_napari_viewer()
     widget = ParticleTracksWidget(
         napari_viewer=viewer,
-        bypass_load_screen=bypass_load_screen,
+        bypass_force_load_data=bypass,
         docking_area=docking_area,
     )
     assert widget.isVisible() is False
     widget.show()
     assert widget.isVisible() is True
 
+    if bypass:
+        return
+
     # Check the widget behavior before and after loading the data
-    if docking_area == "bottom" and bypass_load_screen is False:
-        assert widget.intro_text.isVisible() is True
-        widget.viewer.add_image(
-            np.random.random((100, 100)), name="Particle Tracks"
-        )
-        assert widget.intro_text.isVisible() is False
+    assert widget.particle_decays_menu.isEnabled() is False
+    assert widget.radius_button.isEnabled() is False
+    assert widget.delete_particle.isEnabled() is False
+    assert widget.length_button.isEnabled() is False
+    assert widget.stereoshift_button.isEnabled() is False
+    assert widget.magnification_button.isEnabled() is False
+    assert widget.decay_angles_button.isEnabled() is False
+
+    widget.viewer.add_image(
+        np.random.random((100, 100)), name="Particle Tracks"
+    )
+
+    assert widget.particle_decays_menu.isEnabled() is True
+    assert widget.radius_button.isEnabled() is False
+    assert widget.delete_particle.isEnabled() is False
+    assert widget.length_button.isEnabled() is False
+    assert widget.stereoshift_button.isEnabled() is False
+    assert widget.magnification_button.isEnabled() is True
+    assert widget.decay_angles_button.isEnabled() is False
 
 
 def test_calculate_radius_ui(
