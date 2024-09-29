@@ -80,15 +80,9 @@ def test_calculate_radius_ui(
     for expected in expected_lines:
         assert expected in captured.out
 
-    assert cpt_widget.table.item(
-        0, cpt_widget._get_table_column_index("radius_px")
-    )
-    assert cpt_widget.table.item(
-        0, cpt_widget._get_table_column_index("radius_cm")
-    )
-    assert cpt_widget.table.item(
-        0, cpt_widget._get_table_column_index("rpoints")
-    )
+    assert cpt_widget.table.item(0, cpt_widget._get_table_column_index("radius_px"))
+    assert cpt_widget.table.item(0, cpt_widget._get_table_column_index("radius_cm"))
+    assert cpt_widget.table.item(0, cpt_widget._get_table_column_index("rpoints"))
 
     assert cpt_widget.data[0].radius_px == 1.0
 
@@ -328,9 +322,7 @@ def test_radius_save_preserves_old_data(cpt_widget):
     """Test saving a new particle radius does not mess up the previous one."""
     # setup measurement layer
     # layer_measurements = cpt_widget._setup_measurement_layer()
-    layer_measurements = cpt_widget.viewer.add_points(
-        name="Radii and Lengths", ndim=2
-    )
+    layer_measurements = cpt_widget.viewer.add_points(name="Radii and Lengths", ndim=2)
 
     # add a new particle and calculate radius
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
@@ -368,9 +360,7 @@ def test_length_save_preserves_old_data(cpt_widget):
     """Test saving a new particle length does not mess up the previous one."""
     # setup measurement layer
     # layer_measurements = cpt_widget._setup_measurement_layer()
-    layer_measurements = cpt_widget.viewer.add_points(
-        name="Radii and Lengths", ndim=2
-    )
+    layer_measurements = cpt_widget.viewer.add_points(name="Radii and Lengths", ndim=2)
 
     # add a new particle and calculate length
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
@@ -388,12 +378,10 @@ def test_length_save_preserves_old_data(cpt_widget):
 
     # check the length information is different
     assert (
-        cpt_widget.data[0].decay_length_px
-        != cpt_widget.data[1].decay_length_px
+        cpt_widget.data[0].decay_length_px != cpt_widget.data[1].decay_length_px
     ), "The length should be different"
     assert (
-        cpt_widget.data[0].decay_length_cm
-        != cpt_widget.data[1].decay_length_cm
+        cpt_widget.data[0].decay_length_cm != cpt_widget.data[1].decay_length_cm
     ), "The length should be different"
     assert (
         cpt_widget.data[0]._d1 != cpt_widget.data[1]._d1
