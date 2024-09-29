@@ -347,7 +347,7 @@ class ParticleTracksWidget(QWidget):
         except IndexError:
             napari.utils.notifications.show_error("There are no particles in the table.")
         else:
-            print("calculating radius!")
+            print("calculating radius!") # FIXME: update when PR #164 is updated
             rad = radius(*selected_points)
 
             self.data[selected_row].rpoints = selected_points
@@ -421,8 +421,8 @@ class ParticleTracksWidget(QWidget):
             )
 
             print("calculating decay length!")
-            declen = length(*selected_points)
-            self.data[selected_row].decay_length_px = declen
+            decay_length = length(*selected_points)
+            self.data[selected_row].decay_length_px = decay_length
             self.table.setItem(
                 selected_row,
                 self._get_table_column_index("decay_length_px"),

@@ -319,29 +319,31 @@ def test_close_widget(cpt_widget: ParticleTracksWidget, qtbot: QtBot):
 
 
 def test_radius_save_preserves_old_data(cpt_widget):
-    """Test saving a new particle radius does not mess up the previous one."""
+    """Test saving that previous particles' saved radii are not changed by current particle."""
     # setup measurement layer
     # layer_measurements = cpt_widget._setup_measurement_layer()
     layer_measurements = cpt_widget.viewer.add_points(name="Radii and Lengths", ndim=2)
 
-    # add a new particle and calculate radius
-    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+    # Add first particle
+    cpt_widget.particle_decays_menu.setCurrentIndex(1) # adds new row
+    # Add three points on a circle of radius 1 px
     # layer_measurements.add([[0, 0, 0, 1], [0, 0, 1, 0], [0, 0, 0, -1]]) # 1px radius
     layer_measurements.add([[0, 1], [1, 0], [0, -1]])  # 1px radius
+    # Select the first three points in the layer
     layer_measurements.selected_data = {0, 1, 2}
+    # User clicks the radius calculation button
     cpt_widget._on_click_radius()
 
-    # create a second particle and calculate radius
+    # Create a second particle, add points corresponding to a 5 px radius, and click calculate radius.
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
     # layer_measurements.add([[0, 0, -6, 3], [0, 0, -3, 2], [0, 0, 0, 3]]) # 5px radius
     layer_measurements.add([[-6, 3], [-3, 2], [0, 3]])  # 5px radius
     layer_measurements.selected_data = {3, 4, 5}
     cpt_widget._on_click_radius()
 
-    # check the radius information is different
-    assert (
-        cpt_widget.data[0].radius_px != cpt_widget.data[1].radius_px
-    ), "The radii should be different"
+    first_radius = cpt_widget.data[0].radius_px
+    second_radius = cpt_widget.data[1].radius_px
+    assert first_radius != second_radius, "The radii of different particles should be different"
     assert (
         cpt_widget.data[0].radius_cm != cpt_widget.data[1].radius_cm
     ), "The radii should be different"
