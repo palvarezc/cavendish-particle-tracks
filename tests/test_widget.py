@@ -10,7 +10,11 @@ from pytestqt.qtbot import QtBot
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
-from cavendish_particle_tracks._main_widget import ParticleTracksWidget
+from cavendish_particle_tracks._main_widget import (
+    IMAGE_LAYER_NAME,
+    MEASUREMENTS_LAYER_NAME,
+    ParticleTracksWidget,
+)
 
 from .conftest import get_dialog
 
@@ -41,7 +45,7 @@ def test_open_widget(make_napari_viewer, bypass, docking_area):
     assert widget.magnification_button.isEnabled() is False
     assert widget.decay_angles_button.isEnabled() is False
 
-    widget.viewer.add_image(np.random.random((100, 100)), name="Particle Tracks")
+    widget.viewer.add_image(np.random.random((100, 100)), name=IMAGE_LAYER_NAME)
 
     assert widget.particle_decays_menu.isEnabled() is True
     assert widget.radius_button.isEnabled() is False
@@ -67,7 +71,7 @@ def test_calculate_radius_ui(
 
     # add three points to the points layer and select them
     cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        [(0, 1), (1, 0), (0, -1)], name="Radii and Lengths"
+        [(0, 1), (1, 0), (0, -1)], name=MEASUREMENTS_LAYER_NAME
     )
     cpt_widget.layer_measurements.selected_data = {0, 1, 2}
 
@@ -102,7 +106,7 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
     cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        points, name="Radii and Lengths"
+        points, name=MEASUREMENTS_LAYER_NAME
     )
 
     # select the wrong number of points
@@ -158,7 +162,7 @@ def test_calculate_length_ui(
 
     # add three points to the points layer and select them
     cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        [(0, 1), (0, 0)], name="Radii and Lengths"
+        [(0, 1), (0, 0)], name=MEASUREMENTS_LAYER_NAME
     )
     cpt_widget.layer_measurements.selected_data = {0, 1}
 
@@ -188,7 +192,7 @@ def test_calculate_length_fails_with_wrong_number_of_points(
     # add six random points to the points layer
     points = [(random(), random()) for _ in range(6)]
     cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        points, name="Radii and Lengths"
+        points, name=MEASUREMENTS_LAYER_NAME
     )
 
     # select the wrong number of points
@@ -225,7 +229,7 @@ def test_load_data(
     data_layer_index = 0
     if reload:
         cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-            name="Radii and Lengths"
+            name=MEASUREMENTS_LAYER_NAME
         )
         data_layer_index = 1
 
@@ -253,7 +257,7 @@ def test_load_data(
 
     if expect_data_loaded:
         assert len(cpt_widget.viewer.layers) == 2
-        assert cpt_widget.viewer.layers[data_layer_index].name == "Particle Tracks"
+        assert cpt_widget.viewer.layers[data_layer_index].name == IMAGE_LAYER_NAME
         assert cpt_widget.viewer.layers[data_layer_index].ndim == 4
         assert cpt_widget.viewer.dims.current_step[1] == 0
     else:
@@ -277,7 +281,7 @@ def test_load_data(
 
 def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
     """Test the show/hide buttons"""
-    cpt_widget.viewer.add_image(np.random.random((100, 100)), name="Particle Tracks")
+    cpt_widget.viewer.add_image(np.random.random((100, 100)), name=IMAGE_LAYER_NAME)
     # ideally would like to test isVisible instead of isEnabled, but that requires showing the widget
     # need to think about how to do that, or if it's worth it
     assert cpt_widget.particle_decays_menu.isEnabled() is True
