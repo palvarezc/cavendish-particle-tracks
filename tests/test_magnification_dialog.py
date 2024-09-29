@@ -4,6 +4,7 @@ import pytest
 from cavendish_particle_tracks._calculate import CHAMBER_DEPTH as CD
 from cavendish_particle_tracks._calculate import FIDUCIAL_BACK as FB
 from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
+from cavendish_particle_tracks._magnification_dialog import MAGNIFICATION_LAYER_NAME
 from cavendish_particle_tracks.analysis import Fiducial
 
 
@@ -12,19 +13,19 @@ def test_open_and_close_magnification_dialog(cpt_widget):
     # open the dialog
     cpt_widget._on_click_magnification()
     assert cpt_widget.mag_dlg.isVisible()
-    assert "Magnification" in cpt_widget.viewer.layers
+    assert MAGNIFICATION_LAYER_NAME in cpt_widget.viewer.layers
     assert cpt_widget.mag_dlg.magnification_layer.visible
 
     # close the dialog
     cpt_widget.mag_dlg.reject()
     assert not cpt_widget.mag_dlg.isVisible()
-    assert "Magnification" in cpt_widget.viewer.layers
+    assert MAGNIFICATION_LAYER_NAME in cpt_widget.viewer.layers
     assert not cpt_widget.mag_dlg.magnification_layer.visible
 
     # Click again to test that the dialog opens again
     cpt_widget._on_click_magnification()
     assert cpt_widget.mag_dlg.isVisible()
-    assert "Magnification" in cpt_widget.viewer.layers
+    assert MAGNIFICATION_LAYER_NAME in cpt_widget.viewer.layers
     assert cpt_widget.mag_dlg.magnification_layer.visible
 
 

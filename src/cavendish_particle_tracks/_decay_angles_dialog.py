@@ -11,6 +11,8 @@ from qtpy.QtWidgets import (
 
 from ._calculate import angle, track_parameters
 
+ANGLES_LAYER_NAME = "Decay Angles Tool"
+
 
 class DecayAnglesDialog(QDialog):
     def __init__(self, parent=None):
@@ -77,8 +79,8 @@ class DecayAnglesDialog(QDialog):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
 
         # If layer already exists, then assume it was set up previously.
-        if "Decay Angles Tool" in self.parent.viewer.layers:
-            return self.parent.viewer.layers["Decay Angles Tool"]
+        if ANGLES_LAYER_NAME in self.parent.viewer.layers:
+            return self.parent.viewer.layers[ANGLES_LAYER_NAME]
         origin_x = self.parent.camera_center[0]
         # note down why this is preferred....
         origin_y = self.parent.camera_center[1]
@@ -117,7 +119,7 @@ class DecayAnglesDialog(QDialog):
 
         shapes_layer = self.parent.viewer.add_shapes(
             lines,
-            name="Decay Angles Tool",
+            name=ANGLES_LAYER_NAME,
             shape_type=["line"] * 3,
             edge_width=5,
             edge_color=colors,

@@ -7,7 +7,6 @@ for further analysis.
 """
 
 import glob
-import os
 import pickle
 import warnings
 
@@ -33,6 +32,7 @@ from qtpy.QtWidgets import (
 from ._calculate import length, radius
 from ._decay_angles_dialog import DecayAnglesDialog
 from ._magnification_dialog import MagnificationDialog
+from ._settings import get_shuffling_seed
 from ._stereoshift_dialog import StereoshiftDialog
 from .analysis import EXPECTED_PARTICLES, VIEW_NAMES, ParticleDecay
 
@@ -54,7 +54,7 @@ class ParticleTracksWidget(QWidget):
         self.bypass_force_load_data = bypass_force_load_data
         self.docking_area = docking_area
 
-        self.shuffling_seed = self._get_shuffling_seed()
+        self.shuffling_seed = get_shuffling_seed()
 
         # define QtWidgets
         self.load_button = QPushButton("Load data")
@@ -171,21 +171,6 @@ class ParticleTracksWidget(QWidget):
             self.viewer.window._qt_viewer.layerButtons.show()
             self.viewer.window._qt_viewer.viewerButtons.show()
         super().hideEvent(event)
-
-    def _get_shuffling_seed(self, fallback: int = 1) -> int:
-        """Get the shuffling seed from the environment variable.
-
-        This is useful, for example, for each lab computer being seeded differently.
-        """
-        if not os.getenv("CPT_SHUFFLING_SEED"):
-            return fallback
-        try:
-            return int(os.environ["CPT_SHUFFLING_SEED"])
-        except ValueError:
-            print(
-                f"Warning: Invalid value for CPT_SHUFFLING_SEED. Using seed value of {fallback}."
-            )
-            return fallback
 
     def _confirm_save_before_closing(self):
         """Prompt the user to save data before closing the widget."""
