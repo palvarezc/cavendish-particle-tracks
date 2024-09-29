@@ -130,7 +130,7 @@ def test_calculate_stereoshift_ui(
     # check save to table
     dlg._on_click_save_to_table()
 
-    # select the right vertex
+    # select the stereoshift info corresponding to the correct vertex
     if vertex == "origin":
         data = cpt_widget.data[0].origin_vertex_stereoshift_info
     else:
@@ -140,7 +140,7 @@ def test_calculate_stereoshift_ui(
     assert data.shift_fiducial == dlg.stereoshift_info.shift_fiducial
     assert data.shift_point == dlg.stereoshift_info.shift_point
     assert data.stereoshift == dlg.stereoshift_info.stereoshift
-    # these names should be more consistent between different parts of the program
+    # TODO: these names should be more consistent between different parts of the program
     assert data.depth_cm == dlg.stereoshift_info.depth_cm
 
 
