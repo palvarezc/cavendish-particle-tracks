@@ -14,7 +14,7 @@ import dask.array
 import napari
 import numpy as np
 from dask_image.imread import imread
-from qtpy.QtCore import QPoint, Qt
+from qtpy.QtCore import Qt
 from qtpy.QtGui import QFont
 from qtpy.QtWidgets import (
     QAbstractItemView,
@@ -501,8 +501,6 @@ class ParticleTracksWidget(QWidget):
             return self.decay_angles_dlg
         self.decay_angles_dlg = DecayAnglesDialog(self)
         self.decay_angles_dlg.show()
-        point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        self.decay_angles_dlg.move(point)
         return self.decay_angles_dlg
 
     def _on_click_stereoshift(self) -> StereoshiftDialog:
@@ -515,8 +513,6 @@ class ParticleTracksWidget(QWidget):
             return self.stereoshift_dlg
         self.stereoshift_dlg = StereoshiftDialog(self)
         self.stereoshift_dlg.show()
-        point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        self.stereoshift_dlg.move(point)
         return self.stereoshift_dlg
 
     def _on_click_load_data(self) -> None:
@@ -691,8 +687,6 @@ class ParticleTracksWidget(QWidget):
             return self.mag_dlg
         self.mag_dlg = MagnificationDialog(self)
         self.mag_dlg.show()
-        point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        self.mag_dlg.move(point)
         return self.mag_dlg
 
     def _propagate_magnification(self, a: float, b: float) -> None:
