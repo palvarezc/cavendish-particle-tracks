@@ -9,7 +9,7 @@ plugin_docking_area = "bottom"
 
 # Create the plugin
 plugin_widget = ParticleTracksWidget(
-    viewer, bypass_load_screen=False, docking_area=plugin_docking_area
+    viewer, bypass_force_load_data=False, docking_area=plugin_docking_area
 )
 
 # Add plugin to the viewer

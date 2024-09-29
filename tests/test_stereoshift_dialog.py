@@ -113,9 +113,7 @@ def test_calculate_stereoshift_ui(
 
     # Check recorded points
     for i in range(4):
-        assert dlg.textboxes[i].text() == str(
-            test_points[i + 2] - test_points[i % 2]
-        )
+        assert dlg.textboxes[i].text() == str(test_points[i + 2] - test_points[i % 2])
 
     # Check calculated values
     assert dlg.tshift_fiducial.text() == str(expected_fiducial_shift)
