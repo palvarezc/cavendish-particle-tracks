@@ -44,12 +44,16 @@ class DecayAnglesDialog(QDialog):
         # layout
         self.setLayout(QGridLayout())
         self.layout().addWidget(QLabel("Track parameters (y = a x + b)"), 0, 0, 1, 2)
-        for i, widget in enumerate(
+
+        for i, column_title in enumerate([QLabel("Gradient, a"), QLabel("Intercept, b")]):
+            self.layout().addWidget(column_title, 1, i + 1)
+
+        for i, table_datum in enumerate(
             [QLabel("Λ"), QLabel("p"), QLabel("π")]
             + self.textboxes_slope
             + self.textboxes_intercept
         ):
-            self.layout().addWidget(widget, i % 3 + 1, i // 3)
+            self.layout().addWidget(table_datum, i % 3 + 2, i // 3)
 
         self.layout().addWidget(bss, 4, 0, 1, 3)
 
