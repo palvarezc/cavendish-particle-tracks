@@ -76,28 +76,28 @@ To save the data to a file for the analysis, click on the `Save to file` button.
 
 A `Pickle` file is a binary format, which can be open with Python using:
 
-    ```python
-    import pickle
-    with open('filename.pkl', 'rb') as f:
-        data = pickle.load(f)
-    ```
+```python
+import pickle
+with open('filename.pkl', 'rb') as f:
+    data = pickle.load(f)
+```
 
 The measurements associated with each particle can be accessed by interrogating the elements of `data`:
 
-    ```python
-    >> print("Decay 0 is: ", data[0].name)
-    Decay 0 is:  Σ⁺ ⇨ n + π⁺
-    >> print("The decay length of Decay 0 is: ", data[0].decay_length_cm, "cm")
-    The decay length of Decay 0 is:  0.55 cm
-    ```
+```python
+>>> print("Decay 0 is: ", data[0].name)
+Decay 0 is:  Σ -> n + π
+>>> print("The decay length of Decay 0 is: ", data[0].decay_length_cm, "cm")
+The decay length of Decay 0 is:  0.55 cm
+```
 
 This can be useful if you want to perform the analysis in Python or Jupyter notebooks.
 ## Useful keyboard shortcuts
 A number of keybindigs are available to make the use of the tool more efficient. For example, when a points layer is selected, the following keybindings are available:
 
-- `P` or `2` will activate the `Add point` mode.
-- `S` or `3` will activate the `Select/Move point` mode.
-- `4` will activate the `Move layer` mode.
+- <kbd>P</kbd> or <kbd>2</kbd> will activate the `Add point` mode.
+- <kbd>S</kbd> or <kbd>3</kbd> will activate the `Select/Move point` mode.
+- <kbd>4</kbd> will activate the `Move layer` mode.
 
 Hovering over the buttons in the dialog will show the corresponding keybinding.
 
