@@ -57,8 +57,8 @@ class StereoshiftInfo:
     sf2: list[float] = field(default_factory=list)
     sp1: list[float] = field(default_factory=list)
     sp2: list[float] = field(default_factory=list)
-    shift_fiducial: float = 0.0  # Fiducial = field(default_factory=Fiducial)
-    shift_point: float = 0.0  # Fiducial = field(default_factory=Fiducial)
+    shift_fiducial: float = 0.0
+    shift_point: float = 0.0
     stereoshift: float = -1.0
     depth_cm: float = 0.0
 
