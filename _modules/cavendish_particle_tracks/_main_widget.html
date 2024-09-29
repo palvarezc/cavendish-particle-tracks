@@ -427,9 +427,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">particle_decays_menu</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">particle_decays_menu</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">EXPECTED_PARTICLES</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">particle_decays_menu</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">particle_decays_menu</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_on_click_new_particle</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_decays_menu</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_click_new_particle</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">radius_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Calculate radius&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delete_particle</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Delete particle&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">length_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Calculate length&quot;</span><span class="p">)</span>
@@ -621,13 +619,9 @@ document.write(`
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setColumnHidden</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">show</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">columns_show_calibrated</span>
-            <span class="k">if</span> <span class="n">calibrated</span>
-            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns_show_uncalibrated</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">columns_show_calibrated</span> <span class="k">if</span> <span class="n">calibrated</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns_show_uncalibrated</span>
         <span class="p">)</span>
-        <span class="n">show_index</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">show</span><span class="p">)</span>
-        <span class="p">]</span>
+        <span class="n">show_index</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">show</span><span class="p">)]</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">show_index</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setColumnHidden</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
@@ -683,9 +677,7 @@ document.write(`
 
 <div class="viewcode-block" id="ParticleTracksWidget.set_UI_image_loaded">
 <a class="viewcode-back" href="../../api.html#cavendish_particle_tracks.ParticleTracksWidget.set_UI_image_loaded">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_UI_image_loaded</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">loaded</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">bypass_load_screen</span><span class="p">:</span> <span class="nb">bool</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">set_UI_image_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loaded</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">bypass_load_screen</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">bypass_load_screen</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">loaded</span><span class="p">:</span>
@@ -714,9 +706,7 @@ document.write(`
 
         <span class="c1"># Forcing only 3 points</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
-                <span class="s2">&quot;You have not selected any points.&quot;</span>
-            <span class="p">)</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;You have not selected any points.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_points</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
             <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
@@ -730,9 +720,7 @@ document.write(`
         <span class="k">try</span><span class="p">:</span>
             <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
-                <span class="s2">&quot;There are no particles in the table.&quot;</span>
-            <span class="p">)</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;There are no particles in the table.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Assigns the points and radius to the selected row</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
@@ -758,8 +746,7 @@ document.write(`
 
             <span class="c1">## Add the calibrated radius to the table</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_cm</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">magnification</span>
-                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_px</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">magnification</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_px</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
                 <span class="n">selected_row</span><span class="p">,</span>
@@ -779,9 +766,7 @@ document.write(`
 
         <span class="c1"># Force selection of 2 points</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_points</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
-                <span class="s2">&quot;You have not selected any points.&quot;</span>
-            <span class="p">)</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;You have not selected any points.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_points</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
@@ -802,9 +787,7 @@ document.write(`
         <span class="k">try</span><span class="p">:</span>
             <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
-                <span class="s2">&quot;There are no particles in the table.&quot;</span>
-            <span class="p">)</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;There are no particles in the table.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
                 <span class="n">point</span> <span class="o">=</span> <span class="n">selected_points</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
@@ -888,8 +871,7 @@ document.write(`
         <span class="n">three_subdirectories</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">folder_subdirs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
         <span class="c1"># Checks that these subdirectories correspond to event views.</span>
         <span class="n">subdir_names_contain_views</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
-            <span class="nb">any</span><span class="p">(</span><span class="n">view</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">folder_subdirs</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">VIEW_NAMES</span>
+            <span class="nb">any</span><span class="p">(</span><span class="n">view</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">folder_subdirs</span><span class="p">)</span> <span class="k">for</span> <span class="n">view</span> <span class="ow">in</span> <span class="n">VIEW_NAMES</span>
         <span class="p">)</span>
         <span class="c1"># Checks that each subdirectory contains the same number of images.</span>
         <span class="n">image_count_first</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">folder_subdirs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/*&quot;</span><span class="p">))</span>
@@ -924,9 +906,9 @@ document.write(`
             <span class="k">return</span> <span class="n">array</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">magic_number_smallest_view_pixels</span><span class="p">:,</span> <span class="p">:]</span>
 
         <span class="c1"># Shuffle the images to avoid bias in the order of the events</span>
-        <span class="n">shuffling_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">shuffling_seed</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">image_count_first</span><span class="p">)</span>
+        <span class="n">shuffling_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuffling_seed</span><span class="p">)</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span>
+            <span class="n">image_count_first</span>
+        <span class="p">)</span>
 
         <span class="n">stacks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">folder_subdirs</span><span class="p">:</span>
@@ -1007,16 +989,12 @@ document.write(`
         <span class="k">try</span><span class="p">:</span>
             <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
-                <span class="s2">&quot;There are no particles in the table.&quot;</span>
-            <span class="p">)</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;There are no particles in the table.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">confirmation_dialog</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">()</span>
             <span class="n">confirmation_dialog</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Deleting selected particle&quot;</span><span class="p">)</span>
             <span class="n">confirmation_dialog</span><span class="o">.</span><span class="n">setInformativeText</span><span class="p">(</span><span class="s2">&quot;Do you want to continue?&quot;</span><span class="p">)</span>
-            <span class="n">confirmation_dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span>
-                <span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span> <span class="o">|</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span>
-            <span class="p">)</span>
+            <span class="n">confirmation_dialog</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span> <span class="o">|</span> <span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
             <span class="n">confirmation_dialog</span><span class="o">.</span><span class="n">setDefaultButton</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Cancel</span><span class="p">)</span>
             <span class="n">return_code</span> <span class="o">=</span> <span class="n">confirmation_dialog</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
 
@@ -1047,9 +1025,7 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Changes the visualisation of the table to show calibrated values for radius and decay_length&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_magnification_button</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_apply_magnification</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_table_visible_vars</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">apply_magnification_button</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_table_visible_vars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">apply_magnification_button</span><span class="o">.</span><span class="n">isChecked</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">_apply_magnification</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates magnification and calibrated radius and length for each particle in data&quot;&quot;&quot;</span>
@@ -1105,9 +1081,7 @@ document.write(`
         <span class="c1"># Save as pickle if file_name ends with .pkl</span>
         <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.pkl&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
-                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span>
-                <span class="p">)</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">handle</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span>
 
         <span class="c1"># Save as .csv if file_name ends with .csv</span>
         <span class="k">elif</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
