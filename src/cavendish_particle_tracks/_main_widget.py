@@ -37,7 +37,7 @@ from ._stereoshift_dialog import StereoshiftDialog
 from .analysis import EXPECTED_PARTICLES, VIEW_NAMES, ParticleDecay
 
 MEASUREMENTS_LAYER_NAME = "Radii and Lengths"
-IMAGE_LAYER_NAME = "Particle Tracks"
+IMAGE_LAYER_NAME = "Bubble Chamber Data"
 
 
 class ParticleTracksWidget(QWidget):
