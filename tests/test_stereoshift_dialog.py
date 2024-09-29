@@ -3,7 +3,32 @@ from math import sqrt
 import numpy as np
 import pytest
 
-from cavendish_particle_tracks._analysis import CHAMBER_DEPTH
+from cavendish_particle_tracks.analysis import CHAMBER_DEPTH
+
+
+def test_open_and_close_stereoshift_dialog(cpt_widget):
+    """Test the expected behavior from the expected workflow:
+
+    - Open stereoshift dialog when clicked
+    - Close the dialog
+    """
+    # open the dialog
+    cpt_widget._on_click_stereoshift()
+    assert cpt_widget.stereoshift_dlg.isVisible()
+    assert "Points_Stereoshift" in cpt_widget.viewer.layers
+    assert cpt_widget.stereoshift_dlg.cal_layer.visible
+
+    # close the dialog
+    cpt_widget.stereoshift_dlg.reject()
+    assert not cpt_widget.stereoshift_dlg.isVisible()
+    assert "Points_Stereoshift" in cpt_widget.viewer.layers
+    assert not cpt_widget.stereoshift_dlg.cal_layer.visible
+
+    # Click again to test that the dialog opens again
+    cpt_widget._on_click_stereoshift()
+    assert cpt_widget.stereoshift_dlg.isVisible()
+    assert "Points_Stereoshift" in cpt_widget.viewer.layers
+    assert cpt_widget.stereoshift_dlg.cal_layer.visible
 
 
 @pytest.mark.parametrize("vertex", ["origin", "decay"])
