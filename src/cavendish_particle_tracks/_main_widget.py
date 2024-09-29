@@ -222,7 +222,7 @@ class ParticleTracksWidget(QWidget):
         point and the calculated radius.
         """
         np = ParticleDecay()
-        self.columns = list(np.__dict__.keys())
+        self.columns = list(np._vars_to_save())
         self.columns += ["magnification"]
         self.columns_show_calibrated = np._vars_to_show(True)
         self.columns_show_uncalibrated = np._vars_to_show(False)
@@ -335,19 +335,17 @@ class ParticleTracksWidget(QWidget):
         except IndexError:
             napari.utils.notifications.show_error("There are no particles in the table.")
         else:
-            # Assigns the points and radius to the selected row
-            for i in range(3):
-                point = selected_points[i]
-                self.table.setItem(
-                    selected_row,
-                    self._get_table_column_index("r" + str(i + 1)),
-                    QTableWidgetItem(str(point)),
-                )
+            print("calculating radius!")  # FIXME: update when PR #164 is updated
+            rad = radius(*selected_points)
 
             self.data[selected_row].rpoints = selected_points
 
-            print("calculating radius!")
-            rad = radius(*selected_points)
+            # Assigns the points and radius to the selected row
+            self.table.setItem(
+                selected_row,
+                self._get_table_column_index("rpoints"),
+                QTableWidgetItem(str(self.data[selected_row].rpoints)),
+            )
 
             self.table.setItem(
                 selected_row,
@@ -402,23 +400,22 @@ class ParticleTracksWidget(QWidget):
         except IndexError:
             napari.utils.notifications.show_error("There are no particles in the table.")
         else:
-            for i in range(2):
-                point = selected_points[i]
-                self.table.setItem(
-                    selected_row,
-                    self._get_table_column_index("d" + str(i + 1)),
-                    QTableWidgetItem(str(point)),
-                )
+
             self.data[selected_row].dpoints = selected_points
+            self.table.setItem(
+                selected_row,
+                self._get_table_column_index("dpoints"),
+                QTableWidgetItem(str(self.data[selected_row].dpoints)),
+            )
 
             print("calculating decay length!")
-            declen = length(*selected_points)
+            decay_length = length(*selected_points)
+            self.data[selected_row].decay_length_px = decay_length
             self.table.setItem(
                 selected_row,
                 self._get_table_column_index("decay_length_px"),
-                QTableWidgetItem(str(declen)),
+                QTableWidgetItem(str(decay_length)),
             )
-            self.data[selected_row].decay_length_px = declen
 
             ## Add the calibrated decay length to the table
             self.data[selected_row].decay_length_cm = (
