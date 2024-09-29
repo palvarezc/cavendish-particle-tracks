@@ -66,10 +66,15 @@ def test_calculate_radius_ui(
     for expected in expected_lines:
         assert expected in captured.out
 
-    assert cpt_widget.table.item(0, 1)
-    assert cpt_widget.table.item(0, 2)
-    assert cpt_widget.table.item(0, 3)
-    assert cpt_widget.table.item(0, 4)
+    assert cpt_widget.table.item(
+        0, cpt_widget._get_table_column_index("radius_px")
+    )
+    assert cpt_widget.table.item(
+        0, cpt_widget._get_table_column_index("radius_cm")
+    )
+    assert cpt_widget.table.item(
+        0, cpt_widget._get_table_column_index("rpoints")
+    )
 
     assert cpt_widget.data[0].radius_px == 1.0
 
@@ -349,12 +354,51 @@ def test_radius_save_preserves_old_data(cpt_widget):
     assert (
         cpt_widget.data[0].radius_cm != cpt_widget.data[1].radius_cm
     ), "The radii should be different"
-    assert all(
-        cpt_widget.data[0].r1 != cpt_widget.data[1].r1
+    assert (
+        cpt_widget.data[0]._r1 != cpt_widget.data[1]._r1
     ), "The radius points should be different"
-    assert all(
-        cpt_widget.data[0].r2 != cpt_widget.data[1].r2
+    assert (
+        cpt_widget.data[0]._r2 != cpt_widget.data[1]._r2
     ), "The radius points should be different"
-    assert all(
-        cpt_widget.data[0].r3 != cpt_widget.data[1].r3
+    assert (
+        cpt_widget.data[0]._r3 != cpt_widget.data[1]._r3
     ), "The radius points should be different"
+
+
+def test_length_save_preserves_old_data(cpt_widget):
+    """Test saving a new particle length does not mess up the previous one."""
+    # setup measurement layer
+    # layer_measurements = cpt_widget._setup_measurement_layer()
+    layer_measurements = cpt_widget.viewer.add_points(
+        name="Radii and Lengths", ndim=2
+    )
+
+    # add a new particle and calculate length
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+    # layer_measurements.add([[0, 0, 0, 0], [0, 0, 1, 0]]) # 1px length
+    layer_measurements.add([[0, 0], [1, 0]])  # 1px length
+    layer_measurements.selected_data = {0, 1}
+    cpt_widget._on_click_length()
+
+    # create a second particle and calculate length
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+    # layer_measurements.add([[0, 0, 1, 1], [0, 0, 1, 3], [0, 0, 0, 3]]) # 2px length
+    layer_measurements.add([[1, 1], [1, 3]])  # 2px length
+    layer_measurements.selected_data = {2, 3}
+    cpt_widget._on_click_length()
+
+    # check the length information is different
+    assert (
+        cpt_widget.data[0].decay_length_px
+        != cpt_widget.data[1].decay_length_px
+    ), "The length should be different"
+    assert (
+        cpt_widget.data[0].decay_length_cm
+        != cpt_widget.data[1].decay_length_cm
+    ), "The length should be different"
+    assert (
+        cpt_widget.data[0]._d1 != cpt_widget.data[1]._d1
+    ), "The length points should be different"
+    assert (
+        cpt_widget.data[0]._d2 != cpt_widget.data[1]._d2
+    ), "The length points should be different"

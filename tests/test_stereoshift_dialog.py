@@ -125,7 +125,7 @@ def test_calculate_stereoshift_ui(
 
     # check save to table
     dlg._on_click_save_to_table()
-    assert cpt_widget.data[0].spoints.all() == dlg.spoints.all()
+    assert (cpt_widget.data[0].spoints == dlg.spoints).all()
     assert cpt_widget.data[0].shift_fiducial == dlg.shift_fiducial
     assert cpt_widget.data[0].shift_point == dlg.shift_point
     assert cpt_widget.data[0].stereoshift == dlg.point_stereoshift
