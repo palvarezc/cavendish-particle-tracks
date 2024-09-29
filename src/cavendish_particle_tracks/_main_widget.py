@@ -61,9 +61,7 @@ class ParticleTracksWidget(QWidget):
         self.particle_decays_menu = QComboBox()
         self.particle_decays_menu.addItems(EXPECTED_PARTICLES)
         self.particle_decays_menu.setCurrentIndex(0)
-        self.particle_decays_menu.currentIndexChanged.connect(
-            self._on_click_new_particle
-        )
+        self.particle_decays_menu.currentIndexChanged.connect(self._on_click_new_particle)
         self.radius_button = QPushButton("Calculate radius")
         self.delete_particle = QPushButton("Delete particle")
         self.length_button = QPushButton("Calculate length")
@@ -252,13 +250,9 @@ class ParticleTracksWidget(QWidget):
         for _ in range(len(self.columns)):
             self.table.setColumnHidden(_, True)
         show = (
-            self.columns_show_calibrated
-            if calibrated
-            else self.columns_show_uncalibrated
+            self.columns_show_calibrated if calibrated else self.columns_show_uncalibrated
         )
-        show_index = [
-            i for i, item in enumerate(self.columns) if item in set(show)
-        ]
+        show_index = [i for i, item in enumerate(self.columns) if item in set(show)]
         for _ in show_index:
             self.table.setColumnHidden(_, False)
 
@@ -309,9 +303,7 @@ class ParticleTracksWidget(QWidget):
             # self.magnification_button.setEnabled(False)
             self.save_data_button.setEnabled(False)
 
-    def set_UI_image_loaded(
-        self, loaded: bool, bypass_load_screen: bool
-    ) -> None:
+    def set_UI_image_loaded(self, loaded: bool, bypass_load_screen: bool) -> None:
         if bypass_load_screen:
             return
         if loaded:
@@ -339,9 +331,7 @@ class ParticleTracksWidget(QWidget):
 
         # Forcing only 3 points
         if len(selected_points) == 0:
-            napari.utils.notifications.show_error(
-                "You have not selected any points."
-            )
+            napari.utils.notifications.show_error("You have not selected any points.")
             return
         elif len(selected_points) != 3:
             napari.utils.notifications.show_error(
@@ -355,9 +345,7 @@ class ParticleTracksWidget(QWidget):
         try:
             selected_row = self._get_selected_row()
         except IndexError:
-            napari.utils.notifications.show_error(
-                "There are no particles in the table."
-            )
+            napari.utils.notifications.show_error("There are no particles in the table.")
         else:
             # Assigns the points and radius to the selected row
             for i in range(3):
@@ -383,8 +371,7 @@ class ParticleTracksWidget(QWidget):
 
             ## Add the calibrated radius to the table
             self.data[selected_row].radius_cm = (
-                self.data[selected_row].magnification
-                * self.data[selected_row].radius_px
+                self.data[selected_row].magnification * self.data[selected_row].radius_px
             )
             self.table.setItem(
                 selected_row,
@@ -404,9 +391,7 @@ class ParticleTracksWidget(QWidget):
 
         # Force selection of 2 points
         if len(selected_points) == 0:
-            napari.utils.notifications.show_error(
-                "You have not selected any points."
-            )
+            napari.utils.notifications.show_error("You have not selected any points.")
             return
         elif len(selected_points) != 2:
             napari.utils.notifications.show_error(
@@ -427,9 +412,7 @@ class ParticleTracksWidget(QWidget):
         try:
             selected_row = self._get_selected_row()
         except IndexError:
-            napari.utils.notifications.show_error(
-                "There are no particles in the table."
-            )
+            napari.utils.notifications.show_error("There are no particles in the table.")
         else:
             for i in range(2):
                 point = selected_points[i]
@@ -513,8 +496,7 @@ class ParticleTracksWidget(QWidget):
         three_subdirectories = len(folder_subdirs) == 3
         # Checks that these subdirectories correspond to event views.
         subdir_names_contain_views = all(
-            any(view in name.lower() for name in folder_subdirs)
-            for view in VIEW_NAMES
+            any(view in name.lower() for name in folder_subdirs) for view in VIEW_NAMES
         )
         # Checks that each subdirectory contains the same number of images.
         image_count_first = len(glob.glob(folder_subdirs[0] + "/*"))
@@ -549,9 +531,9 @@ class ParticleTracksWidget(QWidget):
             return array[:, :, magic_number_smallest_view_pixels:, :]
 
         # Shuffle the images to avoid bias in the order of the events
-        shuffling_indices = np.random.RandomState(
-            self.shuffling_seed
-        ).permutation(image_count_first)
+        shuffling_indices = np.random.RandomState(self.shuffling_seed).permutation(
+            image_count_first
+        )
 
         stacks = []
         for subdir in folder_subdirs:
@@ -632,16 +614,12 @@ class ParticleTracksWidget(QWidget):
         try:
             selected_row = self._get_selected_row()
         except IndexError:
-            napari.utils.notifications.show_error(
-                "There are no particles in the table."
-            )
+            napari.utils.notifications.show_error("There are no particles in the table.")
         else:
             confirmation_dialog = QMessageBox()
             confirmation_dialog.setText("Deleting selected particle")
             confirmation_dialog.setInformativeText("Do you want to continue?")
-            confirmation_dialog.setStandardButtons(
-                QMessageBox.Yes | QMessageBox.Cancel
-            )
+            confirmation_dialog.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
             confirmation_dialog.setDefaultButton(QMessageBox.Cancel)
             return_code = confirmation_dialog.exec()
 
@@ -672,9 +650,7 @@ class ParticleTracksWidget(QWidget):
         """Changes the visualisation of the table to show calibrated values for radius and decay_length"""
         if self.apply_magnification_button.isChecked():
             self._apply_magnification()
-        self._set_table_visible_vars(
-            self.apply_magnification_button.isChecked()
-        )
+        self._set_table_visible_vars(self.apply_magnification_button.isChecked())
 
     def _apply_magnification(self) -> None:
         """Calculates magnification and calibrated radius and length for each particle in data"""
@@ -730,9 +706,7 @@ class ParticleTracksWidget(QWidget):
         # Save as pickle if file_name ends with .pkl
         if file_name.endswith(".pkl"):
             with open(file_name, "wb") as handle:
-                pickle.dump(
-                    self.data, handle, protocol=pickle.HIGHEST_PROTOCOL
-                )
+                pickle.dump(self.data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         # Save as .csv if file_name ends with .csv
         elif file_name.endswith(".csv"):
