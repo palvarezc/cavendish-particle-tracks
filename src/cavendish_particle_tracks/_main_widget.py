@@ -9,20 +9,18 @@ for further analysis.
 import glob
 import os
 import pickle
+import warnings
 
 import dask.array
 import napari
 import numpy as np
 from dask_image.imread import imread
-from qtpy.QtCore import QPoint, Qt
-from qtpy.QtGui import QFont
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QComboBox,
     QFileDialog,
     QGridLayout,
     QHBoxLayout,
-    QLabel,
     QMessageBox,
     QPushButton,
     QRadioButton,
@@ -47,15 +45,14 @@ class ParticleTracksWidget(QWidget):
     def __init__(
         self,
         napari_viewer: napari.Viewer,
-        bypass_load_screen: bool = False,
+        bypass_force_load_data: bool = False,
         docking_area: str = "right",
     ):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
-        self.bypass_load_screen = bypass_load_screen
+        # In normal operation: the user is forced to load data before they can do anything.
+        self.bypass_force_load_data = bypass_force_load_data
         self.docking_area = docking_area
-        if self.docking_area != "bottom":
-            self.bypass_load_screen = True
 
         self.shuffling_seed = self._get_shuffling_seed()
 
@@ -101,21 +98,6 @@ class ParticleTracksWidget(QWidget):
         # self.viewer.mouse_press.callbacks.connect(self._on_mouse_press)
         # self.viewer.events.mouse_press(self._on_mouse_click)
 
-        # layout
-        self.intro_text = QLabel(
-            r"""
-   _____                          _ _     _       _____           _   _      _        _______             _
-  / ____|                        | (_)   | |     |  __ \         | | (_)    | |      |__   __|           | |
- | |     __ ___   _____ _ __   __| |_ ___| |__   | |__) |_ _ _ __| |_ _  ___| | ___     | |_ __ __ _  ___| | _____
- | |    / _` \ \ / / _ \ '_ \ / _` | / __| '_ \  |  ___/ _` | '__| __| |/ __| |/ _ \    | | '__/ _` |/ __| |/ / __|
- | |___| (_| |\ V /  __/ | | | (_| | \__ \ | | | | |  | (_| | |  | |_| | (__| |  __/    | | | | (_| | (__|   <\__ \
-  \_____\__,_| \_/ \___|_| |_|\__,_|_|___/_| |_| |_|   \__,_|_|   \__|_|\___|_|\___|    |_|_|  \__,_|\___|_|\_\___/
-
-"""
-        )
-        self.intro_text.setFont(QFont("Lucida Console", 5))
-        self.intro_text.setTextFormat(Qt.TextFormat.PlainText)
-
         if self.docking_area == "bottom":
             self.buttonbox = QGridLayout()
             self.buttonbox.addWidget(self.load_button, 0, 0)
@@ -131,7 +113,6 @@ class ParticleTracksWidget(QWidget):
 
             layout_outer = QHBoxLayout()
             self.setLayout(layout_outer)
-            self.layout().addWidget(self.intro_text)
             layout_outer.addLayout(self.buttonbox)
             self.layout().addWidget(self.table)
 
@@ -150,12 +131,16 @@ class ParticleTracksWidget(QWidget):
             self.buttonbox.addWidget(self.save_data_button)
             self.setLayout(self.buttonbox)
 
-        # Disable native napari layer controls - show again on closing this widget (hide).
+        # Disable some native napari controls
         # NB: Both of these will break in napari 0.6.0
-        self.viewer.window._qt_viewer.layerButtons.hide()
-        # Disable viewer buttons, prevents accidental crash due to viewing image stack side on.
-        self.viewer.window._qt_viewer.viewerButtons.hide()
-        self.set_UI_image_loaded(False, self.bypass_load_screen)
+        with warnings.catch_warnings():
+            warnings.simplefilter(action="ignore", category=FutureWarning)
+            # Disable native napari layer controls - show again on closing this widget (hide).
+            self.viewer.window._qt_viewer.layerButtons.hide()
+            # Disable viewer buttons, prevents accidental crash due to viewing image stack side on.
+            self.viewer.window._qt_viewer.viewerButtons.hide()
+
+        self.set_UI_image_loaded(False, self.bypass_force_load_data)
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
         # Data analysis
@@ -180,8 +165,11 @@ class ParticleTracksWidget(QWidget):
         """
         if len(self.data) > 0:
             self._confirm_save_before_closing()
-        self.viewer.window._qt_viewer.layerButtons.show()
-        self.viewer.window._qt_viewer.viewerButtons.show()
+
+        with warnings.catch_warnings():
+            warnings.simplefilter(action="ignore", category=FutureWarning)
+            self.viewer.window._qt_viewer.layerButtons.show()
+            self.viewer.window._qt_viewer.viewerButtons.show()
         super().hideEvent(event)
 
     def _get_shuffling_seed(self, fallback: int = 1) -> int:
@@ -287,7 +275,7 @@ class ParticleTracksWidget(QWidget):
             if layer.name == "Particle Tracks":
                 images_imported = True
                 break
-        self.set_UI_image_loaded(images_imported, self.bypass_load_screen)
+        self.set_UI_image_loaded(images_imported, self.bypass_force_load_data)
         try:
             selected_row = self._get_selected_row()
             self.save_data_button.setEnabled(True)
@@ -317,39 +305,22 @@ class ParticleTracksWidget(QWidget):
 
     def set_UI_image_loaded(self, loaded: bool, bypass_load_screen: bool) -> None:
         if bypass_load_screen:
-            self.buttonbox.setContentsMargins(0, 0, 0, 0)
-            self.intro_text.hide()
             return
         if loaded:
-            # Set margins (left, top, right, bottom)
-            self.buttonbox.setContentsMargins(0, 0, 0, 0)
-            self.intro_text.hide()
-            self.load_button.hide()
-            self.particle_decays_menu.show()
-            self.delete_particle.show()
-            self.radius_button.show()
-            self.length_button.show()
-            self.decay_angles_button.show()
-            self.stereoshift_button.show()
-            self.save_data_button.show()
-            self.magnification_button.show()
-            self.table.show()
-            self.apply_magnification_button.show()
+            self.load_button.setEnabled(False)
+            self.particle_decays_menu.setEnabled(True)
+            self.magnification_button.setEnabled(True)
         else:
-            # Set margins (left, top, right, bottom)
-            self.buttonbox.setContentsMargins(200, 0, 200, 0)
-            self.intro_text.show()
-            self.load_button.show()
-            self.particle_decays_menu.hide()
-            self.delete_particle.hide()
-            self.radius_button.hide()
-            self.length_button.hide()
-            self.decay_angles_button.hide()
-            self.stereoshift_button.hide()
-            self.save_data_button.hide()
-            self.magnification_button.hide()
-            self.table.hide()
-            self.apply_magnification_button.hide()
+            self.load_button.setEnabled(True)
+            self.particle_decays_menu.setEnabled(False)
+            self.delete_particle.setEnabled(False)
+            self.radius_button.setEnabled(False)
+            self.length_button.setEnabled(False)
+            self.decay_angles_button.setEnabled(False)
+            self.stereoshift_button.setEnabled(False)
+            self.save_data_button.setEnabled(False)
+            self.magnification_button.setEnabled(False)
+            self.apply_magnification_button.setEnabled(False)
 
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
@@ -484,8 +455,6 @@ class ParticleTracksWidget(QWidget):
             return self.decay_angles_dlg
         self.decay_angles_dlg = DecayAnglesDialog(self)
         self.decay_angles_dlg.show()
-        point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        self.decay_angles_dlg.move(point)
         return self.decay_angles_dlg
 
     def _on_click_stereoshift(self) -> StereoshiftDialog:
@@ -498,8 +467,6 @@ class ParticleTracksWidget(QWidget):
             return self.stereoshift_dlg
         self.stereoshift_dlg = StereoshiftDialog(self)
         self.stereoshift_dlg.show()
-        point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        self.stereoshift_dlg.move(point)
         return self.stereoshift_dlg
 
     def _on_click_load_data(self) -> None:
@@ -669,8 +636,6 @@ class ParticleTracksWidget(QWidget):
             return self.mag_dlg
         self.mag_dlg = MagnificationDialog(self)
         self.mag_dlg.show()
-        point = QPoint(self.pos().x() + self.width(), self.pos().y())
-        self.mag_dlg.move(point)
         return self.mag_dlg
 
     def _propagate_magnification(self, a: float, b: float) -> None:
