@@ -69,8 +69,8 @@ class ParticleDecay:
     shift_point: Fiducial = field(default_factory=Fiducial)
     stereoshift: float = -1.0
     depth_cm: float = -1.0
-    magnification_a: float = -1.0e6
-    magnification_b: float = -1.0e6
+    magnification_a: float = -1.0
+    magnification_b: float = 0.0
     # magnification: float = -1.0
     phi_proton: float = -100
     phi_pion: float = -100

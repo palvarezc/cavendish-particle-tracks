@@ -149,8 +149,8 @@ class ParticleTracksWidget(QWidget):
         # Data analysis
         self.data: list[ParticleDecay] = []
         # might not need this eventually
-        self.mag_a = -1.0e6
-        self.mag_b = -1.0e6
+        self.mag_a = -1.0
+        self.mag_b = 0.0
 
         # Dialog pointers to reuse
         self.mag_dlg: MagnificationDialog | None = None
@@ -315,8 +315,7 @@ class ParticleTracksWidget(QWidget):
         for slice_index, data_slice in enumerate(["View", "Event"]):
             current_slice = self.viewer.dims.current_step[slice_index]
             all_points_in_current_slice = all(
-                current_slice == point[slice_index]
-                for point in selected_points
+                current_slice == point[slice_index] for point in selected_points
             )
             if not all_points_in_current_slice:
                 napari.utils.notifications.show_error(
@@ -355,7 +354,7 @@ class ParticleTracksWidget(QWidget):
         else:
             napari.utils.notifications.show_info(
                 f"Adding points to the table: {selected_points_xy}"
-            ) # FIXME: update when PR #164 is updated
+            )  # FIXME: update when PR #164 is updated
             # Assigns the points and radius to the selected row
             self.data[selected_row].rpoints = selected_points_xy
 
@@ -434,7 +433,6 @@ class ParticleTracksWidget(QWidget):
                 self._get_table_column_index("dpoints"),
                 QTableWidgetItem(str(self.data[selected_row].dpoints)),
             )
-
 
             print("calculating decay length!")
             decay_length = length(*selected_points)
