@@ -313,36 +313,22 @@ class ParticleTracksWidget(QWidget):
         self, loaded: bool, bypass_load_screen: bool
     ) -> None:
         if bypass_load_screen:
-            self.buttonbox.setContentsMargins(0, 0, 0, 0)
             return
         if loaded:
-            # Set margins (left, top, right, bottom)
-            self.buttonbox.setContentsMargins(0, 0, 0, 0)
-            self.load_button.hide()
-            self.particle_decays_menu.show()
-            self.delete_particle.show()
-            self.radius_button.show()
-            self.length_button.show()
-            self.decay_angles_button.show()
-            self.stereoshift_button.show()
-            self.save_data_button.show()
-            self.magnification_button.show()
-            self.table.show()
-            self.apply_magnification_button.show()
+            self.load_button.setEnabled(False)
+            self.particle_decays_menu.setEnabled(True)
+            self.magnification_button.setEnabled(True)
         else:
-            # Set margins (left, top, right, bottom)
-            self.buttonbox.setContentsMargins(200, 0, 200, 0)
-            self.load_button.show()
-            self.particle_decays_menu.hide()
-            self.delete_particle.hide()
-            self.radius_button.hide()
-            self.length_button.hide()
-            self.decay_angles_button.hide()
-            self.stereoshift_button.hide()
-            self.save_data_button.hide()
-            self.magnification_button.hide()
-            self.table.hide()
-            self.apply_magnification_button.hide()
+            self.load_button.setEnabled(True)
+            self.particle_decays_menu.setEnabled(False)
+            self.delete_particle.setEnabled(False)
+            self.radius_button.setEnabled(False)
+            self.length_button.setEnabled(False)
+            self.decay_angles_button.setEnabled(False)
+            self.stereoshift_button.setEnabled(False)
+            self.save_data_button.setEnabled(False)
+            self.magnification_button.setEnabled(False)
+            self.apply_magnification_button.setEnabled(False)
 
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
