@@ -336,7 +336,8 @@ document.write(`
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#C"><strong>C</strong></a>
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
@@ -345,6 +346,7 @@ document.write(`
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -354,6 +356,14 @@ document.write(`
  | <a href="#Y"><strong>Y</strong></a>
  
 </div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.average_depth_cm">average_depth_cm (cavendish_particle_tracks.analysis.ParticleDecay property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -387,9 +397,13 @@ document.write(`
 </li>
       <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.decay_length_px">decay_length_px (cavendish_particle_tracks.analysis.ParticleDecay attribute)</a>
 </li>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.decay_vertex_depth_cm">decay_vertex_depth_cm (cavendish_particle_tracks.analysis.ParticleDecay property)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.depth_cm">depth_cm (cavendish_particle_tracks.analysis.ParticleDecay attribute)</a>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.decay_vertex_stereoshift_info">decay_vertex_stereoshift_info (cavendish_particle_tracks.analysis.ParticleDecay attribute)</a>
+</li>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.StereoshiftInfo.depth_cm">depth_cm (cavendish_particle_tracks.analysis.StereoshiftInfo attribute)</a>
 </li>
       <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.dpoints">dpoints (cavendish_particle_tracks.analysis.ParticleDecay property)</a>
 </li>
@@ -467,7 +481,21 @@ document.write(`
       <ul>
         <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.name">(cavendish_particle_tracks.analysis.ParticleDecay attribute)</a>
 </li>
+        <li><a href="api.html#cavendish_particle_tracks.analysis.StereoshiftInfo.name">(cavendish_particle_tracks.analysis.StereoshiftInfo attribute)</a>
+</li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.origin_vertex_depth_cm">origin_vertex_depth_cm (cavendish_particle_tracks.analysis.ParticleDecay property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.origin_vertex_stereoshift_info">origin_vertex_stereoshift_info (cavendish_particle_tracks.analysis.ParticleDecay attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -508,15 +536,25 @@ document.write(`
 </li>
       <li><a href="api.html#cavendish_particle_tracks.ParticleTracksWidget.set_UI_image_loaded">set_UI_image_loaded() (cavendish_particle_tracks.ParticleTracksWidget method)</a>
 </li>
-      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.shift_fiducial">shift_fiducial (cavendish_particle_tracks.analysis.ParticleDecay attribute)</a>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.StereoshiftInfo.sf1">sf1 (cavendish_particle_tracks.analysis.StereoshiftInfo attribute)</a>
+</li>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.StereoshiftInfo.sf2">sf2 (cavendish_particle_tracks.analysis.StereoshiftInfo attribute)</a>
+</li>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.StereoshiftInfo.shift_fiducial">shift_fiducial (cavendish_particle_tracks.analysis.StereoshiftInfo attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.shift_point">shift_point (cavendish_particle_tracks.analysis.ParticleDecay attribute)</a>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.StereoshiftInfo.shift_point">shift_point (cavendish_particle_tracks.analysis.StereoshiftInfo attribute)</a>
 </li>
-      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.spoints">spoints (cavendish_particle_tracks.analysis.ParticleDecay property)</a>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.StereoshiftInfo.sp1">sp1 (cavendish_particle_tracks.analysis.StereoshiftInfo attribute)</a>
 </li>
-      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.stereoshift">stereoshift (cavendish_particle_tracks.analysis.ParticleDecay attribute)</a>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.StereoshiftInfo.sp2">sp2 (cavendish_particle_tracks.analysis.StereoshiftInfo attribute)</a>
+</li>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.StereoshiftInfo.spoints">spoints (cavendish_particle_tracks.analysis.StereoshiftInfo property)</a>
+</li>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.StereoshiftInfo.stereoshift">stereoshift (cavendish_particle_tracks.analysis.StereoshiftInfo attribute)</a>
+</li>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.StereoshiftInfo">StereoshiftInfo (class in cavendish_particle_tracks.analysis)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -532,6 +570,12 @@ document.write(`
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.vars_to_save">vars_to_save() (cavendish_particle_tracks.analysis.ParticleDecay method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.vars_to_show">vars_to_show() (cavendish_particle_tracks.analysis.ParticleDecay method)</a>
+</li>
       <li><a href="api.html#cavendish_particle_tracks.analysis.ParticleDecay.view_number">view_number (cavendish_particle_tracks.analysis.ParticleDecay attribute)</a>
 </li>
   </ul></td>

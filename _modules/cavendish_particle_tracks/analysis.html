@@ -403,6 +403,9 @@ document.write(`
     <span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0e6</span>
     <span class="n">y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0e6</span>
 
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Fiducial(name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">; x=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">; y=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">)&quot;</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">xy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">])</span>
@@ -411,6 +414,33 @@ document.write(`
     <span class="k">def</span> <span class="nf">xy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="StereoshiftInfo">
+<a class="viewcode-back" href="../../api.html#cavendish_particle_tracks.analysis.StereoshiftInfo">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">StereoshiftInfo</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">sf1</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">sf2</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">sp1</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">sp2</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">shift_fiducial</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">shift_point</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">stereoshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+    <span class="n">depth_cm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">sf1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sp1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sp2</span><span class="p">])</span>
+
+    <span class="nd">@spoints</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">spoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sf1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sf2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sp1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sp2</span> <span class="o">=</span> <span class="n">points</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;StereoshiftInfo(name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">; sf1=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sf1</span><span class="si">}</span><span class="s2">; sf2=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sf2</span><span class="si">}</span><span class="s2">; sp1=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sp1</span><span class="si">}</span><span class="s2">; sp2=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sp2</span><span class="si">}</span><span class="s2">; shift_fiducial=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shift_fiducial</span><span class="si">}</span><span class="s2">; shift_point=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shift_point</span><span class="si">}</span><span class="s2">; stereoshift=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stereoshift</span><span class="si">}</span><span class="s2">; depth_cm=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">depth_cm</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
 
@@ -430,29 +460,29 @@ document.write(`
     <span class="n">_d2</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
     <span class="n">decay_length_px</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">decay_length_cm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">_sf1</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
-    <span class="n">_sf2</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
-    <span class="n">_sp1</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
-    <span class="n">_sp2</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
-    <span class="n">shift_fiducial</span><span class="p">:</span> <span class="n">Fiducial</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Fiducial</span><span class="p">)</span>
-    <span class="n">shift_point</span><span class="p">:</span> <span class="n">Fiducial</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Fiducial</span><span class="p">)</span>
-    <span class="n">stereoshift</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
-    <span class="n">depth_cm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">magnification_a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
     <span class="n">magnification_b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="c1"># magnification: float = -1.0</span>
+    <span class="n">origin_vertex_stereoshift_info</span><span class="p">:</span> <span class="n">StereoshiftInfo</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">StereoshiftInfo</span>
+    <span class="p">)</span>
+    <span class="n">decay_vertex_stereoshift_info</span><span class="p">:</span> <span class="n">StereoshiftInfo</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">StereoshiftInfo</span>
+    <span class="p">)</span>
     <span class="n">phi_proton</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
     <span class="n">phi_pion</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
     <span class="n">event_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="n">view_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
-    <span class="k">def</span> <span class="nf">_vars_to_show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibrated</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ParticleDecay.vars_to_show">
+<a class="viewcode-back" href="../../api.html#cavendish_particle_tracks.analysis.ParticleDecay.vars_to_show">[docs]</a>
+    <span class="k">def</span> <span class="nf">vars_to_show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibrated</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">calibrated</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span>
                 <span class="s2">&quot;name&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;radius_cm&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;decay_length_cm&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;depth_cm&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;origin_vertex_depth_cm&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;decay_vertex_depth_cm&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;magnification&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;phi_proton&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;phi_pion&quot;</span><span class="p">,</span>
@@ -462,17 +492,23 @@ document.write(`
                 <span class="s2">&quot;name&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;radius_px&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;decay_length_px&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;depth_cm&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;origin_vertex_depth_cm&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;decay_vertex_depth_cm&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;magnification&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;phi_proton&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;phi_pion&quot;</span><span class="p">,</span>
-            <span class="p">]</span>
+            <span class="p">]</span></div>
 
-    <span class="k">def</span> <span class="nf">_vars_to_save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ParticleDecay.vars_to_save">
+<a class="viewcode-back" href="../../api.html#cavendish_particle_tracks.analysis.ParticleDecay.vars_to_save">[docs]</a>
+    <span class="k">def</span> <span class="nf">vars_to_save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Variable to save in the output file, all for the moment&quot;&quot;&quot;</span>
         <span class="n">vars_to_save</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="k">if</span> <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;_&quot;</span><span class="p">]</span>
-        <span class="n">vars_to_save</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;rpoints&quot;</span><span class="p">,</span> <span class="s2">&quot;dpoints&quot;</span><span class="p">,</span> <span class="s2">&quot;spoints&quot;</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">vars_to_save</span>
+        <span class="n">vars_to_save</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;origin_vertex_depth_cm&quot;</span><span class="p">,</span> <span class="s2">&quot;decay_vertex_depth_cm&quot;</span><span class="p">]</span>
+        <span class="n">vars_to_save</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">&quot;rpoints&quot;</span><span class="p">,</span> <span class="s2">&quot;dpoints&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">vars_to_save</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">rpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -495,18 +531,20 @@ document.write(`
             <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">spoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_sf1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sf2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sp1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sp2</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">origin_vertex_depth_cm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin_vertex_stereoshift_info</span><span class="o">.</span><span class="n">depth_cm</span>
 
-    <span class="nd">@spoints</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">spoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spoints</span><span class="p">):</span>
-            <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">decay_vertex_depth_cm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">decay_vertex_stereoshift_info</span><span class="o">.</span><span class="n">depth_cm</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">average_depth_cm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin_vertex_stereoshift_info</span><span class="o">.</span><span class="n">depth_cm</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">magnification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnification_a</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnification_b</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth_cm</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnification_a</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnification_b</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_depth_cm</span>
 
 <div class="viewcode-block" id="ParticleDecay.calibrate">
 <a class="viewcode-back" href="../../api.html#cavendish_particle_tracks.analysis.ParticleDecay.calibrate">[docs]</a>
@@ -519,7 +557,7 @@ document.write(`
 <a class="viewcode-back" href="../../api.html#cavendish_particle_tracks.analysis.ParticleDecay.to_csv">[docs]</a>
     <span class="k">def</span> <span class="nf">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">mystring</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vars_to_save</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars_to_save</span><span class="p">():</span>
             <span class="n">mystring</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span>
         <span class="k">return</span> <span class="n">mystring</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span></div>
 </div>
