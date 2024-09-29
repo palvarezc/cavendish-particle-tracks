@@ -24,6 +24,9 @@ if TYPE_CHECKING:
     from ._main_widget import ParticleTracksWidget
 
 
+MAGNIFICATION_LAYER_NAME = "Magnification"
+
+
 class MagnificationDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent)  # Call QDialog constructor
@@ -40,9 +43,9 @@ class MagnificationDialog(QDialog):
         self.magnification_layer = self.create_or_retrieve_magnification_layer()
 
     def create_or_retrieve_magnification_layer(self) -> Points:
-        if "Magnification" in self.parent.viewer.layers:
-            return self.parent.viewer.layers["Magnification"]
-        return self.parent.viewer.add_points(name="Magnification")
+        if MAGNIFICATION_LAYER_NAME in self.parent.viewer.layers:
+            return self.parent.viewer.layers[MAGNIFICATION_LAYER_NAME]
+        return self.parent.viewer.add_points(name=MAGNIFICATION_LAYER_NAME)
 
     def ui_setup(self):
         self.setWindowTitle("Magnification")
@@ -154,7 +157,9 @@ class MagnificationDialog(QDialog):
     def _add_coords(self, fiducial: int) -> list[float]:
         """When 'Add' is selected, the selected point is added to the corresponding fiducial text box"""
 
-        selected_points = self.parent._get_selected_points("Magnification")
+        selected_points = self.parent._get_selected_points(
+            layer_name=MAGNIFICATION_LAYER_NAME
+        )
 
         # Forcing only 1 points
         if len(selected_points) != 1:
