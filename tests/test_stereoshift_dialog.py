@@ -154,3 +154,40 @@ def test_stereoshift_save_to_table_fails_with_empty_table(cpt_widget, capsys):
     captured = capsys.readouterr()
 
     assert "ERROR: There are no particles in the table." in captured.out
+
+
+def test_stereoshift_save_preserves_old_data(cpt_widget, capsys):
+    """Test saving a new particle stereoshift does not mess up the previous one."""
+    # open the dialog
+    dlg = cpt_widget._on_click_stereoshift()
+
+    # create a new particle and calculate stereoshift
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+    # move reference point to avoid the default nan
+    dlg.cal_layer.data[0][1] += -50
+    dlg._on_click_calculate()
+    dlg._on_click_save_to_table()
+    first_particle_depth = cpt_widget.data[
+        0
+    ].origin_vertex_stereoshift_info.depth_cm
+
+    # create a second particle and calculate stereoshift
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+    # move point to change depth
+    dlg.cal_layer.data[-1][1] += -20
+    dlg._on_click_calculate()
+    assert (
+        dlg.stereoshift_info.depth_cm != first_particle_depth
+    ), "The depths should be different."
+    dlg._on_click_save_to_table()
+
+    first_particle_depth = cpt_widget.data[
+        0
+    ].origin_vertex_stereoshift_info.depth_cm
+    second_particle_depth = cpt_widget.data[
+        1
+    ].origin_vertex_stereoshift_info.depth_cm
+
+    assert (
+        first_particle_depth != second_particle_depth
+    ), "The depths should be different."
