@@ -46,12 +46,13 @@ class ParticleTracksWidget(QWidget):
     def __init__(
         self,
         napari_viewer: napari.Viewer,
-        bypass_load_screen: bool = False,
+        bypass_force_load_data: bool = False,
         docking_area: str = "right",
     ):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
-        self.bypass_load_screen = bypass_load_screen
+        # In normal operation: the user is forced to load data before they can do anything.
+        self.bypass_force_load_data = bypass_force_load_data
         self.docking_area = docking_area
 
         self.shuffling_seed = self._get_shuffling_seed()
@@ -142,7 +143,7 @@ class ParticleTracksWidget(QWidget):
             # Disable viewer buttons, prevents accidental crash due to viewing image stack side on.
             self.viewer.window._qt_viewer.viewerButtons.hide()
 
-        self.set_UI_image_loaded(False, self.bypass_load_screen)
+        self.set_UI_image_loaded(False, self.bypass_force_load_data)
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
         # Data analysis
@@ -281,7 +282,7 @@ class ParticleTracksWidget(QWidget):
             if layer.name == "Particle Tracks":
                 images_imported = True
                 break
-        self.set_UI_image_loaded(images_imported, self.bypass_load_screen)
+        self.set_UI_image_loaded(images_imported, self.bypass_force_load_data)
         try:
             selected_row = self._get_selected_row()
             self.save_data_button.setEnabled(True)
