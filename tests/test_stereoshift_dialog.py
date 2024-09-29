@@ -117,9 +117,7 @@ def test_calculate_stereoshift_ui(
 
     # Check recorded points
     for i in range(4):
-        assert dlg.textboxes[i].text() == str(
-            test_points[i + 2] - test_points[i % 2]
-        )
+        assert dlg.textboxes[i].text() == str(test_points[i + 2] - test_points[i % 2])
 
     # Check calculated values
     assert dlg.tshift_fiducial.text() == str(expected_fiducial_shift)
@@ -167,9 +165,7 @@ def test_stereoshift_save_preserves_old_data(cpt_widget):
     dlg.cal_layer.data[0][1] += -50
     dlg._on_click_calculate()
     dlg._on_click_save_to_table()
-    first_particle_depth = cpt_widget.data[
-        0
-    ].origin_vertex_stereoshift_info.depth_cm
+    first_particle_depth = cpt_widget.data[0].origin_vertex_stereoshift_info.depth_cm
 
     # create a second particle and calculate stereoshift
     cpt_widget.particle_decays_menu.setCurrentIndex(1)
@@ -181,12 +177,8 @@ def test_stereoshift_save_preserves_old_data(cpt_widget):
     ), "The depths should be different."
     dlg._on_click_save_to_table()
 
-    first_particle_depth = cpt_widget.data[
-        0
-    ].origin_vertex_stereoshift_info.depth_cm
-    second_particle_depth = cpt_widget.data[
-        1
-    ].origin_vertex_stereoshift_info.depth_cm
+    first_particle_depth = cpt_widget.data[0].origin_vertex_stereoshift_info.depth_cm
+    second_particle_depth = cpt_widget.data[1].origin_vertex_stereoshift_info.depth_cm
 
     assert (
         first_particle_depth != second_particle_depth

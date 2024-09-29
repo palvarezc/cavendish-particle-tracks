@@ -43,9 +43,7 @@ def magnification(f1: Fiducial, f2: Fiducial, b1: Fiducial, b2: Fiducial):
     tb2 = np.array(FIDUCIAL_BACK[b2.name])
 
     a = np.linalg.norm(tf1 - tf2) / np.linalg.norm(f1.xy - f2.xy)
-    b = (
-        np.linalg.norm(tb1 - tb2) / np.linalg.norm(b1.xy - b2.xy) - a
-    ) / CHAMBER_DEPTH
+    b = (np.linalg.norm(tb1 - tb2) / np.linalg.norm(b1.xy - b2.xy) - a) / CHAMBER_DEPTH
 
     return a, b
 
@@ -83,6 +81,4 @@ def track_parameters(line):
 
 def angle(line1: np.array, line2: np.array) -> float:
     v1, v2 = np.diff(line1, axis=0)[0], np.diff(line2, axis=0)[0]
-    return np.arccos(
-        np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-    )
+    return np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))

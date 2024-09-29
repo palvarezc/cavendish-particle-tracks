@@ -10,9 +10,7 @@ def test_version_fallback(mocker):
 
     assert cavendish_particle_tracks.__version__ != "unknown"  # type: ignore[attr-defined]
 
-    mocker.patch.dict(
-        sys.modules, {"cavendish_particle_tracks._version": None}
-    )
+    mocker.patch.dict(sys.modules, {"cavendish_particle_tracks._version": None})
     importlib.reload(cavendish_particle_tracks)
     assert cavendish_particle_tracks.__version__ == "unknown"  # type: ignore[attr-defined]
 

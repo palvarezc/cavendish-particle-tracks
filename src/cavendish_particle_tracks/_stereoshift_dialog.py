@@ -34,9 +34,7 @@ class StereoshiftDialog(QDialog):
             "Point view1",
             "Point view2",
         ]
-        self._fiducial_views = [
-            Fiducial(view_name) for view_name in FIDUCIAL_VIEWS
-        ]
+        self._fiducial_views = [Fiducial(view_name) for view_name in FIDUCIAL_VIEWS]
 
         # drop-down lists of vertex
         self.vertex_combobox = QComboBox()
@@ -90,9 +88,7 @@ class StereoshiftDialog(QDialog):
         self.setLayout(QGridLayout())
         self.layout().addWidget(QLabel("Select Vertex"), 0, 0, 1, 2)
         self.layout().addWidget(self.vertex_combobox, 0, 2)
-        self.layout().addWidget(
-            QLabel("Select Reference / Fiducial"), 1, 0, 1, 2
-        )
+        self.layout().addWidget(QLabel("Select Reference / Fiducial"), 1, 0, 1, 2)
         self.layout().addWidget(self.cbf1, 1, 2)
         self.layout().addWidget(QLabel("Fiducial coordinates"), 2, 0, 1, 2)
         for i, widget in enumerate(
@@ -254,9 +250,7 @@ class StereoshiftDialog(QDialog):
             self.textboxes[i].setText(str(self._fiducial_views[i].xy))
 
         # Calculate stereoshift and depth
-        self.stereoshift_info.shift_fiducial = length(
-            self.f(1).xy, self.f(2).xy
-        )
+        self.stereoshift_info.shift_fiducial = length(self.f(1).xy, self.f(2).xy)
         self.stereoshift_info.shift_point = length(self.b(1).xy, self.b(2).xy)
         self.stereoshift_info.stereoshift = stereoshift(
             *[view.xy for view in self._fiducial_views]
@@ -288,16 +282,12 @@ class StereoshiftDialog(QDialog):
             what_vertex = self.vertex_combobox.currentIndex()
             # Save the stereoshift info to the particle
             if what_vertex == 0:
-                self.parent.data[
-                    selected_row
-                ].origin_vertex_stereoshift_info = copy.deepcopy(
-                    self.stereoshift_info
+                self.parent.data[selected_row].origin_vertex_stereoshift_info = (
+                    copy.deepcopy(self.stereoshift_info)
                 )
             else:
-                self.parent.data[
-                    selected_row
-                ].decay_vertex_stereoshift_info = copy.deepcopy(
-                    self.stereoshift_info
+                self.parent.data[selected_row].decay_vertex_stereoshift_info = (
+                    copy.deepcopy(self.stereoshift_info)
                 )
             # Update the table
             self.parent.table.setItem(
