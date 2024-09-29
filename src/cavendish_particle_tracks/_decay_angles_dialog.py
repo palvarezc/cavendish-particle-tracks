@@ -26,9 +26,7 @@ class DecayAnglesDialog(QDialog):
         self.textboxes_phi = [QLabel(self) for _ in range(2)]
 
         for textbox in (
-            self.textboxes_slope
-            + self.textboxes_intercept
-            + self.textboxes_phi
+            self.textboxes_slope + self.textboxes_intercept + self.textboxes_phi
         ):
             textbox.setMinimumWidth(200)
 
@@ -43,13 +41,9 @@ class DecayAnglesDialog(QDialog):
 
         # layout
         self.setLayout(QGridLayout())
-        self.layout().addWidget(
-            QLabel("Track parameters (y = a x + b)"), 0, 0, 1, 2
-        )
+        self.layout().addWidget(QLabel("Track parameters (y = a x + b)"), 0, 0, 1, 2)
 
-        for i, column_title in enumerate(
-            [QLabel("Gradient, a"), QLabel("Intercept, b")]
-        ):
+        for i, column_title in enumerate([QLabel("Gradient, a"), QLabel("Intercept, b")]):
             self.layout().addWidget(column_title, 1, i + 1)
 
         for i, table_datum in enumerate(
@@ -69,8 +63,7 @@ class DecayAnglesDialog(QDialog):
             3,
         )
         for i, widget in enumerate(
-            [QLabel("ϕ_proton [rad]"), QLabel("ϕ_pion [rad]")]
-            + self.textboxes_phi
+            [QLabel("ϕ_proton [rad]"), QLabel("ϕ_pion [rad]")] + self.textboxes_phi
         ):
             self.layout().addWidget(widget, i % 2 + 6, i // 2 + 1)
         self.layout().addWidget(bap, 8, 0, 1, 3)

@@ -33,9 +33,7 @@ class StereoshiftDialog(QDialog):
             "Point view1",
             "Point view2",
         ]
-        self._fiducial_views = [
-            Fiducial(view_name) for view_name in FIDUCIAL_VIEWS
-        ]
+        self._fiducial_views = [Fiducial(view_name) for view_name in FIDUCIAL_VIEWS]
 
         # drop-down lists of fiducials
         self.cbf1 = QComboBox()
@@ -81,9 +79,7 @@ class StereoshiftDialog(QDialog):
 
         # layout
         self.setLayout(QGridLayout())
-        self.layout().addWidget(
-            QLabel("Select Reference / Fiducial"), 0, 0, 1, 2
-        )
+        self.layout().addWidget(QLabel("Select Reference / Fiducial"), 0, 0, 1, 2)
         self.layout().addWidget(QLabel("Fiducial coordinates"), 1, 0, 1, 2)
         self.layout().addWidget(self.cbf1, 0, 2)
         for i, widget in enumerate(
@@ -243,9 +239,7 @@ class StereoshiftDialog(QDialog):
         # Calculate stereoshift and depth
         self.shift_fiducial = length(self.f(1).xy, self.f(2).xy)
         self.shift_point = length(self.b(1).xy, self.b(2).xy)
-        self.point_stereoshift = stereoshift(
-            *[view.xy for view in self._fiducial_views]
-        )
+        self.point_stereoshift = stereoshift(*[view.xy for view in self._fiducial_views])
         self.point_depth = depth(
             self.f(1),
             self.f(2),
