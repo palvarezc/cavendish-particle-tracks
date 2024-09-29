@@ -9,6 +9,7 @@ for further analysis.
 import glob
 import os
 import pickle
+import warnings
 
 import dask.array
 import napari
@@ -152,11 +153,15 @@ class ParticleTracksWidget(QWidget):
             self.buttonbox.addWidget(self.save_data_button)
             self.setLayout(self.buttonbox)
 
-        # Disable native napari layer controls - show again on closing this widget (hide).
+        # Disable some native napari controls
         # NB: Both of these will break in napari 0.6.0
-        self.viewer.window._qt_viewer.layerButtons.hide()
-        # Disable viewer buttons, prevents accidental crash due to viewing image stack side on.
-        self.viewer.window._qt_viewer.viewerButtons.hide()
+        with warnings.catch_warnings():
+            warnings.simplefilter(action="ignore", category=FutureWarning)
+            # Disable native napari layer controls - show again on closing this widget (hide).
+            self.viewer.window._qt_viewer.layerButtons.hide()
+            # Disable viewer buttons, prevents accidental crash due to viewing image stack side on.
+            self.viewer.window._qt_viewer.viewerButtons.hide()
+
         self.set_UI_image_loaded(False, self.bypass_load_screen)
         # TODO: include self.stsh in the logic, depending on what it actually ends up doing
 
@@ -182,8 +187,11 @@ class ParticleTracksWidget(QWidget):
         """
         if len(self.data) > 0:
             self._confirm_save_before_closing()
-        self.viewer.window._qt_viewer.layerButtons.show()
-        self.viewer.window._qt_viewer.viewerButtons.show()
+
+        with warnings.catch_warnings():
+            warnings.simplefilter(action="ignore", category=FutureWarning)
+            self.viewer.window._qt_viewer.layerButtons.show()
+            self.viewer.window._qt_viewer.viewerButtons.show()
         super().hideEvent(event)
 
     def _get_shuffling_seed(self, fallback: int = 1) -> int:
