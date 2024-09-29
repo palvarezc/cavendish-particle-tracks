@@ -130,7 +130,7 @@ class StereoshiftDialog(QDialog):
         self.cal_layer = self._setup_stereoshift_layer()
 
         # Stereoshift related parameters
-        self.stereoshift_info: StereoshiftInfo = StereoshiftInfo()
+        self.stereoshift_info = StereoshiftInfo()
         self.stereoshift_info.name = "origin_vertex"
 
     def _setup_stereoshift_layer(self):

@@ -789,13 +789,6 @@ class ParticleTracksWidget(QWidget):
             self.msg.show()
             return
 
-        with open(file_name, "w", encoding="UTF8", newline="") as f:
-            # write the header
-            f.write(",".join(self.data[0].vars_to_save()) + "\n")
-
-            # write the data
-            f.writelines([particle.to_csv() for particle in self.data])
-
         napari.utils.notifications.show_info("Data saved to " + file_name)
 
     def _activate_calibration_layer(self, layer):
