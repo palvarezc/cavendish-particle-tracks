@@ -31,11 +31,21 @@ def test_open_widget(make_napari_viewer, bypass_load_screen, docking_area):
 
     # Check the widget behavior before and after loading the data
     if docking_area == "bottom" and bypass_load_screen is False:
-        assert widget.intro_text.isVisible() is True
+        assert widget.particle_decays_menu.isVisible() is False
+        assert widget.radius_button.isVisible() is False
+        assert widget.delete_particle.isVisible() is False
+        assert widget.length_button.isVisible() is False
+        assert widget.decay_angles_button.isVisible() is False
+
         widget.viewer.add_image(
             np.random.random((100, 100)), name="Particle Tracks"
         )
-        assert widget.intro_text.isVisible() is False
+
+        assert widget.particle_decays_menu.isVisible() is True
+        assert widget.radius_button.isVisible() is True
+        assert widget.delete_particle.isVisible() is True
+        assert widget.length_button.isVisible() is True
+        assert widget.decay_angles_button.isVisible() is True
 
 
 def test_calculate_radius_ui(
