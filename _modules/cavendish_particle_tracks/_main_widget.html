@@ -371,7 +371,6 @@ document.write(`
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
@@ -397,8 +396,12 @@ document.write(`
 <span class="kn">from</span> <span class="nn">._calculate</span> <span class="kn">import</span> <span class="n">length</span><span class="p">,</span> <span class="n">radius</span>
 <span class="kn">from</span> <span class="nn">._decay_angles_dialog</span> <span class="kn">import</span> <span class="n">DecayAnglesDialog</span>
 <span class="kn">from</span> <span class="nn">._magnification_dialog</span> <span class="kn">import</span> <span class="n">MagnificationDialog</span>
+<span class="kn">from</span> <span class="nn">._settings</span> <span class="kn">import</span> <span class="n">get_shuffling_seed</span>
 <span class="kn">from</span> <span class="nn">._stereoshift_dialog</span> <span class="kn">import</span> <span class="n">StereoshiftDialog</span>
 <span class="kn">from</span> <span class="nn">.analysis</span> <span class="kn">import</span> <span class="n">EXPECTED_PARTICLES</span><span class="p">,</span> <span class="n">VIEW_NAMES</span><span class="p">,</span> <span class="n">ParticleDecay</span>
+
+<span class="n">MEASUREMENTS_LAYER_NAME</span> <span class="o">=</span> <span class="s2">&quot;Radii and Lengths&quot;</span>
+<span class="n">IMAGE_LAYER_NAME</span> <span class="o">=</span> <span class="s2">&quot;Bubble Chamber Data&quot;</span>
 
 
 <div class="viewcode-block" id="ParticleTracksWidget">
@@ -420,7 +423,7 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">bypass_force_load_data</span> <span class="o">=</span> <span class="n">bypass_force_load_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">docking_area</span> <span class="o">=</span> <span class="n">docking_area</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_shuffling_seed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="o">=</span> <span class="n">get_shuffling_seed</span><span class="p">()</span>
 
         <span class="c1"># define QtWidgets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Load data&quot;</span><span class="p">)</span>
@@ -541,21 +544,6 @@ document.write(`
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">hideEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_get_shuffling_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fallback</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the shuffling seed from the environment variable.</span>
-
-<span class="sd">        This is useful, for example, for each lab computer being seeded differently.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;CPT_SHUFFLING_SEED&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">fallback</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;CPT_SHUFFLING_SEED&quot;</span><span class="p">])</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Warning: Invalid value for CPT_SHUFFLING_SEED. Using seed value of </span><span class="si">{</span><span class="n">fallback</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="n">fallback</span>
-
     <span class="k">def</span> <span class="nf">_confirm_save_before_closing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prompt the user to save data before closing the widget.&quot;&quot;&quot;</span>
         <span class="n">message_box</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -576,7 +564,7 @@ document.write(`
         <span class="c1"># update for 4d implementation as appropriate.</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">camera</span><span class="o">.</span><span class="n">center</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">_get_selected_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer_name</span><span class="o">=</span><span class="s2">&quot;Radii and Lengths&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_get_selected_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layer_name</span><span class="o">=</span><span class="n">MEASUREMENTS_LAYER_NAME</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns array of selected points in the viewer&quot;&quot;&quot;</span>
 
         <span class="c1"># Filtering selected layer (layer names are unique)</span>
@@ -643,7 +631,7 @@ document.write(`
     <span class="k">def</span> <span class="nf">set_button_availability</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">images_imported</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;Particle Tracks&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">layer</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">IMAGE_LAYER_NAME</span><span class="p">:</span>
                 <span class="n">images_imported</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">break</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_UI_image_loaded</span><span class="p">(</span><span class="n">images_imported</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bypass_force_load_data</span><span class="p">)</span>
@@ -920,17 +908,17 @@ document.write(`
 
         <span class="c1"># Concatenate stacks along new spatial dimension such that we have a view, and event slider</span>
         <span class="n">concatenated_stack</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">stacks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="n">concatenated_stack</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Particle Tracks&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="n">concatenated_stack</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">IMAGE_LAYER_NAME</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">axis_labels</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;View&quot;</span><span class="p">,</span> <span class="s2">&quot;Event&quot;</span><span class="p">,</span> <span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">)</span>
 
         <span class="c1"># Move to the first event in the series</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">set_current_step</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-        <span class="n">measurement_layer_present</span> <span class="o">=</span> <span class="s2">&quot;Radii and Lengths&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">layers</span>
+        <span class="n">measurement_layer_present</span> <span class="o">=</span> <span class="n">MEASUREMENTS_LAYER_NAME</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">layers</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">measurement_layer_present</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">layer_measurements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Radii and Lengths&quot;</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">MEASUREMENTS_LAYER_NAME</span><span class="p">,</span>
                 <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
                 <span class="n">border_width</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
                 <span class="n">border_width_is_relative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -955,7 +943,7 @@ document.write(`
 
         <span class="c1"># Record the event and view number if the data has been loaded</span>
         <span class="c1"># Potentially this could be used to check the measurements are done in the right event</span>
-        <span class="n">data_has_been_loaded</span> <span class="o">=</span> <span class="s2">&quot;Particle Tracks&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">layers</span>
+        <span class="n">data_has_been_loaded</span> <span class="o">=</span> <span class="n">IMAGE_LAYER_NAME</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">layers</span>
         <span class="k">if</span> <span class="n">data_has_been_loaded</span><span class="p">:</span>
             <span class="n">new_particle</span><span class="o">.</span><span class="n">event_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">current_step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">new_particle</span><span class="o">.</span><span class="n">view_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">current_step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
