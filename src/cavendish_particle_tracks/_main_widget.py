@@ -365,10 +365,8 @@ class ParticleTracksWidget(QWidget):
                 QTableWidgetItem(str(self.data[selected_row].rpoints)),
             )
 
-            self.data[selected_row].rpoints = selected_points
-
-            logging.info("calculating radius!")
-            rad = radius(*selected_points)
+            print("calculating radius!")
+            self.data[selected_row].radius_px = radius(*selected_points_xy)
 
             self.table.setItem(
                 selected_row,
@@ -406,9 +404,10 @@ class ParticleTracksWidget(QWidget):
             warnings.warn("Select two points to calculate the decay length.")
             return
         else:
-            napari.utils.notifications.show_info(
-                f"Adding points to the table: {selected_points}"
-            )
+            if not self._selected_points_are_on_current_slice(selected_points):
+                return
+
+            selected_points_xy = [point[2:] for point in selected_points]
 
         # Forcing only 2 points
         if len(selected_points) != 2:
