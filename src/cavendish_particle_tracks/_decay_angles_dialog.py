@@ -21,8 +21,10 @@ class DecayAnglesDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
-        # region UI Setup
+
+        ### Set up the Decay Angles dialog
         self.setWindowTitle("Decay Angles")
+
         # text boxes for track parameters and results
         self.textboxes_slope = [QLabel(self) for _ in range(3)]
         self.textboxes_intercept = [QLabel(self) for _ in range(3)]
@@ -31,6 +33,7 @@ class DecayAnglesDialog(QDialog):
             self.textboxes_slope + self.textboxes_intercept + self.textboxes_phi
         ):
             textbox.setMinimumWidth(200)
+
         # buttons
         btn_calculate = QPushButton("Calculate")
         btn_calculate.clicked.connect(self._on_click_calculate)
@@ -54,21 +57,15 @@ class DecayAnglesDialog(QDialog):
             self.layout().addWidget(table_datum, i % 3 + 2, i // 3)
 
         self.layout().addWidget(btn_calculate, 5, 0, 1, 3)
-        self.layout().addWidget(
-            QLabel("Opening angles"),
-            6,
-            0,
-            1,
-            3,
-        )
+        self.layout().addWidget(QLabel("Opening angles"), 6, 0, 1, 3)
         for i, widget in enumerate(
             [QLabel("ϕ_proton [rad]"), QLabel("ϕ_pion [rad]")] + self.textboxes_phi
         ):
             self.layout().addWidget(widget, i % 2 + 7, i // 2 + 1)
         self.layout().addWidget(btn_save, 9, 0, 1, 3)
         self.layout().addWidget(self.buttonBox, 11, 0, 1, 3)
-        # endregion
-        # Setup shapes layer
+
+        ### Setup Decay Angles layer
         self.join_coordinates = [200, 300]
         self.cal_layer: Shapes = self._setup_decayangles_layer()
         self.cal_layer.events.data.connect(self._enforce_points_coincident)
@@ -96,39 +93,33 @@ class DecayAnglesDialog(QDialog):
         self.alines = []
 
     def _enforce_points_coincident(self, event: Event) -> None:
-        # event.data_indices says what shape was changed
-        # action says what was done to the shape
-        # data doesn't get set till user lets go, mouse drag might be better, but not sure how to implement it
-        # Maybe the long term solution is to have a custom shape?
-        if event.action == "changed":
-            shapes_modified = event.data_indices
-            data = self.cal_layer.data
-            if len(shapes_modified) == 3:
-                # if all shapes were modified, this must be a translation of the three shapes
-                # do nothing.
-                return
-            elif len(shapes_modified) == 2:
-                # if two of them have been moved, move the third one (if it has not been moved already)
-                for i in range(3):
-                    if (i not in shapes_modified) and (
-                        self.cal_layer.data[i][0]
-                        != self.cal_layer.data[shapes_modified[0]][0]
-                    ).any():
-                        data[i][0] = self.cal_layer.data[shapes_modified[0]][0]
-                        self.cal_layer.data = data
-            elif len(shapes_modified) == 1:
-                # if only one has been moved, move the other two (if they have not been moved already)
-                for i in range(3):
-                    if (i not in shapes_modified) and (
-                        self.cal_layer.data[i][0]
-                        != self.cal_layer.data[shapes_modified[0]][0]
-                    ).any():
-                        data[i][0] = self.cal_layer.data[shapes_modified[0]][0]
-                        self.cal_layer.data = data
-            else:
-                # nothing moved, or more shapes have been added
-                # do nothing
-                return
+        """Enforce that the decay vertex of the Lambda and the origin vertices of proton and pion are coincident"""
+        if event is None:
+            return
+
+        if event.action != "changed":
+            return  # Nothing has been moved, so nothing to do
+
+        shapes_modified = event.data_indices
+        data = self.cal_layer.data
+        if len(shapes_modified) == 1:
+            # if only one has been moved, move the other two (if they have not been moved already)
+            for i in range(3):
+                if (i not in shapes_modified) and (
+                    self.cal_layer.data[i][0]
+                    != self.cal_layer.data[shapes_modified[0]][0]
+                ).any():
+                    data[i][0] = self.cal_layer.data[shapes_modified[0]][0]
+                    self.cal_layer.data = data
+        elif len(shapes_modified) == 2:
+            # if two of them have been moved, move the third one (if it has not been moved already)
+            for i in range(3):
+                if (i not in shapes_modified) and (
+                    self.cal_layer.data[i][0]
+                    != self.cal_layer.data[shapes_modified[0]][0]
+                ).any():
+                    data[i][0] = self.cal_layer.data[shapes_modified[0]][0]
+                    self.cal_layer.data = data
 
     def _setup_decayangles_layer(self):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
