@@ -52,10 +52,9 @@ def test_decay_vertex_update(cpt_widget):
     dialog = cpt_widget._on_click_decay_angles()
 
     # Move the decay vertex of the Lambda
-    data = dialog.cal_layer.data
-    old_value = data[0][0][0]
-    data[0][0][0] = old_value + 50
-    dialog.cal_layer.data = data  # For some reason, this doesn't trigger the change event
+    old_value = dialog.cal_layer.data[0][0][0]
+    dialog.cal_layer.data[0][0][0] = old_value + 50
+    # For some reason, this doesn't trigger the change event
     dialog.cal_layer.events.data(action="changed", data_indices=(0,))
 
     # Check that the decay vertex has been updated
