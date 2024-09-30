@@ -81,4 +81,6 @@ def track_parameters(line):
 
 def angle(line1: np.array, line2: np.array) -> float:
     v1, v2 = np.diff(line1, axis=0)[0], np.diff(line2, axis=0)[0]
-    return np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
+    costheta = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+    sintheta = np.cross(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+    return np.arctan2(sintheta, costheta)
