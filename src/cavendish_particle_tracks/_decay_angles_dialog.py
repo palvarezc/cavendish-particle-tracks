@@ -77,6 +77,8 @@ class DecayAnglesDialog(QDialog):
 
     def _enforce_points_coincident(self, event: Event) -> None:
         """Enforce that the decay vertex of the Lambda and the origin vertices of proton and pion are coincident"""
+        if event is None:
+            return
 
         if event.action != "changed":
             return  # Nothing has been moved, so nothing to do
