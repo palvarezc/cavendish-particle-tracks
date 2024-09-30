@@ -1,4 +1,7 @@
+import napari
 import numpy as np
+from napari.layers import Shapes
+from napari.utils.events.event import Event
 from napari.utils.notifications import show_error
 from qtpy.QtWidgets import (
     QDialog,
@@ -17,27 +20,25 @@ ANGLES_LAYER_NAME = "Decay Angles Tool"
 class DecayAnglesDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-
         self.parent = parent
 
+        ### Set up the Decay Angles dialog
         self.setWindowTitle("Decay Angles")
 
         # text boxes for track parameters and results
         self.textboxes_slope = [QLabel(self) for _ in range(3)]
         self.textboxes_intercept = [QLabel(self) for _ in range(3)]
         self.textboxes_phi = [QLabel(self) for _ in range(2)]
-
         for textbox in (
             self.textboxes_slope + self.textboxes_intercept + self.textboxes_phi
         ):
             textbox.setMinimumWidth(200)
 
-        bss = QPushButton("Calculate")
-        bss.clicked.connect(self._on_click_calculate)
-
-        bap = QPushButton("Save to table")
-        bap.clicked.connect(self._on_click_save_to_table)
-
+        # buttons
+        btn_calculate = QPushButton("Calculate")
+        btn_calculate.clicked.connect(self._on_click_calculate)
+        btn_save = QPushButton("Save to table")
+        btn_save.clicked.connect(self._on_click_save_to_table)
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Cancel)
         self.buttonBox.clicked.connect(self.reject)
 
@@ -55,29 +56,53 @@ class DecayAnglesDialog(QDialog):
         ):
             self.layout().addWidget(table_datum, i % 3 + 2, i // 3)
 
-        self.layout().addWidget(bss, 4, 0, 1, 3)
-
-        self.layout().addWidget(
-            QLabel("Opening angles"),
-            5,
-            0,
-            1,
-            3,
-        )
+        self.layout().addWidget(btn_calculate, 5, 0, 1, 3)
+        self.layout().addWidget(QLabel("Opening angles"), 6, 0, 1, 3)
         for i, widget in enumerate(
             [QLabel("ϕ_proton [rad]"), QLabel("ϕ_pion [rad]")] + self.textboxes_phi
         ):
-            self.layout().addWidget(widget, i % 2 + 6, i // 2 + 1)
-        self.layout().addWidget(bap, 8, 0, 1, 3)
-        self.layout().addWidget(self.buttonBox, 10, 0, 1, 3)
+            self.layout().addWidget(widget, i % 2 + 7, i // 2 + 1)
+        self.layout().addWidget(btn_save, 9, 0, 1, 3)
+        self.layout().addWidget(self.buttonBox, 11, 0, 1, 3)
 
-        # Setup shapes layer
-        self.cal_layer = self._setup_decayangles_layer()
+        ### Setup Decay Angles layer
+        self.join_coordinates = [200, 300]
+        self.cal_layer: Shapes = self._setup_decayangles_layer()
+        self.cal_layer.events.data.connect(self._enforce_points_coincident)
 
-        # Decay Angles related parameters
+        ### Define decay Angles related parameters used to store the results
         self.phi_proton = 0.0
         self.phi_pion = 0.0
         self.alines = []
+
+    def _enforce_points_coincident(self, event: Event) -> None:
+        """Enforce that the decay vertex of the Lambda and the origin vertices of proton and pion are coincident"""
+        if event is None:
+            return
+
+        if event.action != "changed":
+            return  # Nothing has been moved, so nothing to do
+
+        shapes_modified = event.data_indices
+        data = self.cal_layer.data
+        if len(shapes_modified) == 1:
+            # if only one has been moved, move the other two (if they have not been moved already)
+            for i in range(3):
+                if (i not in shapes_modified) and (
+                    self.cal_layer.data[i][0]
+                    != self.cal_layer.data[shapes_modified[0]][0]
+                ).any():
+                    data[i][0] = self.cal_layer.data[shapes_modified[0]][0]
+                    self.cal_layer.data = data
+        elif len(shapes_modified) == 2:
+            # if two of them have been moved, move the third one (if it has not been moved already)
+            for i in range(3):
+                if (i not in shapes_modified) and (
+                    self.cal_layer.data[i][0]
+                    != self.cal_layer.data[shapes_modified[0]][0]
+                ).any():
+                    data[i][0] = self.cal_layer.data[shapes_modified[0]][0]
+                    self.cal_layer.data = data
 
     def _setup_decayangles_layer(self):
         """Create a shapes layer and add three lines to measure the Lambda, p and pi tracks"""
@@ -91,11 +116,12 @@ class DecayAnglesDialog(QDialog):
 
         zoom_factor = self.parent.viewer.camera.zoom
 
+        # The first point for all tracks is the decay vertex
         # Scale offsets by the inverse of the zoom factor
         lambda_line = np.array(
             [
-                [origin_x + -100 / zoom_factor, origin_y + -100 / zoom_factor],
                 [origin_x + 100 / zoom_factor, origin_y + 200 / zoom_factor],
+                [origin_x + -100 / zoom_factor, origin_y + -100 / zoom_factor],
             ]
         )
         proton_line = np.array(
@@ -116,7 +142,7 @@ class DecayAnglesDialog(QDialog):
 
         text = {
             "string": ["Λ", "p", "π"],
-            "size": 14,
+            "size": 20,
             "color": colors,
             "translation": np.array([-30, 0]),
         }
@@ -135,11 +161,19 @@ class DecayAnglesDialog(QDialog):
     def _on_click_calculate(self) -> None:
         """When 'Calculate' button is clicked, calculate opening angles and populate table"""
 
-        # Compute tracks and angles
-        tracks = [track_parameters(line) for line in self.cal_layer.data]
+        # The Lambda travels towards the decay vertex, line needs to be reversed
+        lambda_line = self.cal_layer.data[0][::-1]
+        proton_line = self.cal_layer.data[1]
+        pion_line = self.cal_layer.data[2]
 
-        self.phi_proton = angle(self.cal_layer.data[0], self.cal_layer.data[1])
-        self.phi_pion = angle(self.cal_layer.data[0], self.cal_layer.data[2])
+        # Save the lines
+        self.alines = [lambda_line, proton_line, pion_line]
+
+        # Compute tracks and angles
+        tracks = [track_parameters(line) for line in self.alines]
+
+        self.phi_proton = angle(lambda_line, proton_line)
+        self.phi_pion = angle(lambda_line, pion_line)
 
         # # Populate the table
         for slope, intercept, track in zip(
@@ -151,9 +185,6 @@ class DecayAnglesDialog(QDialog):
         self.textboxes_phi[0].setText(str(self.phi_proton))
         self.textboxes_phi[1].setText(str(self.phi_pion))
 
-        # Save points
-        self.alines = self.cal_layer.data
-
     def _on_click_save_to_table(self) -> None:
         """When 'Save to table' button is clicked, propagate stereoshift and depth to main table"""
 
@@ -163,22 +194,10 @@ class DecayAnglesDialog(QDialog):
         except IndexError:
             show_error("There are no particles in the table.")
         else:
-            # self.parent.data[selected_row].spoints = self.alines
+            # self.parent.data[selected_row].alines = self.alines
             self.parent.data[selected_row].phi_proton = self.phi_proton
             self.parent.data[selected_row].phi_pion = self.phi_pion
 
-            # Propagate to parent table
-            # for i in range(2):
-            #     self.parent.table.setItem(
-            #         selected_row,
-            #         self.parent._get_table_column_index("sf" + str(i + 1)),
-            #         QTableWidgetItem(str(self.spoints[i])),
-            #     )
-            #     self.parent.table.setItem(
-            #         selected_row,
-            #         self.parent._get_table_column_index("sp" + str(i + 1)),
-            #         QTableWidgetItem(str(self.spoints[i + 2])),
-            #     )
             self.parent.table.setItem(
                 selected_row,
                 self.parent._get_table_column_index("phi_proton"),
@@ -189,6 +208,9 @@ class DecayAnglesDialog(QDialog):
                 self.parent._get_table_column_index("phi_pion"),
                 QTableWidgetItem(str(self.phi_pion)),
             )
+        napari.utils.notifications.show_info(
+            "Decay angles saved to particle " + str(selected_row)
+        )
 
     def reject(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
