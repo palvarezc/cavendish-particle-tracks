@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+import napari
 from napari.layers import Points
 from qtpy.QtWidgets import (
     QAbstractItemView,
@@ -83,7 +84,7 @@ class MagnificationDialog(QDialog):
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.setHorizontalHeaderLabels(["a", "b"])
         # Add Ok/Cancel button box
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
@@ -193,6 +194,7 @@ class MagnificationDialog(QDialog):
         self.parent.apply_magnification_button.setEnabled(True)
         # self.parent.mag.setEnabled(False)
         self.parent.magnification_button.setText("Update magnification")
+        napari.utils.notifications.show_info("Magnification parameters updated.")
         return super().accept()
 
     def reject(self) -> None:
