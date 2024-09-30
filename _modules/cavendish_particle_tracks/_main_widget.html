@@ -515,8 +515,8 @@ document.write(`
         <span class="c1"># Data analysis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ParticleDecay</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># might not need this eventually</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mag_a</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0e6</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mag_b</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0e6</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_a</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mag_b</span> <span class="o">=</span> <span class="mf">0.0</span>
 
         <span class="c1"># Dialog pointers to reuse</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mag_dlg</span><span class="p">:</span> <span class="n">MagnificationDialog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -685,6 +685,20 @@ document.write(`
             <span class="bp">self</span><span class="o">.</span><span class="n">apply_magnification_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
 
 
+    <span class="k">def</span> <span class="nf">_selected_points_are_on_current_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected_points</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check that the selected points are in the current slice of the viewer&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">slice_index</span><span class="p">,</span> <span class="n">data_slice</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="s2">&quot;View&quot;</span><span class="p">,</span> <span class="s2">&quot;Event&quot;</span><span class="p">]):</span>
+            <span class="n">current_slice</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">current_step</span><span class="p">[</span><span class="n">slice_index</span><span class="p">]</span>
+            <span class="n">all_points_in_current_slice</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="n">current_slice</span> <span class="o">==</span> <span class="n">point</span><span class="p">[</span><span class="n">slice_index</span><span class="p">]</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">selected_points</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">all_points_in_current_slice</span><span class="p">:</span>
+                <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Measurement points not in current </span><span class="si">{</span><span class="n">data_slice</span><span class="si">}</span><span class="s2">. Measurement not completed.&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
     <span class="k">def</span> <span class="nf">_on_click_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When the &#39;Calculate radius&#39; button is clicked, calculate the radius</span>
 <span class="sd">        for the currently selected points and assign it to the currently selected table row.</span>
@@ -702,33 +716,38 @@ document.write(`
             <span class="p">)</span>
             <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Adding points to the table: </span><span class="si">{</span><span class="n">selected_points</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_points_are_on_current_slice</span><span class="p">(</span><span class="n">selected_points</span><span class="p">):</span>
+                <span class="k">return</span>
+
+            <span class="n">selected_points_xy</span> <span class="o">=</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">selected_points</span><span class="p">]</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="n">selected_row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_selected_row</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;There are no particles in the table.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;calculating radius!&quot;</span><span class="p">)</span>  <span class="c1"># FIXME: update when PR #164 is updated</span>
-            <span class="n">rad</span> <span class="o">=</span> <span class="n">radius</span><span class="p">(</span><span class="o">*</span><span class="n">selected_points</span><span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">rpoints</span> <span class="o">=</span> <span class="n">selected_points</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Adding points to the table: </span><span class="si">{</span><span class="n">selected_points_xy</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>  <span class="c1"># FIXME: update when PR #164 is updated</span>
 
             <span class="c1"># Assigns the points and radius to the selected row</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">rpoints</span> <span class="o">=</span> <span class="n">selected_points_xy</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
                 <span class="n">selected_row</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;rpoints&quot;</span><span class="p">),</span>
                 <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">rpoints</span><span class="p">)),</span>
             <span class="p">)</span>
 
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;calculating radius!&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_px</span> <span class="o">=</span> <span class="n">radius</span><span class="p">(</span><span class="o">*</span><span class="n">selected_points_xy</span><span class="p">)</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
                 <span class="n">selected_row</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;radius_px&quot;</span><span class="p">),</span>
-                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rad</span><span class="p">)),</span>
+                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_px</span><span class="p">)),</span>
             <span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_px</span> <span class="o">=</span> <span class="n">rad</span>
 
             <span class="c1">## Add the calibrated radius to the table</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_cm</span> <span class="o">=</span> <span class="p">(</span>
@@ -740,7 +759,9 @@ document.write(`
                 <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">radius_cm</span><span class="p">)),</span>
             <span class="p">)</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modified particle &quot;</span><span class="p">,</span> <span class="n">selected_row</span><span class="p">)</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_info</span><span class="p">(</span>
+                <span class="s2">&quot;Radius added to particle &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">selected_row</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_on_click_length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -760,9 +781,11 @@ document.write(`
             <span class="p">)</span>
             <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_info</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Adding points to the table: </span><span class="si">{</span><span class="n">selected_points</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selected_points_are_on_current_slice</span><span class="p">(</span><span class="n">selected_points</span><span class="p">):</span>
+                <span class="k">return</span>
+
+            <span class="n">selected_points_xy</span> <span class="o">=</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">selected_points</span><span class="p">]</span>
 
         <span class="c1"># Forcing only 2 points</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_points</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
@@ -776,7 +799,9 @@ document.write(`
             <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;There are no particles in the table.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">dpoints</span> <span class="o">=</span> <span class="n">selected_points</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Adding points to the table: </span><span class="si">{</span><span class="n">selected_points_xy</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">dpoints</span> <span class="o">=</span> <span class="n">selected_points_xy</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
                 <span class="n">selected_row</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;dpoints&quot;</span><span class="p">),</span>
@@ -784,12 +809,11 @@ document.write(`
             <span class="p">)</span>
 
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;calculating decay length!&quot;</span><span class="p">)</span>
-            <span class="n">decay_length</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="o">*</span><span class="n">selected_points</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_px</span> <span class="o">=</span> <span class="n">decay_length</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_px</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="o">*</span><span class="n">selected_points</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
                 <span class="n">selected_row</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;decay_length_px&quot;</span><span class="p">),</span>
-                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">decay_length</span><span class="p">)),</span>
+                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_px</span><span class="p">)),</span>
             <span class="p">)</span>
 
             <span class="c1">## Add the calibrated decay length to the table</span>
@@ -803,7 +827,9 @@ document.write(`
                 <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_cm</span><span class="p">)),</span>
             <span class="p">)</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Modified particle &quot;</span><span class="p">,</span> <span class="n">selected_row</span><span class="p">)</span>
+            <span class="n">napari</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">show_info</span><span class="p">(</span>
+                <span class="s2">&quot;Decay length added to particle &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">selected_row</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">selected_row</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_on_click_decay_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DecayAnglesDialog</span><span class="p">:</span>
@@ -911,18 +937,25 @@ document.write(`
         <span class="c1"># Move to the first event in the series</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">dims</span><span class="o">.</span><span class="n">set_current_step</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-        <span class="n">measurement_layer_present</span> <span class="o">=</span> <span class="n">MEASUREMENTS_LAYER_NAME</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">layers</span>
+        <span class="c1"># Create measurements layer if not already there</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer_measurements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_measurement_layer</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">measurement_layer_present</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">layer_measurements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span>
+        <span class="c1"># Disable the load button after loading the data (interim solution until we can move to bottom-docked UI)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setup_measurement_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a Points layer for the measurement of the radii and lengths.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">MEASUREMENTS_LAYER_NAME</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">MEASUREMENTS_LAYER_NAME</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">MEASUREMENTS_LAYER_NAME</span><span class="p">,</span>
+                <span class="n">ndim</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
                 <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
                 <span class="n">border_width</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
                 <span class="n">border_width_is_relative</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
-
-        <span class="c1"># Disable the load button after loading the data (interim solution until we can move to bottom-docked UI)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_click_new_particle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;When the &#39;New particle&#39; button is clicked, append a new blank row to</span>
