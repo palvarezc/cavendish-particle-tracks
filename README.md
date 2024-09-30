@@ -36,7 +36,6 @@ The version for 2024 students is [v1.0.0](https://github.com/palvarezc/cavendish
 
 ## Getting started
 
-**TODO** put some instructions with screenshots here.
 The user manual can be found [here](https://palvarezc.github.io/cavendish-particle-tracks/user-manual.html).
 
 ## License
