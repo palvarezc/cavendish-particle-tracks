@@ -73,6 +73,23 @@ class DecayAnglesDialog(QDialog):
         self.cal_layer: Shapes = self._setup_decayangles_layer()
         self.cal_layer.events.data.connect(self._enforce_points_coincident)
 
+        # # This almost gets the behavior we want, but only for the line labels
+        # def enforce_points_coincident_v2(event: Event) -> None:
+        #     (selected_shape,) = self.cal_layer.selected_data
+        #     data = self.cal_layer.data
+        #     if len(data) != 3:
+        #         return
+        #     if selected_shape==0 and (data[0][0] != data[1][0]).all():
+        #         # # This is what we want but needs private methods
+        #         # vertices = self.cal_layer._data_view.shapes[1].data
+        #         # vertices[0] = data[0][0]
+        #         # self.cal_layer._data_view.edit(1, vertices, new_type=None)
+        #         # self.cal_layer.refresh()
+        #         data[1][0][0] = data[0][0][0]
+        #         data[1][0][1] = data[0][0][1]
+        #         self.cal_layer.refresh()
+        # self.cal_layer.events.set_data.connect(enforce_points_coincident_v2)
+
         # Decay Angles related parameters
         self.phi_proton = 0.0
         self.phi_pion = 0.0
