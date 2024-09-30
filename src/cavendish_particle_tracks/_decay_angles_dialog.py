@@ -87,6 +87,12 @@ class DecayAnglesDialog(QDialog):
         #         self.cal_layer.refresh()
         # self.cal_layer.events.set_data.connect(enforce_points_coincident_v2)
 
+        ## This code below might be useful for debugging
+        # def event_explore(event: Event):
+        #     print(event.type)
+        # for event in list(self.cal_layer.events):
+        #     getattr(self.cal_layer.events, event).connect(event_explore)
+
         # Decay Angles related parameters
         self.phi_proton = 0.0
         self.phi_pion = 0.0
