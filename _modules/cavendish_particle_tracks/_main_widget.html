@@ -396,7 +396,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">._calculate</span> <span class="kn">import</span> <span class="n">length</span><span class="p">,</span> <span class="n">radius</span>
 <span class="kn">from</span> <span class="nn">._decay_angles_dialog</span> <span class="kn">import</span> <span class="n">DecayAnglesDialog</span>
 <span class="kn">from</span> <span class="nn">._magnification_dialog</span> <span class="kn">import</span> <span class="n">MagnificationDialog</span>
-<span class="kn">from</span> <span class="nn">._settings</span> <span class="kn">import</span> <span class="n">get_shuffling_seed</span>
+<span class="kn">from</span> <span class="nn">._settings</span> <span class="kn">import</span> <span class="n">get_bypass</span><span class="p">,</span> <span class="n">get_shuffling_seed</span>
 <span class="kn">from</span> <span class="nn">._stereoshift_dialog</span> <span class="kn">import</span> <span class="n">StereoshiftDialog</span>
 <span class="kn">from</span> <span class="nn">.analysis</span> <span class="kn">import</span> <span class="n">EXPECTED_PARTICLES</span><span class="p">,</span> <span class="n">VIEW_NAMES</span><span class="p">,</span> <span class="n">ParticleDecay</span>
 
@@ -414,16 +414,17 @@ document.write(`
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">napari_viewer</span><span class="p">:</span> <span class="n">napari</span><span class="o">.</span><span class="n">Viewer</span><span class="p">,</span>
-        <span class="n">bypass_force_load_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">docking_area</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;right&quot;</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewer</span><span class="p">:</span> <span class="n">napari</span><span class="o">.</span><span class="n">Viewer</span> <span class="o">=</span> <span class="n">napari_viewer</span>
+
         <span class="c1"># In normal operation: the user is forced to load data before they can do anything.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bypass_force_load_data</span> <span class="o">=</span> <span class="n">bypass_force_load_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bypass_force_load_data</span> <span class="o">=</span> <span class="n">get_bypass</span><span class="p">()</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">docking_area</span> <span class="o">=</span> <span class="n">docking_area</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="o">=</span> <span class="n">get_shuffling_seed</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuffling_seed</span> <span class="o">=</span> <span class="n">get_shuffling_seed</span><span class="p">(</span><span class="n">fallback</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># define QtWidgets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">load_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&quot;Load data&quot;</span><span class="p">)</span>
