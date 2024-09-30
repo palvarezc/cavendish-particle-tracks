@@ -32,7 +32,7 @@ from qtpy.QtWidgets import (
 from ._calculate import length, radius
 from ._decay_angles_dialog import DecayAnglesDialog
 from ._magnification_dialog import MagnificationDialog
-from ._settings import get_shuffling_seed
+from ._settings import get_bypass, get_shuffling_seed
 from ._stereoshift_dialog import StereoshiftDialog
 from .analysis import EXPECTED_PARTICLES, VIEW_NAMES, ParticleDecay
 
@@ -48,16 +48,17 @@ class ParticleTracksWidget(QWidget):
     def __init__(
         self,
         napari_viewer: napari.Viewer,
-        bypass_force_load_data: bool = False,
         docking_area: str = "right",
     ):
         super().__init__()
         self.viewer: napari.Viewer = napari_viewer
+
         # In normal operation: the user is forced to load data before they can do anything.
-        self.bypass_force_load_data = bypass_force_load_data
+        self.bypass_force_load_data = get_bypass()
+
         self.docking_area = docking_area
 
-        self.shuffling_seed = get_shuffling_seed()
+        self.shuffling_seed = get_shuffling_seed(fallback=1)
 
         # define QtWidgets
         self.load_button = QPushButton("Load data")

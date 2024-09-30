@@ -8,9 +8,7 @@ viewer = Viewer()
 plugin_docking_area = "bottom"
 
 # Create the plugin
-plugin_widget = ParticleTracksWidget(
-    viewer, bypass_force_load_data=False, docking_area=plugin_docking_area
-)
+plugin_widget = ParticleTracksWidget(viewer, docking_area=plugin_docking_area)
 
 # Add plugin to the viewer
 dock_widget = viewer.window.add_dock_widget(
