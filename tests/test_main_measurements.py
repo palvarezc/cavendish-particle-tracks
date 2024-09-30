@@ -20,9 +20,9 @@ from cavendish_particle_tracks._main_widget import (
 def test_calculate_radius_ui(
     cpt_widget: ParticleTracksWidget,
     capsys: pytest.CaptureFixture[str],
-    three_points,
-    rad,
-):
+    three_points: list[int],
+    rad: int,
+) -> None:
     """Test the expected behavior from the expected workflow:
 
     - Add a particle.
@@ -59,7 +59,7 @@ def test_calculate_radius_ui(
 def test_calculate_radius_fails_with_wrong_number_of_points(
     cpt_widget: ParticleTracksWidget,
     capsys: pytest.CaptureFixture[str],
-    npoints,
+    npoints: int,
 ):
     """Test the obvious failure modes: if I don't select 3 points, I can't
     calculate a radius so better send a nice message."""
@@ -91,9 +91,9 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
 def test_calculate_radius_fails_data_out_of_sync(
     cpt_widget: ParticleTracksWidget,
     capsys: pytest.CaptureFixture[str],
-    three_points,
-    rad,
-):
+    three_points: list[int],
+    rad: int,
+) -> None:
     """Test that the radius cannot be computed if the data is out of sync."""
     # Add images to the viewer (view, event, y, x)
     images = np.random.randint(0, 10, (3, 5, 10, 10), "uint8")

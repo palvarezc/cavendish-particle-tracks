@@ -310,7 +310,7 @@ class ParticleTracksWidget(QWidget):
             self.magnification_button.setEnabled(False)
             self.apply_magnification_button.setEnabled(False)
 
-    def _check_points_in_current_slice(self, selected_points) -> bool:
+    def _selected_points_are_on_current_slice(self, selected_points) -> bool:
         """Check that the selected points are in the current slice of the viewer"""
         for slice_index, data_slice in enumerate(["View", "Event"]):
             current_slice = self.viewer.dims.current_step[slice_index]
@@ -342,7 +342,7 @@ class ParticleTracksWidget(QWidget):
             return
         else:
 
-            if not self._check_points_in_current_slice(selected_points):
+            if not self._selected_points_are_on_current_slice(selected_points):
                 return
 
             selected_points_xy = [point[2:] for point in selected_points]
