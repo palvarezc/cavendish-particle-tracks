@@ -57,9 +57,11 @@ def test_decay_vertex_update(cpt_widget):
     # For some reason, this doesn't trigger the change event
     dialog.cal_layer.events.data(action="changed", data_indices=(0,))
 
-    assert dialog.cal_layer.data[0][0][0] == old_value + 50, "The decay vertex has not been updated!"
-    assert (dialog.cal_layer.data[1][0] == data[0][0]).all()
-    assert (dialog.cal_layer.data[2][0] == data[0][0]).all()
+    assert (
+        dialog.cal_layer.data[0][0][0] == old_value + 50
+    ), "The decay vertex has not been updated!"
+    assert (dialog.cal_layer.data[1][0] == dialog.cal_layer.data[0][0]).all()
+    assert (dialog.cal_layer.data[2][0] == dialog.cal_layer.data[0][0]).all()
 
     # Move two tracks simultaneously
     old_value = dialog.cal_layer.data[0][0][0]
