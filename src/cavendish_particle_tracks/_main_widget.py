@@ -352,9 +352,10 @@ class ParticleTracksWidget(QWidget):
         except IndexError:
             napari.utils.notifications.show_error("There are no particles in the table.")
         else:
-            napari.utils.notifications.show_info(
+            print(
                 f"Adding points to the table: {selected_points_xy}"
             )  # FIXME: update when PR #164 is updated
+
             # Assigns the points and radius to the selected row
             self.data[selected_row].rpoints = selected_points_xy
 
@@ -365,15 +366,13 @@ class ParticleTracksWidget(QWidget):
             )
 
             print("calculating radius!")
-            rad = radius(*selected_points_xy)
+            self.data[selected_row].radius_px = radius(*selected_points_xy)
 
             self.table.setItem(
                 selected_row,
                 self._get_table_column_index("radius_px"),
-                QTableWidgetItem(str(rad)),
+                QTableWidgetItem(str(self.data[selected_row].radius_px)),
             )
-
-            self.data[selected_row].radius_px = rad
 
             ## Add the calibrated radius to the table
             self.data[selected_row].radius_cm = (
@@ -385,7 +384,9 @@ class ParticleTracksWidget(QWidget):
                 QTableWidgetItem(str(self.data[selected_row].radius_cm)),
             )
 
-            print("Modified particle ", selected_row)
+            napari.utils.notifications.show_info(
+                "Radius added to particle " + str(selected_row)
+            )
             print(self.data[selected_row])
 
     def _on_click_length(self) -> None:
@@ -406,7 +407,7 @@ class ParticleTracksWidget(QWidget):
             return
         else:
 
-            if not self._check_points_in_current_slice(selected_points):
+            if not self._selected_points_are_on_current_slice(selected_points):
                 return
 
             selected_points_xy = [point[2:] for point in selected_points]
@@ -423,9 +424,7 @@ class ParticleTracksWidget(QWidget):
             napari.utils.notifications.show_error("There are no particles in the table.")
         else:
 
-            napari.utils.notifications.show_info(
-                f"Adding points to the table: {selected_points_xy}"
-            )
+            print(f"Adding points to the table: {selected_points_xy}")
             self.data[selected_row].dpoints = selected_points_xy
 
             self.table.setItem(
@@ -435,12 +434,11 @@ class ParticleTracksWidget(QWidget):
             )
 
             print("calculating decay length!")
-            decay_length = length(*selected_points)
-            self.data[selected_row].decay_length_px = decay_length
+            self.data[selected_row].decay_length_px = length(*selected_points)
             self.table.setItem(
                 selected_row,
                 self._get_table_column_index("decay_length_px"),
-                QTableWidgetItem(str(decay_length)),
+                QTableWidgetItem(str(self.data[selected_row].decay_length_px)),
             )
 
             ## Add the calibrated decay length to the table
@@ -454,7 +452,9 @@ class ParticleTracksWidget(QWidget):
                 QTableWidgetItem(str(self.data[selected_row].decay_length_cm)),
             )
 
-            print("Modified particle ", selected_row)
+            napari.utils.notifications.show_info(
+                "Decay length added to particle " + str(selected_row)
+            )
             print(self.data[selected_row])
 
     def _on_click_decay_angles(self) -> DecayAnglesDialog:

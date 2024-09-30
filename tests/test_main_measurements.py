@@ -20,8 +20,8 @@ from cavendish_particle_tracks._main_widget import (
 def test_calculate_radius_ui(
     cpt_widget: ParticleTracksWidget,
     capsys: pytest.CaptureFixture[str],
-    three_points: list[int],
-    rad: int,
+    three_points: list[list[int]],
+    rad: float,
 ) -> None:
     """Test the expected behavior from the expected workflow:
 
@@ -91,8 +91,8 @@ def test_calculate_radius_fails_with_wrong_number_of_points(
 def test_calculate_radius_fails_data_out_of_sync(
     cpt_widget: ParticleTracksWidget,
     capsys: pytest.CaptureFixture[str],
-    three_points: list[int],
-    rad: int,
+    three_points: list[list[int]],
+    rad: float,
 ) -> None:
     """Test that the radius cannot be computed if the data is out of sync."""
     # Add images to the viewer (view, event, y, x)
@@ -156,7 +156,7 @@ def test_calculate_radius_fails_data_out_of_sync(
     ), "The radius points should have been recorded"
 
 
-def test_radius_save_preserves_old_data(cpt_widget):
+def test_radius_save_preserves_old_data(cpt_widget: ParticleTracksWidget):
     """Test that previous particles' saved radii are not changed by current particle."""
     measurements_layer = cpt_widget._setup_measurement_layer()
 
@@ -298,7 +298,7 @@ def test_calculate_length_fails_data_out_of_sync(
     ), "The decay length should be calculated"
 
 
-def test_length_save_preserves_old_data(cpt_widget):
+def test_length_save_preserves_old_data(cpt_widget: ParticleTracksWidget):
     """Test saving a new particle length does not mess up the previous one."""
     measurements_layer = cpt_widget._setup_measurement_layer()
 
