@@ -2,6 +2,7 @@
 
 This script is intended to start `napari` with the plugin for use in the Cavendish lab computers.
 """
+
 from napari import Viewer, run
 
 from cavendish_particle_tracks import ParticleTracksWidget
