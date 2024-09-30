@@ -1,3 +1,4 @@
+import napari
 import numpy as np
 from napari.layers import Shapes
 from napari.utils.events.event import Event
@@ -233,6 +234,9 @@ class DecayAnglesDialog(QDialog):
                 self.parent._get_table_column_index("phi_pion"),
                 QTableWidgetItem(str(self.phi_pion)),
             )
+        napari.utils.notifications.show_info(
+            "Decay angles saved to particle " + str(selected_row)
+        )
 
     def reject(self) -> None:
         """On cancel remove the points_Stereoshift layer"""
