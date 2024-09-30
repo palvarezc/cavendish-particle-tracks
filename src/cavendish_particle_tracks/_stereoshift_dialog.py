@@ -1,6 +1,7 @@
 import copy
 from typing import TYPE_CHECKING
 
+import napari
 import numpy as np
 from napari.utils.notifications import show_error
 from qtpy.QtWidgets import (
@@ -303,6 +304,13 @@ class StereoshiftDialog(QDialog):
                     self.stereoshift_info.name + "_depth_cm"
                 ),
                 QTableWidgetItem(str(self.stereoshift_info.depth_cm)),
+            )
+
+            napari.utils.notifications.show_info(
+                "Stereoshift of "
+                + self.stereoshift_info.name.replace("_", " ")
+                + " saved to particle "
+                + str(selected_row)
             )
 
     def reject(self) -> None:
