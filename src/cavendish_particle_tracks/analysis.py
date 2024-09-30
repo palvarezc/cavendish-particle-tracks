@@ -53,25 +53,27 @@ class Fiducial:
 @dataclass
 class StereoshiftInfo:
     name: str = ""
-    sf1: list[float] = field(default_factory=list)
-    sf2: list[float] = field(default_factory=list)
-    sp1: list[float] = field(default_factory=list)
-    sp2: list[float] = field(default_factory=list)
+    _sf1: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    _sf2: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    _sp1: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    _sp2: list[float] = field(default_factory=lambda: [0.0, 0.0])
     shift_fiducial: float = 0.0
     shift_point: float = 0.0
     stereoshift: float = -1.0
-    depth_cm: float = 0.0
+    depth_cm: float = -1.0
 
     @property
     def spoints(self):
-        return np.array([self.sf1, self.sf2, self.sp1, self.sp2])
+        return [self._sf1, self._sf2, self._sp1, self._sp2]
 
     @spoints.setter
-    def spoints(self, points):
-        self.sf1, self.sf2, self.sp1, self.sp2 = points
+    def spoints(self, values):
+        for i, point in enumerate(self.spoints):
+            point[0] = values[i][0]
+            point[1] = values[i][1]
 
     def __str__(self):
-        return f"StereoshiftInfo(name={self.name}; sf1={self.sf1}; sf2={self.sf2}; sp1={self.sp1}; sp2={self.sp2}; shift_fiducial={self.shift_fiducial}; shift_point={self.shift_point}; stereoshift={self.stereoshift}; depth_cm={self.depth_cm})"
+        return f"StereoshiftInfo(name={self.name}; sf1={self._sf1}; sf2={self._sf2}; sp1={self._sp1}; sp2={self._sp2}; shift_fiducial={self.shift_fiducial}; shift_point={self.shift_point}; stereoshift={self.stereoshift}; depth_cm={self.depth_cm})"
 
 
 # Idea is to save a list of ParticleDecays as we go along, and then pandas.DataFrame(list_of_particles) does all the magic
