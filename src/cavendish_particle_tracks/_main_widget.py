@@ -149,8 +149,8 @@ class ParticleTracksWidget(QWidget):
         # Data analysis
         self.data: list[ParticleDecay] = []
         # might not need this eventually
-        self.mag_a = -1.0e6
-        self.mag_b = -1.0e6
+        self.mag_a = -1.0
+        self.mag_b = 0.0
 
         # Dialog pointers to reuse
         self.mag_dlg: MagnificationDialog | None = None
@@ -310,6 +310,20 @@ class ParticleTracksWidget(QWidget):
             self.magnification_button.setEnabled(False)
             self.apply_magnification_button.setEnabled(False)
 
+    def _selected_points_are_on_current_slice(self, selected_points) -> bool:
+        """Check that the selected points are in the current slice of the viewer"""
+        for slice_index, data_slice in enumerate(["View", "Event"]):
+            current_slice = self.viewer.dims.current_step[slice_index]
+            all_points_in_current_slice = all(
+                current_slice == point[slice_index] for point in selected_points
+            )
+            if not all_points_in_current_slice:
+                napari.utils.notifications.show_error(
+                    f"Measurement points not in current {data_slice}. Measurement not completed."
+                )
+                return False
+        return True
+
     def _on_click_radius(self) -> None:
         """When the 'Calculate radius' button is clicked, calculate the radius
         for the currently selected points and assign it to the currently selected table row.
@@ -327,33 +341,38 @@ class ParticleTracksWidget(QWidget):
             )
             return
         else:
-            napari.utils.notifications.show_info(
-                f"Adding points to the table: {selected_points}"
-            )
+
+            if not self._selected_points_are_on_current_slice(selected_points):
+                return
+
+            selected_points_xy = [point[2:] for point in selected_points]
+
         try:
             selected_row = self._get_selected_row()
         except IndexError:
             napari.utils.notifications.show_error("There are no particles in the table.")
         else:
-            print("calculating radius!")  # FIXME: update when PR #164 is updated
-            rad = radius(*selected_points)
-
-            self.data[selected_row].rpoints = selected_points
+            print(
+                f"Adding points to the table: {selected_points_xy}"
+            )  # FIXME: update when PR #164 is updated
 
             # Assigns the points and radius to the selected row
+            self.data[selected_row].rpoints = selected_points_xy
+
             self.table.setItem(
                 selected_row,
                 self._get_table_column_index("rpoints"),
                 QTableWidgetItem(str(self.data[selected_row].rpoints)),
             )
 
+            print("calculating radius!")
+            self.data[selected_row].radius_px = radius(*selected_points_xy)
+
             self.table.setItem(
                 selected_row,
                 self._get_table_column_index("radius_px"),
-                QTableWidgetItem(str(rad)),
+                QTableWidgetItem(str(self.data[selected_row].radius_px)),
             )
-
-            self.data[selected_row].radius_px = rad
 
             ## Add the calibrated radius to the table
             self.data[selected_row].radius_cm = (
@@ -365,7 +384,9 @@ class ParticleTracksWidget(QWidget):
                 QTableWidgetItem(str(self.data[selected_row].radius_cm)),
             )
 
-            print("Modified particle ", selected_row)
+            napari.utils.notifications.show_info(
+                "Radius added to particle " + str(selected_row)
+            )
             print(self.data[selected_row])
 
     def _on_click_length(self) -> None:
@@ -385,9 +406,11 @@ class ParticleTracksWidget(QWidget):
             )
             return
         else:
-            napari.utils.notifications.show_info(
-                f"Adding points to the table: {selected_points}"
-            )
+
+            if not self._selected_points_are_on_current_slice(selected_points):
+                return
+
+            selected_points_xy = [point[2:] for point in selected_points]
 
         # Forcing only 2 points
         if len(selected_points) != 2:
@@ -401,7 +424,9 @@ class ParticleTracksWidget(QWidget):
             napari.utils.notifications.show_error("There are no particles in the table.")
         else:
 
-            self.data[selected_row].dpoints = selected_points
+            print(f"Adding points to the table: {selected_points_xy}")
+            self.data[selected_row].dpoints = selected_points_xy
+
             self.table.setItem(
                 selected_row,
                 self._get_table_column_index("dpoints"),
@@ -409,12 +434,11 @@ class ParticleTracksWidget(QWidget):
             )
 
             print("calculating decay length!")
-            decay_length = length(*selected_points)
-            self.data[selected_row].decay_length_px = decay_length
+            self.data[selected_row].decay_length_px = length(*selected_points)
             self.table.setItem(
                 selected_row,
                 self._get_table_column_index("decay_length_px"),
-                QTableWidgetItem(str(decay_length)),
+                QTableWidgetItem(str(self.data[selected_row].decay_length_px)),
             )
 
             ## Add the calibrated decay length to the table
@@ -428,7 +452,9 @@ class ParticleTracksWidget(QWidget):
                 QTableWidgetItem(str(self.data[selected_row].decay_length_cm)),
             )
 
-            print("Modified particle ", selected_row)
+            napari.utils.notifications.show_info(
+                "Decay length added to particle " + str(selected_row)
+            )
             print(self.data[selected_row])
 
     def _on_click_decay_angles(self) -> DecayAnglesDialog:
@@ -536,18 +562,25 @@ class ParticleTracksWidget(QWidget):
         # Move to the first event in the series
         self.viewer.dims.set_current_step(1, 0)
 
-        measurement_layer_present = MEASUREMENTS_LAYER_NAME in self.viewer.layers
+        # Create measurements layer if not already there
+        self.layer_measurements = self._setup_measurement_layer()
 
-        if not measurement_layer_present:
-            self.layer_measurements = self.viewer.add_points(
+        # Disable the load button after loading the data (interim solution until we can move to bottom-docked UI)
+        self.load_button.setEnabled(False)
+
+    def _setup_measurement_layer(self):
+        """Create a Points layer for the measurement of the radii and lengths."""
+
+        if MEASUREMENTS_LAYER_NAME in self.viewer.layers:
+            return self.viewer.layers[MEASUREMENTS_LAYER_NAME]
+        else:
+            return self.viewer.add_points(
                 name=MEASUREMENTS_LAYER_NAME,
+                ndim=4,
                 size=20,
                 border_width=7,
                 border_width_is_relative=False,
             )
-
-        # Disable the load button after loading the data (interim solution until we can move to bottom-docked UI)
-        self.load_button.setEnabled(False)
 
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
