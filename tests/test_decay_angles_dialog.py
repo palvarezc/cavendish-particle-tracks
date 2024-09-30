@@ -73,6 +73,16 @@ def test_decay_vertex_update(cpt_widget):
     # Check that the decay vertex has been updated
     assert dialog.cal_layer.data[0][0][0] == old_value + 50
 
+    # Check that no error is raised when DecayAnglesDialog._enforce_points_coincident(event) is called with event = None
+    # The reason why the data changed event is triggered with event = None might be because the dialog is hidden,
+    # but have not been able to reproduce this in the test.
+    try:
+        dialog._enforce_points_coincident(None)
+    except TypeError:
+        pytest.fail(
+            "An error was raised when the dialog was hidden and a data change event was triggered."
+        )
+
 
 @pytest.mark.parametrize(
     "Lambda_track, p_track, pi_track, phi_proton, phi_pion",
