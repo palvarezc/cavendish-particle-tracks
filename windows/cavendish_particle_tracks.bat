@@ -4,6 +4,8 @@
 :: If you are feeling creative, you can also change the icon of the shortcut to the Cavendish logo (C:\Program Files\Python39\Lib\site-packages\cavendish_particle_tracks\docs\ParticleCrocodile.png)
 @echo off
 if not exist "%userprofile%\.napari" mkdir  %userprofile%\.napari
+set PYTHON_ROOT=C:\Program Files\Python39
 set NUMBA_CACHE_DIR=%userprofile%\.napari
 set CPT_SHUFFLING_SEED=1
-napari -w cavendish-particle-tracks
+:: napari -w cavendish-particle-tracks
+python %PYTHON_ROOT%\Lib\site-packages\cavendish_particle_tracks\windows\start_cpt.py
