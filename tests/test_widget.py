@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from random import random
 
 import numpy as np
 import pytest
@@ -10,98 +9,47 @@ from pytestqt.qtbot import QtBot
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QDialogButtonBox, QMessageBox
 
-from cavendish_particle_tracks._main_widget import ParticleTracksWidget
+from cavendish_particle_tracks._main_widget import (
+    IMAGE_LAYER_NAME,
+    MEASUREMENTS_LAYER_NAME,
+    ParticleTracksWidget,
+)
 
 from .conftest import get_dialog
 
 
-@pytest.mark.parametrize("bypass_load_screen", [True, False])
+@pytest.mark.parametrize("bypass", [True, False])
 @pytest.mark.parametrize("docking_area", ["left", "bottom"])
-def test_open_widget(make_napari_viewer, bypass_load_screen, docking_area):
+def test_open_widget(make_napari_viewer, bypass, docking_area):
     """Test the opening of the widget"""
     viewer = make_napari_viewer()
-    widget = ParticleTracksWidget(
-        napari_viewer=viewer,
-        bypass_load_screen=bypass_load_screen,
-        docking_area=docking_area,
-    )
+    widget = ParticleTracksWidget(napari_viewer=viewer, docking_area=docking_area)
+    widget.bypass_force_load_data = bypass
     assert widget.isVisible() is False
     widget.show()
     assert widget.isVisible() is True
 
+    if bypass:
+        return
+
     # Check the widget behavior before and after loading the data
-    if docking_area == "bottom" and bypass_load_screen is False:
-        assert widget.intro_text.isVisible() is True
-        widget.viewer.add_image(
-            np.random.random((100, 100)), name="Particle Tracks"
-        )
-        assert widget.intro_text.isVisible() is False
+    assert widget.particle_decays_menu.isEnabled() is False
+    assert widget.radius_button.isEnabled() is False
+    assert widget.delete_particle.isEnabled() is False
+    assert widget.length_button.isEnabled() is False
+    assert widget.stereoshift_button.isEnabled() is False
+    assert widget.magnification_button.isEnabled() is False
+    assert widget.decay_angles_button.isEnabled() is False
 
+    widget.viewer.add_image(np.random.random((100, 100)), name=IMAGE_LAYER_NAME)
 
-def test_calculate_radius_ui(
-    cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
-):
-    """Test the expected behavior from the expected workflow:
-
-    - Add a particle.
-    - Add and select three points.
-    - Calculate a radius from this.
-    - The table should have the correct radius.
-    """
-    # need to click "new particle" to add a row to the table
-    cpt_widget.particle_decays_menu.setCurrentIndex(1)
-
-    # add three points to the points layer and select them
-    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        [(0, 1), (1, 0), (0, -1)], name="Radii and Lengths"
-    )
-    cpt_widget.layer_measurements.selected_data = {0, 1, 2}
-
-    # click the calculate radius button
-    cpt_widget._on_click_radius()
-
-    # read captured output and check that it's as we expected
-    captured = capsys.readouterr()
-    expected_lines = ["Adding points to the table:", "calculating radius!"]
-    for expected in expected_lines:
-        assert expected in captured.out
-
-    assert cpt_widget.table.item(0, 1)
-    assert cpt_widget.table.item(0, 2)
-    assert cpt_widget.table.item(0, 3)
-    assert cpt_widget.table.item(0, 4)
-
-    assert cpt_widget.data[0].radius_px == 1.0
-
-
-@pytest.mark.parametrize("npoints", [1, 2, 4, 5])
-def test_calculate_radius_fails_with_wrong_number_of_points(
-    cpt_widget: ParticleTracksWidget,
-    capsys: pytest.CaptureFixture[str],
-    npoints,
-):
-    """Test the obvious failure modes: if I don't select 3 points, I can't
-    calculate a radius so better send a nice message."""
-    # need to click "new particle" to add a row to the table
-    cpt_widget.particle_decays_menu.setCurrentIndex(1)
-
-    # add six random points to the points layer
-    points = [(random(), random()) for _ in range(6)]
-    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        points, name="Radii and Lengths"
-    )
-
-    # select the wrong number of points
-    cpt_widget.layer_measurements.selected_data = set(range(npoints))
-
-    # click the calculate radius button
-    cpt_widget._on_click_radius()
-    captured = capsys.readouterr()
-
-    assert (
-        "ERROR: Select three points to calculate the path radius."
-        in captured.out
-    )
+    assert widget.particle_decays_menu.isEnabled() is True
+    assert widget.radius_button.isEnabled() is False
+    assert widget.delete_particle.isEnabled() is False
+    assert widget.length_button.isEnabled() is False
+    assert widget.stereoshift_button.isEnabled() is False
+    assert widget.magnification_button.isEnabled() is True
+    assert widget.decay_angles_button.isEnabled() is False
 
 
 def test_add_new_particle_ui(cpt_widget: ParticleTracksWidget):
@@ -136,65 +84,6 @@ def test_delete_particle_ui(cpt_widget: ParticleTracksWidget):
     assert len(cpt_widget.data) == 0
 
 
-def test_calculate_length_ui(
-    cpt_widget: ParticleTracksWidget, capsys: pytest.CaptureFixture[str]
-):
-    # add a random image to the napari viewer
-    cpt_widget.viewer.add_image(np.random.random((100, 100)))
-
-    # need to click "new particle" to add a row to the table
-    cpt_widget.particle_decays_menu.setCurrentIndex(1)
-
-    # add three points to the points layer and select them
-    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        [(0, 1), (0, 0)], name="Radii and Lengths"
-    )
-    cpt_widget.layer_measurements.selected_data = {0, 1}
-
-    # click the calculate decay length button
-    cpt_widget._on_click_length()
-
-    assert cpt_widget.table.item(
-        0, cpt_widget._get_table_column_index("decay_length_px")
-    )
-    assert (
-        cpt_widget.table.item(
-            0, cpt_widget._get_table_column_index("decay_length_px")
-        ).text()
-        == "1.0"
-    )
-
-
-@pytest.mark.parametrize("npoints", [1, 3, 4, 5])
-def test_calculate_length_fails_with_wrong_number_of_points(
-    cpt_widget: ParticleTracksWidget,
-    capsys: pytest.CaptureFixture[str],
-    npoints,
-):
-    """Test the obvious failure modes: if I don't select 2 points, I can't
-    calculate a length so better send a nice message."""
-    # need to click "new particle" to add a row to the table
-    cpt_widget.particle_decays_menu.setCurrentIndex(1)
-
-    # add six random points to the points layer
-    points = [(random(), random()) for _ in range(6)]
-    cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-        points, name="Radii and Lengths"
-    )
-
-    # select the wrong number of points
-    cpt_widget.layer_measurements.selected_data = set(range(npoints))
-
-    # click the calculate decay length button
-    cpt_widget._on_click_length()
-    captured = capsys.readouterr()
-
-    assert (
-        "ERROR: Select two points to calculate the decay length."
-        in captured.out
-    )
-
-
 @pytest.mark.parametrize(
     "data_subdirs, image_count, expect_data_loaded, reload",
     [
@@ -219,7 +108,7 @@ def test_load_data(
     data_layer_index = 0
     if reload:
         cpt_widget.layer_measurements = cpt_widget.viewer.add_points(
-            name="Radii and Lengths"
+            name=MEASUREMENTS_LAYER_NAME
         )
         data_layer_index = 1
 
@@ -228,9 +117,7 @@ def test_load_data(
         p = tmp_path / subdir
         p.mkdir()
         for i in range(n):
-            data = np.random.randint(
-                0, 255, (resolution, resolution, 3), "uint8"
-            )
+            data = np.random.randint(0, 255, (resolution, resolution, 3), "uint8")
             tf.imwrite(p / f"temp{i}.tif", data)
 
     def set_directory_and_close(dialog):
@@ -249,10 +136,7 @@ def test_load_data(
 
     if expect_data_loaded:
         assert len(cpt_widget.viewer.layers) == 2
-        assert (
-            cpt_widget.viewer.layers[data_layer_index].name
-            == "Particle Tracks"
-        )
+        assert cpt_widget.viewer.layers[data_layer_index].name == IMAGE_LAYER_NAME
         assert cpt_widget.viewer.layers[data_layer_index].ndim == 4
         assert cpt_widget.viewer.dims.current_step[1] == 0
     else:
@@ -276,9 +160,7 @@ def test_load_data(
 
 def test_show_hide_buttons(cpt_widget: ParticleTracksWidget):
     """Test the show/hide buttons"""
-    cpt_widget.viewer.add_image(
-        np.random.random((100, 100)), name="Particle Tracks"
-    )
+    cpt_widget.viewer.add_image(np.random.random((100, 100)), name=IMAGE_LAYER_NAME)
     # ideally would like to test isVisible instead of isEnabled, but that requires showing the widget
     # need to think about how to do that, or if it's worth it
     assert cpt_widget.particle_decays_menu.isEnabled() is True

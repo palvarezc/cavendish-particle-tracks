@@ -84,12 +84,12 @@ namespaces = false
 write_to = "src/cavendish_particle_tracks/_version.py"
 
 [tool.black]
-line-length = 79
+line-length = 90
 target-version = ['py39', 'py310', 'py311', 'py312']
 
 
 [tool.ruff]
-line-length = 79
+line-length = 90
 target-version = "py39"
 fix = true
 

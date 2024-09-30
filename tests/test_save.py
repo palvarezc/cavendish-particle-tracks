@@ -10,9 +10,7 @@ from .conftest import get_dialog
 
 
 def test_try_saving_empty_get_warning(cpt_widget):
-    with pytest.warns(
-        UserWarning, match="There is no data in the table to save."
-    ):
+    with pytest.warns(UserWarning, match="There is no data in the table to save."):
         cpt_widget._on_click_save()
 
 
@@ -48,9 +46,7 @@ def test_save_single_particle(
     )
 
     if expect_data_loaded:
-        expected_file_name = (
-            file_name  # Expect the file name to be the one we set
-        )
+        expected_file_name = file_name  # Expect the file name to be the one we set
         csv_files = glob(str(tmp_path / "*.csv"))
         pkl_files = glob(str(tmp_path / "*.pkl"))
 

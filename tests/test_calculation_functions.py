@@ -7,6 +7,7 @@ from cavendish_particle_tracks._calculate import CHAMBER_DEPTH as CD
 from cavendish_particle_tracks._calculate import FIDUCIAL_BACK as FB
 from cavendish_particle_tracks._calculate import FIDUCIAL_FRONT as FF
 from cavendish_particle_tracks._calculate import (
+    angle,
     depth,
     length,
     magnification,
@@ -105,3 +106,20 @@ def test_calculate_stereoshift(f1, f2, p1, p2, S):
 def test_calculate_depth(f1, f2, p1, p2, S):
     assert depth(f1, f2, p1, p2) == pytest.approx(S, rel=1e-3)
     assert depth(f1, f2, p1, p2, reverse=True) == pytest.approx(S, rel=1e-3)
+
+
+@pytest.mark.parametrize(
+    "v1, v2, theta12",
+    [
+        ([[-1, 1], [0, 0]], [[0, 0], [1, 0]], np.pi / 4),
+        ([[-1, 1], [0, 0]], [[0, 0], [0, -1]], -1 * np.pi / 4),
+        (
+            [[1, -1], [0, 0]],
+            [[0, 0], [1, 0]],
+            -3 * np.pi / 4,
+        ),
+        ([[1, -1], [0, 0]], [[0, 0], [0, -1]], +3 * np.pi / 4),
+    ],
+)
+def test_calculate_angles(v1, v2, theta12):
+    assert angle(v1, v2) == pytest.approx(theta12, rel=1e-6)
