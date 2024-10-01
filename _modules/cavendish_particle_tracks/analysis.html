@@ -453,6 +453,8 @@ document.write(`
 <span class="k">class</span> <span class="nc">ParticleDecay</span><span class="p">:</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">event_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">view_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="n">_r1</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
     <span class="n">_r2</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
     <span class="n">_r3</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
@@ -472,14 +474,13 @@ document.write(`
     <span class="p">)</span>
     <span class="n">phi_proton</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
     <span class="n">phi_pion</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
-    <span class="n">event_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="n">view_number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
 <div class="viewcode-block" id="ParticleDecay.vars_to_show">
 <a class="viewcode-back" href="../../api.html#cavendish_particle_tracks.analysis.ParticleDecay.vars_to_show">[docs]</a>
     <span class="k">def</span> <span class="nf">vars_to_show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibrated</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">calibrated</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span>
+                <span class="s2">&quot;event_number&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;name&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;radius_cm&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;decay_length_cm&quot;</span><span class="p">,</span>
@@ -491,6 +492,7 @@ document.write(`
             <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span>
+                <span class="s2">&quot;event_number&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;name&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;radius_px&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;decay_length_px&quot;</span><span class="p">,</span>

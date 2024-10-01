@@ -987,12 +987,17 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">),</span>
-            <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="n">new_particle</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+            <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">new_particle</span><span class="o">.</span><span class="n">index</span><span class="p">)),</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">),</span>
             <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="n">new_particle</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;event_number&quot;</span><span class="p">),</span>
+            <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">new_particle</span><span class="o">.</span><span class="n">event_number</span><span class="p">)),</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
@@ -1056,16 +1061,22 @@ document.write(`
                 <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;magnification&quot;</span><span class="p">),</span>
                 <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">magnification</span><span class="p">)),</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
-                <span class="n">i</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;radius_cm&quot;</span><span class="p">),</span>
-                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">radius_cm</span><span class="p">)),</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
-                <span class="n">i</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;decay_length_cm&quot;</span><span class="p">),</span>
-                <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_cm</span><span class="p">)),</span>
-            <span class="p">)</span>
+            <span class="c1"># if the radius has been computed before, show the calibrated value</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;radius_px&quot;</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
+                    <span class="n">i</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;radius_cm&quot;</span><span class="p">),</span>
+                    <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">radius_cm</span><span class="p">)),</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;decay_length_px&quot;</span><span class="p">))</span>
+                <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span>
+                    <span class="n">i</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_get_table_column_index</span><span class="p">(</span><span class="s2">&quot;decay_length_cm&quot;</span><span class="p">),</span>
+                    <span class="n">QTableWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">decay_length_cm</span><span class="p">)),</span>
+                <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_on_click_save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save list of particles to csv file.</span>
