@@ -1,4 +1,3 @@
-
 # Contributing
 
 Contributions are very welcome.
@@ -9,7 +8,6 @@ Presumably also with the testing dependencies:
     git clone git@github.com/palvarezc/cavendish-particle-tracks.git
     cd cavendish-particle-tracks
     python -m pip install -e ".[testing]"
-
 
 Tests are run with [tox] across python 3.9, 3.10, 3.11 and 3.12.
 You can also check quickly with `pytest` if you installed the `testing` extras.
@@ -22,7 +20,15 @@ We also use `pre-commit` to ensure uniform code style.
 
 [tox]: https://tox.readthedocs.io/en/latest/
 
+We use Python's `warnings` module to communicate warnings to users.
+Warnings are forwarded by `napari`'s notification system.
+For informative messages to the user (i.e. not warnings or errors), we use `napari.utils.notifications.show_info` which is consistent with `warnings.warn`.
+
+For developer-facing logging information, we use Python's `logging`.
+This is not shown to users unless they have run `napari` in a terminal.
+
 ## Contributing documentation
+
 We are using the [myst](https://myst-parser.readthedocs.io/en/latest/index.html) markdown parser.
 
 To test contributions to the documentation, this can be built locally following:
