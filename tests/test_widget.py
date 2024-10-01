@@ -23,11 +23,8 @@ from .conftest import get_dialog
 def test_open_widget(make_napari_viewer, bypass, docking_area):
     """Test the opening of the widget"""
     viewer = make_napari_viewer()
-    widget = ParticleTracksWidget(
-        napari_viewer=viewer,
-        bypass_force_load_data=bypass,
-        docking_area=docking_area,
-    )
+    widget = ParticleTracksWidget(napari_viewer=viewer, docking_area=docking_area)
+    widget.bypass_force_load_data = bypass
     assert widget.isVisible() is False
     widget.show()
     assert widget.isVisible() is True
