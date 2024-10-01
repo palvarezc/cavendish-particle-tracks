@@ -155,7 +155,7 @@ def test_load_data(
         )
 
         # Check that apply_magnification does not show anything in the table
-        cpt_widget._apply_magnification()
+        cpt_widget._on_click_apply_magnification()
         assert not cpt_widget.table.item(
             0, cpt_widget._get_table_column_index("radius_cm")
         ), "The calibrated radius should not be shown in the table"
