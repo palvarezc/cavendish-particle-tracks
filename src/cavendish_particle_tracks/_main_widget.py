@@ -611,12 +611,17 @@ class ParticleTracksWidget(QWidget):
         self.table.setItem(
             self.table.rowCount() - 1,
             self._get_table_column_index("index"),
-            QTableWidgetItem(new_particle.index),
+            QTableWidgetItem(str(new_particle.index)),
         )
         self.table.setItem(
             self.table.rowCount() - 1,
             self._get_table_column_index("name"),
             QTableWidgetItem(new_particle.name),
+        )
+        self.table.setItem(
+            self.table.rowCount() - 1,
+            self._get_table_column_index("event_number"),
+            QTableWidgetItem(str(new_particle.event_number)),
         )
         self.table.setItem(
             self.table.rowCount() - 1,
@@ -680,16 +685,22 @@ class ParticleTracksWidget(QWidget):
                 self._get_table_column_index("magnification"),
                 QTableWidgetItem(str(self.data[i].magnification)),
             )
-            self.table.setItem(
-                i,
-                self._get_table_column_index("radius_cm"),
-                QTableWidgetItem(str(self.data[i].radius_cm)),
-            )
-            self.table.setItem(
-                i,
-                self._get_table_column_index("decay_length_cm"),
-                QTableWidgetItem(str(self.data[i].decay_length_cm)),
-            )
+            # if the radius has been computed before, show the calibrated value
+            if self.table.item(i, self._get_table_column_index("radius_px")) is not None:
+                self.table.setItem(
+                    i,
+                    self._get_table_column_index("radius_cm"),
+                    QTableWidgetItem(str(self.data[i].radius_cm)),
+                )
+            if (
+                self.table.item(i, self._get_table_column_index("decay_length_px"))
+                is not None
+            ):
+                self.table.setItem(
+                    i,
+                    self._get_table_column_index("decay_length_cm"),
+                    QTableWidgetItem(str(self.data[i].decay_length_cm)),
+                )
 
     def _on_click_save(self) -> None:
         """Save list of particles to csv file.
