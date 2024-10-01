@@ -86,12 +86,10 @@ class ParticleDecay:
     _r1: list[float] = field(default_factory=lambda: [0.0, 0.0])
     _r2: list[float] = field(default_factory=lambda: [0.0, 0.0])
     _r3: list[float] = field(default_factory=lambda: [0.0, 0.0])
-    radius_px: float = -1.0
-    radius_cm: float = -1.0
+    radius: float = -1.0
     _d1: list[float] = field(default_factory=lambda: [0.0, 0.0])
     _d2: list[float] = field(default_factory=lambda: [0.0, 0.0])
-    decay_length_px: float = -1.0
-    decay_length_cm: float = -1.0
+    decay_length: float = -1.0
     magnification_a: float = -1.0
     magnification_b: float = 0.0
     origin_vertex_stereoshift_info: StereoshiftInfo = field(
@@ -106,34 +104,36 @@ class ParticleDecay:
     def vars_to_show(self, calibrated=False):
         if calibrated:
             return [
-                "event_number",
                 "name",
+                "event_number",
                 "radius_cm",
                 "decay_length_cm",
+                "phi_proton",
+                "phi_pion",
                 "origin_vertex_depth_cm",
                 "decay_vertex_depth_cm",
                 "magnification",
-                "phi_proton",
-                "phi_pion",
             ]
         else:
             return [
-                "event_number",
                 "name",
-                "radius_px",
-                "decay_length_px",
+                "event_number",
+                "radius",
+                "decay_length",
+                "phi_proton",
+                "phi_pion",
                 "origin_vertex_depth_cm",
                 "decay_vertex_depth_cm",
                 "magnification",
-                "phi_proton",
-                "phi_pion",
             ]
 
     def vars_to_save(self):
-        """Variable to save in the output file, all for the moment"""
+        """Variable to save in the output file."""
         vars_to_save = [var for var in self.__dict__ if var[0] != "_"]
+        vars_to_save.insert(vars_to_save.index("radius") + 1, "radius_cm")
+        vars_to_save.insert(vars_to_save.index("decay_length") + 1, "decay_length_cm")
         vars_to_save += ["origin_vertex_depth_cm", "decay_vertex_depth_cm"]
-        vars_to_save += ["rpoints", "dpoints"]
+        vars_to_save += ["rpoints", "dpoints", "magnification"]
         return vars_to_save
 
     @property
@@ -172,9 +172,13 @@ class ParticleDecay:
     def magnification(self):
         return self.magnification_a + self.magnification_b * self.average_depth_cm
 
-    def calibrate(self) -> None:
-        self.radius_cm = self.magnification * self.radius_px
-        self.decay_length_cm = self.magnification * self.decay_length_px
+    @property
+    def radius_cm(self):
+        return self.magnification * self.radius
+
+    @property
+    def decay_length_cm(self):
+        return self.magnification * self.decay_length
 
     def to_csv(self):
         mystring = ""
