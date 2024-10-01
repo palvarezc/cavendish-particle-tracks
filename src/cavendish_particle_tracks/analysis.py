@@ -81,6 +81,8 @@ class StereoshiftInfo:
 class ParticleDecay:
     name: str = ""
     index: int = 0
+    event_number: int = -1
+    view_number: int = -1
     _r1: list[float] = field(default_factory=lambda: [0.0, 0.0])
     _r2: list[float] = field(default_factory=lambda: [0.0, 0.0])
     _r3: list[float] = field(default_factory=lambda: [0.0, 0.0])
@@ -100,12 +102,11 @@ class ParticleDecay:
     )
     phi_proton: float = -100
     phi_pion: float = -100
-    event_number: int = -1
-    view_number: int = -1
 
     def vars_to_show(self, calibrated=False):
         if calibrated:
             return [
+                "event_number",
                 "name",
                 "radius_cm",
                 "decay_length_cm",
@@ -117,6 +118,7 @@ class ParticleDecay:
             ]
         else:
             return [
+                "event_number",
                 "name",
                 "radius_px",
                 "decay_length_px",

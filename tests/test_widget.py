@@ -139,6 +139,30 @@ def test_load_data(
         assert cpt_widget.viewer.layers[data_layer_index].name == IMAGE_LAYER_NAME
         assert cpt_widget.viewer.layers[data_layer_index].ndim == 4
         assert cpt_widget.viewer.dims.current_step[1] == 0
+
+        # Add a new particle and check the event_number is recorded correctly
+        # Move to event 1
+        cpt_widget.viewer.dims.set_current_step(1, 1)
+        # Add a new particle
+        cpt_widget.particle_decays_menu.setCurrentIndex(1)
+        assert cpt_widget.table.rowCount() == 1
+        assert cpt_widget.data[0].event_number == 1, "The event number should be 1"
+        assert (
+            cpt_widget.table.item(
+                0, cpt_widget._get_table_column_index("event_number")
+            ).text()
+            == "1"
+        )
+
+        # Check that apply_magnification does not show anything in the table
+        cpt_widget._on_click_apply_magnification()
+        assert not cpt_widget.table.item(
+            0, cpt_widget._get_table_column_index("radius_cm")
+        ), "The calibrated radius should not be shown in the table"
+        assert not cpt_widget.table.item(
+            0, cpt_widget._get_table_column_index("decay_length_cm")
+        ), "The calibrated radius should not be shown in the table"
+
     else:
         # def capture_msgbox():
         #    for widget in QApplication.topLevelWidgets():
