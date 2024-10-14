@@ -90,6 +90,8 @@ def test_csv_file_has_correct_columns(cpt_widget, tmp_path, qtbot: QtBot):
     file_name = "test_saved_file.csv"
 
     def set_filename_and_close(dialog):
+        # Function of the signature needed to use as a dialog action.
+        # Defined internally so we can access the fixtures without passing.
         qtbot.addWidget(dialog)
         dialog.setDirectory(str(tmp_path))
         dialog.findChild(QLineEdit, "fileNameEdit").setText(file_name)
