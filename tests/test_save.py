@@ -107,7 +107,7 @@ def test_csv_file_has_correct_columns(cpt_widget, tmp_path, qtbot: QtBot):
     # Check the file has the correct columns
     csv_files = glob(str(tmp_path / "*.csv"))
     assert len(csv_files) == 1, "Expecting one CSV file to be saved"
-    with open(csv_files[0], newline="") as f:
+    with open(csv_files[0], encoding="utf8") as f:
         myreader = csv.reader(f, delimiter=",")
         for row in myreader:
             assert len(row) == 18, "Expecting 18 columns in the CSV file"
