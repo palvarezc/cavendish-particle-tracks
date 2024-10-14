@@ -87,7 +87,7 @@ def test_csv_file_has_correct_columns(cpt_widget, tmp_path, qtbot: QtBot):
     cpt_widget.particle_decays_menu.setCurrentIndex(1)  # select the Σ
     assert len(cpt_widget.data) == 1, "Expecting one particle in the table"
 
-    file_name = "my_file.csv"
+    file_name = "test_saved_file.csv"
 
     def set_filename_and_close(dialog):
         qtbot.addWidget(dialog)
