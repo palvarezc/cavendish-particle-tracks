@@ -190,7 +190,8 @@ class ParticleDecay:
             if var in ["rpoints", "dpoints"]:
                 mystring += "["
                 for point in getattr(self, var):
-                    mystring += "[" + str(point[0]) + " " + str(point[1]) + "]; "
+                    x, y = point
+                    mystring += "[{x} {y}]; "
                 mystring = mystring[0:-2] + "],"
             else:
                 mystring += str(getattr(self, var)) + ","
