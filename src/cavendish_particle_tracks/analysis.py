@@ -193,7 +193,7 @@ class ParticleDecay:
                 mystring += "["
                 for point in getattr(self, var):
                     x, y = point
-                    mystring += "[{x} {y}]; "
+                    mystring += f"[{x} {y}]; "
                 mystring = mystring[0:-2] + "],"
             else:
                 mystring += str(getattr(self, var)) + ","
