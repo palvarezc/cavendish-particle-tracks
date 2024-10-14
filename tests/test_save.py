@@ -1,4 +1,5 @@
 import csv
+import filecmp
 from glob import glob
 from os import stat
 
@@ -84,7 +85,7 @@ def test_save_single_particle(
 
 def test_csv_file_has_correct_columns(cpt_widget, tmp_path, qtbot: QtBot):
     # start napari and the particle widget, add a single particle
-    cpt_widget.particle_decays_menu.setCurrentIndex(1)  # select the Σ
+    cpt_widget.particle_decays_menu.setCurrentIndex(4)  # select the Λ
     assert len(cpt_widget.data) == 1, "Expecting one particle in the table"
 
     file_name = "test_saved_file.csv"
@@ -113,3 +114,6 @@ def test_csv_file_has_correct_columns(cpt_widget, tmp_path, qtbot: QtBot):
         myreader = csv.reader(f, delimiter=",")
         for row in myreader:
             assert len(row) == 18, "Expecting 18 columns in the CSV file"
+    assert filecmp.cmp(
+        csv_files[0], "tests/data/test_output_file.csv"
+    ), "Output cvs file is different from the expected one"
