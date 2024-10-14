@@ -74,7 +74,9 @@ class StereoshiftInfo:
 
     def __str__(self):
         mystring = f"StereoshiftInfo(name={self.name}; "
-        for name, point in zip(["sf1", "sf2", "sp1", "sp2"], [self._sf1, self._sf2, self._sp1, self._sp2]):
+        for name, point in zip(
+            ["sf1", "sf2", "sp1", "sp2"], [self._sf1, self._sf2, self._sp1, self._sp2]
+        ):
             x, y = point
             mystring += f"{name}=[{x} {y}]; "
         mystring += f"shift_fiducial={self.shift_fiducial}; "
