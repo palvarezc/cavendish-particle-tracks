@@ -1,3 +1,4 @@
+import csv
 from glob import glob
 from os import stat
 
@@ -79,3 +80,34 @@ def test_save_single_particle(
         assert msgbox.text() == (
             "The file must be a CSV (*.csv) or Pickle (*.pkl) file. Please try again."
         )
+
+
+def test_csv_file_has_correct_columns(cpt_widget, tmp_path, qtbot: QtBot):
+    # start napari and the particle widget, add a single particle
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)  # select the Σ
+    assert len(cpt_widget.data) == 1, "Expecting one particle in the table"
+
+    file_name = "my_file.csv"
+
+    def set_filename_and_close(dialog):
+        qtbot.addWidget(dialog)
+        dialog.setDirectory(str(tmp_path))
+        dialog.findChild(QLineEdit, "fileNameEdit").setText(file_name)
+        buttonbox = dialog.findChild(QDialogButtonBox, "buttonBox")
+        openbutton = buttonbox.children()[1]
+        qtbot.mouseClick(openbutton, Qt.LeftButton, delay=1)
+
+    # Open and retrieve file dialog
+    get_dialog(
+        dialog_trigger=cpt_widget._on_click_save,
+        dialog_action=set_filename_and_close,
+        time_out=5,
+    )
+
+    # Check the file has the correct columns
+    csv_files = glob(str(tmp_path / "*.csv"))
+    assert len(csv_files) == 1, "Expecting one CSV file to be saved"
+    with open(csv_files[0], newline="") as f:
+        myreader = csv.reader(f, delimiter=",")
+        for row in myreader:
+            assert len(row) == 18, "Expecting 18 columns in the CSV file"
