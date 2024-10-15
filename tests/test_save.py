@@ -1,5 +1,4 @@
 import csv
-import filecmp
 from glob import glob
 from os import stat
 
@@ -31,7 +30,6 @@ def test_cant_save_empty(cpt_widget, capsys):
 def test_save_single_particle(
     cpt_widget, tmp_path, qtbot: QtBot, file_name, expect_data_loaded
 ):
-
     # start napari and the particle widget, add a single particle
     cpt_widget.particle_decays_menu.setCurrentIndex(1)  # select the Σ
     assert len(cpt_widget.data) == 1, "Expecting one particle in the table"
@@ -83,6 +81,15 @@ def test_save_single_particle(
         )
 
 
+def _assert_file_contents_the_same(left: str, right: str) -> None:
+    # Can't use filecmp.cmp because file created on macOS/linux has different line endings to Windows.
+    with open(left, encoding="utf8") as f:
+        left_contents = f.read()
+    with open(right, encoding="utf8") as f:
+        right_contents = f.read()
+    assert left_contents == right_contents, "File contents are not the same"
+
+
 def test_csv_file_has_correct_columns(cpt_widget, tmp_path, qtbot: QtBot):
     # start napari and the particle widget, add a single particle
     cpt_widget.particle_decays_menu.setCurrentIndex(4)  # select the Λ
@@ -114,6 +121,5 @@ def test_csv_file_has_correct_columns(cpt_widget, tmp_path, qtbot: QtBot):
         myreader = csv.reader(f, delimiter=",")
         for row in myreader:
             assert len(row) == 18, "Expecting 18 columns in the CSV file"
-    assert filecmp.cmp(
-        csv_files[0], "tests/data/test_output_file.csv"
-    ), "Output cvs file is different from the expected one"
+
+    _assert_file_contents_the_same(csv_files[0], "tests/data/test_output_file.csv")
