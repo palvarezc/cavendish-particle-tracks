@@ -1,3 +1,4 @@
+import csv
 from glob import glob
 from os import stat
 
@@ -29,7 +30,6 @@ def test_cant_save_empty(cpt_widget, capsys):
 def test_save_single_particle(
     cpt_widget, tmp_path, qtbot: QtBot, file_name, expect_data_loaded
 ):
-
     # start napari and the particle widget, add a single particle
     cpt_widget.particle_decays_menu.setCurrentIndex(1)  # select the Σ
     assert len(cpt_widget.data) == 1, "Expecting one particle in the table"
@@ -79,3 +79,47 @@ def test_save_single_particle(
         assert msgbox.text() == (
             "The file must be a CSV (*.csv) or Pickle (*.pkl) file. Please try again."
         )
+
+
+def _assert_file_contents_the_same(left: str, right: str) -> None:
+    # Can't use filecmp.cmp because file created on macOS/linux has different line endings to Windows.
+    with open(left, encoding="utf8") as f:
+        left_contents = f.read()
+    with open(right, encoding="utf8") as f:
+        right_contents = f.read()
+    assert left_contents == right_contents, "File contents are not the same"
+
+
+def test_csv_file_has_correct_columns(cpt_widget, tmp_path, qtbot: QtBot):
+    # start napari and the particle widget, add a single particle
+    cpt_widget.particle_decays_menu.setCurrentIndex(4)  # select the Λ
+    assert len(cpt_widget.data) == 1, "Expecting one particle in the table"
+
+    file_name = "test_saved_file.csv"
+
+    def set_filename_and_close(dialog):
+        # Function of the signature needed to use as a dialog action.
+        # Defined internally so we can access the fixtures without passing.
+        qtbot.addWidget(dialog)
+        dialog.setDirectory(str(tmp_path))
+        dialog.findChild(QLineEdit, "fileNameEdit").setText(file_name)
+        buttonbox = dialog.findChild(QDialogButtonBox, "buttonBox")
+        openbutton = buttonbox.children()[1]
+        qtbot.mouseClick(openbutton, Qt.LeftButton, delay=1)
+
+    # Open and retrieve file dialog
+    get_dialog(
+        dialog_trigger=cpt_widget._on_click_save,
+        dialog_action=set_filename_and_close,
+        time_out=5,
+    )
+
+    # Check the file has the correct columns
+    csv_files = glob(str(tmp_path / "*.csv"))
+    assert len(csv_files) == 1, "Expecting one CSV file to be saved"
+    with open(csv_files[0], encoding="utf8") as f:
+        myreader = csv.reader(f, delimiter=",")
+        for row in myreader:
+            assert len(row) == 18, "Expecting 18 columns in the CSV file"
+
+    _assert_file_contents_the_same(csv_files[0], "tests/data/test_output_file.csv")
