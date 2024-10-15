@@ -14,12 +14,15 @@ import dask.array
 import napari
 import numpy as np
 from dask_image.imread import imread
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QAbstractItemView,
+    QAction,
     QComboBox,
     QFileDialog,
     QGridLayout,
     QHBoxLayout,
+    QMenu,
     QMessageBox,
     QPushButton,
     QRadioButton,
@@ -224,7 +227,6 @@ class ParticleTracksWidget(QWidget):
         """
         np = ParticleDecay()
         self.columns = list(np.vars_to_save())
-        self.columns += ["magnification"]
         self.columns_show_calibrated = np.vars_to_show(True)
         self.columns_show_uncalibrated = np.vars_to_show(False)
         out = QTableWidget(0, len(self.columns))
@@ -233,7 +235,48 @@ class ParticleTracksWidget(QWidget):
         out.setSelectionMode(QAbstractItemView.SingleSelection)
         out.setEditTriggers(QAbstractItemView.NoEditTriggers)
         out.setSelectionBehavior(QTableWidget.SelectRows)
+
+        # Setup editable columns
+        # Set up the table context menu
+        self.table_context_menu = QMenu(self)
+        for i in self.columns:
+            # Skip the calibrated variables, not to double count them
+            if i in ["radius_cm", "decay_length_cm"]:
+                continue
+            action = QAction(i, self.table_context_menu)
+            action.setCheckable(True)
+            if i in self.columns_show_uncalibrated:
+                action.setChecked(True)
+            action.triggered.connect(self._hide_show_column)
+            self.table_context_menu.addAction(action)
+
+        out.horizontalHeader().setContextMenuPolicy(Qt.CustomContextMenu)
+        out.horizontalHeader().customContextMenuRequested.connect(
+            self._get_table_context_menu
+        )
+
         return out
+
+    def _hide_show_column(self, action) -> None:
+        new_columns_show_calibrated = []
+        new_columns_show_uncalibrated = []
+        for action in self.table_context_menu.actions():
+            if action.isChecked():
+                new_columns_show_calibrated.append(action.text())
+                new_columns_show_uncalibrated.append(action.text())
+                if action.text() in ["radius", "decay_length"]:
+                    new_columns_show_calibrated[-1] += "_cm"
+
+        # Update columns to show if calibrated
+        self.columns_show_uncalibrated = new_columns_show_uncalibrated
+        self.columns_show_calibrated = new_columns_show_calibrated
+        print(self.columns_show_uncalibrated)
+        print(self.columns_show_calibrated)
+
+        self._set_table_visible_vars(self.apply_magnification_button.isChecked())
+
+    def _get_table_context_menu(self, pos):
+        self.table_context_menu.exec_(self.table.mapToGlobal(pos))
 
     def _set_table_visible_vars(self, calibrated) -> None:
         for _ in range(len(self.columns)):
@@ -367,18 +410,15 @@ class ParticleTracksWidget(QWidget):
             )
 
             print("calculating radius!")
-            self.data[selected_row].radius_px = radius(*selected_points_xy)
+            self.data[selected_row].radius = radius(*selected_points_xy)
 
             self.table.setItem(
                 selected_row,
-                self._get_table_column_index("radius_px"),
-                QTableWidgetItem(str(self.data[selected_row].radius_px)),
+                self._get_table_column_index("radius"),
+                QTableWidgetItem(str(self.data[selected_row].radius)),
             )
 
             ## Add the calibrated radius to the table
-            self.data[selected_row].radius_cm = (
-                self.data[selected_row].magnification * self.data[selected_row].radius_px
-            )
             self.table.setItem(
                 selected_row,
                 self._get_table_column_index("radius_cm"),
@@ -418,7 +458,7 @@ class ParticleTracksWidget(QWidget):
             print("Select (only) two points to calculate the decay length.")
             return
 
-        # Assigns the points and radius to the selected row
+        # Assigns the points and length to the selected row
         try:
             selected_row = self._get_selected_row()
         except IndexError:
@@ -435,18 +475,14 @@ class ParticleTracksWidget(QWidget):
             )
 
             print("calculating decay length!")
-            self.data[selected_row].decay_length_px = length(*selected_points)
+            self.data[selected_row].decay_length = length(*selected_points)
             self.table.setItem(
                 selected_row,
-                self._get_table_column_index("decay_length_px"),
-                QTableWidgetItem(str(self.data[selected_row].decay_length_px)),
+                self._get_table_column_index("decay_length"),
+                QTableWidgetItem(str(self.data[selected_row].decay_length)),
             )
 
             ## Add the calibrated decay length to the table
-            self.data[selected_row].decay_length_cm = (
-                self.data[selected_row].magnification
-                * self.data[selected_row].decay_length_px
-            )
             self.table.setItem(
                 selected_row,
                 self._get_table_column_index("decay_length_cm"),
@@ -459,7 +495,7 @@ class ParticleTracksWidget(QWidget):
             print(self.data[selected_row])
 
     def _on_click_decay_angles(self) -> DecayAnglesDialog:
-        """When the 'Calculate decay angles' buttong is clicked, open the decay angles dialog"""
+        """When the 'Calculate decay angles' button is clicked, open the decay angles dialog"""
         if self.decay_angles_dlg is not None:
             self.decay_angles_dlg.show()
             self.decay_angles_dlg.raise_()
@@ -670,6 +706,10 @@ class ParticleTracksWidget(QWidget):
             particle.magnification_a = a
             particle.magnification_b = b
 
+        # Propagate the magnification to the table if the option is selected
+        if self.apply_magnification_button.isChecked():
+            self._apply_magnification()
+
     def _on_click_apply_magnification(self) -> None:
         """Changes the visualisation of the table to show calibrated values for radius and decay_length"""
         if self.apply_magnification_button.isChecked():
@@ -680,21 +720,20 @@ class ParticleTracksWidget(QWidget):
         """Calculates magnification and calibrated radius and length for each particle in data"""
 
         for i in range(len(self.data)):
-            self.data[i].calibrate()
             self.table.setItem(
                 i,
                 self._get_table_column_index("magnification"),
                 QTableWidgetItem(str(self.data[i].magnification)),
             )
             # if the radius has been computed before, show the calibrated value
-            if self.table.item(i, self._get_table_column_index("radius_px")) is not None:
+            if self.table.item(i, self._get_table_column_index("radius")) is not None:
                 self.table.setItem(
                     i,
                     self._get_table_column_index("radius_cm"),
                     QTableWidgetItem(str(self.data[i].radius_cm)),
                 )
             if (
-                self.table.item(i, self._get_table_column_index("decay_length_px"))
+                self.table.item(i, self._get_table_column_index("decay_length"))
                 is not None
             ):
                 self.table.setItem(
