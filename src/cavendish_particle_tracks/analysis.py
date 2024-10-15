@@ -73,7 +73,17 @@ class StereoshiftInfo:
             point[1] = values[i][1]
 
     def __str__(self):
-        return f"StereoshiftInfo(name={self.name}; sf1={self._sf1}; sf2={self._sf2}; sp1={self._sp1}; sp2={self._sp2}; shift_fiducial={self.shift_fiducial}; shift_point={self.shift_point}; stereoshift={self.stereoshift}; depth_cm={self.depth_cm})"
+        mystring = f"StereoshiftInfo(name={self.name}; "
+        for name, point in zip(
+            ["sf1", "sf2", "sp1", "sp2"], [self._sf1, self._sf2, self._sp1, self._sp2]
+        ):
+            x, y = point
+            mystring += f"{name}=[{x} {y}]; "
+        mystring += f"shift_fiducial={self.shift_fiducial}; "
+        mystring += f"shift_point={self.shift_point}; "
+        mystring += f"stereoshift={self.stereoshift}; "
+        mystring += f"depth_cm={self.depth_cm})"
+        return mystring
 
 
 # Idea is to save a list of ParticleDecays as we go along, and then pandas.DataFrame(list_of_particles) does all the magic
@@ -179,5 +189,12 @@ class ParticleDecay:
     def to_csv(self):
         mystring = ""
         for var in self.vars_to_save():
-            mystring += str(getattr(self, var)) + ","
+            if var in ["rpoints", "dpoints"]:
+                mystring += "["
+                for point in getattr(self, var):
+                    x, y = point
+                    mystring += f"[{x} {y}]; "
+                mystring = mystring[0:-2] + "],"
+            else:
+                mystring += str(getattr(self, var)) + ","
         return mystring[0:-1] + "\n"
