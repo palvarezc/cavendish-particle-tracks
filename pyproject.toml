@@ -85,7 +85,7 @@ write_to = "src/cavendish_particle_tracks/_version.py"
 
 [tool.black]
 line-length = 90
-target-version = ['py39', 'py310', 'py311', 'py312']
+target-version = ['py39', 'py310', 'py311', 'py312', 'py313']
 
 
 [tool.ruff]
@@ -152,6 +152,7 @@ python =
     3.10: py310
     3.11: py311
     3.12: py312
+    3.13: py313
 
 [gh-actions:env]
 PLATFORM =
