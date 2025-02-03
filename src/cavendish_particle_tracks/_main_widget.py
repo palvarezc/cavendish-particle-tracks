@@ -150,8 +150,11 @@ class ParticleTracksWidget(QWidget):
         # Data analysis
         self.data: list[ParticleDecay] = []
         # might not need this eventually
-        self.mag_a = -1.0
-        self.mag_b = 0.0
+        self.mag_a: dict[int, float] = {}
+        self.mag_b: dict[int, float] = {}
+        # place-holder for current magnification values
+        self.mag_a[-1] = -1.0
+        self.mag_b[-1] = 0.0
 
         # Dialog pointers to reuse
         self.mag_dlg: MagnificationDialog | None = None
@@ -583,6 +586,18 @@ class ParticleTracksWidget(QWidget):
                 border_width_is_relative=False,
             )
 
+    def get_current_event(self):
+        if IMAGE_LAYER_NAME in self.viewer.layers:
+            return self.viewer.dims.current_step[1]
+        else:
+            return -1
+
+    def get_current_view(self):
+        if IMAGE_LAYER_NAME in self.viewer.layers:
+            return self.viewer.dims.current_step[0]
+        else:
+            return -1
+
     def _on_click_new_particle(self) -> None:
         """When the 'New particle' button is clicked, append a new blank row to
         the table and select the first cell ready to recieve the first point.
@@ -594,15 +609,19 @@ class ParticleTracksWidget(QWidget):
         new_particle = ParticleDecay()
         new_particle.name = self.particle_decays_menu.currentText()
         new_particle.index = self.particle_decays_menu.currentIndex()
-        new_particle.magnification_a = self.mag_a
-        new_particle.magnification_b = self.mag_b
 
         # Record the event and view number if the data has been loaded
         # Potentially this could be used to check the measurements are done in the right event
-        data_has_been_loaded = IMAGE_LAYER_NAME in self.viewer.layers
-        if data_has_been_loaded:
-            new_particle.event_number = self.viewer.dims.current_step[1]
-            new_particle.view_number = self.viewer.dims.current_step[0]
+        new_particle.event_number = self.get_current_event()
+        new_particle.view_number = self.get_current_view()
+
+        # Add the magnification parameters if magnification has been measured
+        if new_particle.event_number in self.mag_a:
+            new_particle.magnification_a = self.mag_a[new_particle.event_number]
+            new_particle.magnification_b = self.mag_b[new_particle.event_number]
+        else:
+            new_particle.magnification_a = self.mag_a[-1]
+            new_particle.magnification_b = self.mag_b[-1]
 
         self.data += [new_particle]
 
@@ -664,11 +683,18 @@ class ParticleTracksWidget(QWidget):
 
     def _propagate_magnification(self, a: float, b: float) -> None:
         """Assigns a and b to the class magnification parameters and to each of the particles in data"""
-        self.mag_a = a
-        self.mag_b = b
+        current_event = self.get_current_event()
+        # Assign the magnification parameters for this event
+        self.mag_a[current_event] = a
+        self.mag_b[current_event] = b
+        # and update default
+        self.mag_a[-1] = a
+        self.mag_b[-1] = b
+        # Update magnification for particles in this event
         for particle in self.data:
-            particle.magnification_a = a
-            particle.magnification_b = b
+            if particle.event_number == current_event:
+                particle.magnification_a = self.mag_a[current_event]
+                particle.magnification_b = self.mag_b[current_event]
 
     def _on_click_apply_magnification(self) -> None:
         """Changes the visualisation of the table to show calibrated values for radius and decay_length"""
