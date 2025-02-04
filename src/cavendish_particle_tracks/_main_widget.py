@@ -152,6 +152,7 @@ class ParticleTracksWidget(QWidget):
         # might not need this eventually
         self.mag_a = -1.0
         self.mag_b = 0.0
+        self.mag_measured = False
 
         # Dialog pointers to reuse
         self.mag_dlg: MagnificationDialog | None = None
@@ -666,9 +667,11 @@ class ParticleTracksWidget(QWidget):
         """Assigns a and b to the class magnification parameters and to each of the particles in data"""
         self.mag_a = a
         self.mag_b = b
-        for particle in self.data:
-            particle.magnification_a = a
-            particle.magnification_b = b
+        if not self.mag_measured:
+            for particle in self.data:
+                particle.magnification_a = a
+                particle.magnification_b = b
+        self.mag_measured = True
 
     def _on_click_apply_magnification(self) -> None:
         """Changes the visualisation of the table to show calibrated values for radius and decay_length"""

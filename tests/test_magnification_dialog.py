@@ -71,6 +71,10 @@ def test_magnification_ui(
     - Magnification is calculated on click of calculate button.
     - Magnification is propagated to the table when "ok" is clicked.
     """
+
+    # Add a particle to the table
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+
     # The user opens the child dialog (also test fringe case that they click the button again).
     if click_twice:
         cpt_widget._on_click_magnification()
@@ -127,6 +131,33 @@ def test_magnification_ui(
     dlg.accept()
     assert cpt_widget.mag_a == expected_magnification_params[0]
     assert cpt_widget.mag_b == expected_magnification_params[1]
+    assert cpt_widget.data[0].magnification_a == expected_magnification_params[0]
+    assert cpt_widget.data[0].magnification_b == expected_magnification_params[1]
+    assert cpt_widget.mag_measured
+
+    # Add another particle to the table and check that the magnification parameters are the same
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+    assert cpt_widget.data[0].magnification_a == cpt_widget.data[-1].magnification_a
+    assert cpt_widget.data[0].magnification_b == cpt_widget.data[-1].magnification_b
+
+    # Update the magnification parameters
+    dlg = cpt_widget._on_click_magnification()
+    newfiducial = Fiducial("F'", *FF["F'"])
+    newfiducial.x *= 1.5
+    dlg.magnification_layer.add(newfiducial.xy)
+    dlg.magnification_layer.selected_data = {len(dlg.magnification_layer.data) - 1}
+    dlg._on_click_add_coords_f2()
+    dlg._on_click_magnification()
+
+    # Check that the magnification parameters are different
+    assert dlg.a != pytest.approx(expected_magnification_params[0], rel=1e-3)
+    assert dlg.b != pytest.approx(expected_magnification_params[1], rel=1e-3)
+    dlg.accept()
+
+    # Add another particle to the table and check that the magnification parameters are different
+    cpt_widget.particle_decays_menu.setCurrentIndex(1)
+    assert cpt_widget.data[0].magnification_a != cpt_widget.data[-1].magnification_a
+    assert cpt_widget.data[0].magnification_b != cpt_widget.data[-1].magnification_b
 
 
 def test_magnification_cancel(cpt_widget):
