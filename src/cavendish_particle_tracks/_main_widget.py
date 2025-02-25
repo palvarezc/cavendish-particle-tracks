@@ -7,6 +7,7 @@ for further analysis.
 """
 
 import glob
+import logging
 import pickle
 import warnings
 
@@ -251,7 +252,7 @@ class ParticleTracksWidget(QWidget):
             if item == columntext:
                 return i
 
-        print("Column ", columntext, " not in the table")
+        logging.error("Column ", columntext, " not in the table")
         return -1
 
     def _on_row_selection_changed(self) -> None:
@@ -334,12 +335,10 @@ class ParticleTracksWidget(QWidget):
 
         # Forcing only 3 points
         if len(selected_points) == 0:
-            napari.utils.notifications.show_error("You have not selected any points.")
+            warnings.warn("You have not selected any points.")
             return
         elif len(selected_points) != 3:
-            napari.utils.notifications.show_error(
-                "Select three points to calculate the path radius."
-            )
+            warnings.warn("Select three points to calculate the path radius.")
             return
         else:
 
@@ -399,15 +398,12 @@ class ParticleTracksWidget(QWidget):
 
         # Force selection of 2 points
         if len(selected_points) == 0:
-            napari.utils.notifications.show_error("You have not selected any points.")
+            warnings.warn("You have not selected any points.")
             return
         elif len(selected_points) != 2:
-            napari.utils.notifications.show_error(
-                "Select two points to calculate the decay length."
-            )
+            warnings.warn("Select two points to calculate the decay length.")
             return
         else:
-
             if not self._selected_points_are_on_current_slice(selected_points):
                 return
 
@@ -434,7 +430,7 @@ class ParticleTracksWidget(QWidget):
                 QTableWidgetItem(str(self.data[selected_row].dpoints)),
             )
 
-            print("calculating decay length!")
+            logging.info("calculating decay length!")
             self.data[selected_row].decay_length_px = length(*selected_points)
             self.table.setItem(
                 selected_row,
@@ -630,7 +626,7 @@ class ParticleTracksWidget(QWidget):
             QTableWidgetItem(str(new_particle.magnification)),
         )
 
-        print(self.data[-1])
+        logging.info(self.data[-1])
         self.particle_decays_menu.setCurrentIndex(0)
 
     def _on_click_delete_particle(self) -> None:
@@ -709,10 +705,7 @@ class ParticleTracksWidget(QWidget):
         """
 
         if not len(self.data):
-            napari.utils.notifications.show_error(
-                "There is no data in the table to save."
-            )
-            print("There is no data in the table to save.")
+            warnings.warn("There is no data in the table to save.")
             return
 
         # setup UI

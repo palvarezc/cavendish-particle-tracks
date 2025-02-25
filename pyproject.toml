@@ -110,6 +110,7 @@ select = [
     "SIM", # flake8-simplify
 ]
 ignore = [
+    "B028",   # ignore bugbear about warning stack level:- we're talking to users
     "E501",   # line too long. let black handle this
     "UP006",
     "UP007",  # type annotation. As using magicgui require runtime type annotation then we disable this.
