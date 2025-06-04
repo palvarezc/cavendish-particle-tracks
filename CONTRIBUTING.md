@@ -11,7 +11,7 @@ Presumably also with the testing dependencies:
     python -m pip install -e ".[testing]"
 
 
-Tests are run with [tox] across python 3.9, 3.10, 3.11 and 3.12.
+Tests are run with [tox] across python 3.9, 3.10, 3.11 and 3.12 (following [SPEC0](https://scientific-python.org/specs/spec-0000/#support-window)).
 You can also check quickly with `pytest` if you installed the `testing` extras.
 Please ensure the coverage at least stays the same before you submit a pull request.
 
