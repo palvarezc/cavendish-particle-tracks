@@ -36,4 +36,4 @@ Python's built in http server can be then used to serve the page:
     python -m http.server
 
 > [!NOTE]
-> On macOS you can directly do `open _build/html/index.html` to open the documentation in your browser.
+> On macOS you can directly do `open docs/_build/html/index.html` to open the documentation in your browser.

@@ -26,9 +26,9 @@ Firstly, you'll need to [install napari](https://napari.org/stable/tutorials/fun
 
 Then you can install this plugin with:
 
-    python -m pip install git+https://github.com/palvarezc/cavendish-particle-tracks.git@v1.0.1
+    python -m pip install git+https://github.com/palvarezc/cavendish-particle-tracks.git@v1.0.2
 
-The version for 2024 students is [v1.0.1](https://github.com/palvarezc/cavendish-particle-tracks/releases).
+The version for 2024 students is [v1.0.2](https://github.com/palvarezc/cavendish-particle-tracks/releases).
 
 > [!NOTE]
 > On macOS we've found it easier to install napari through `conda-forge` (the napari docs give instructions for this under the **'From conda-forge using conda'** tab.)
