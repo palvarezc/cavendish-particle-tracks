@@ -48,11 +48,11 @@ def test_calculate_radius_ui(
     for expected in expected_lines:
         assert expected in captured.out
 
-    assert cpt_widget.table.item(0, cpt_widget._get_table_column_index("radius_px"))
+    assert cpt_widget.table.item(0, cpt_widget._get_table_column_index("radius"))
     assert cpt_widget.table.item(0, cpt_widget._get_table_column_index("radius_cm"))
     assert cpt_widget.table.item(0, cpt_widget._get_table_column_index("rpoints"))
 
-    assert cpt_widget.data[0].radius_px == pytest.approx(rad, rel=1e-3)
+    assert cpt_widget.data[0].radius == pytest.approx(rad, rel=1e-3)
 
 
 @pytest.mark.parametrize("npoints", [1, 2, 4, 5])
@@ -132,7 +132,7 @@ def test_calculate_radius_fails_data_out_of_sync(
         in captured.out
     )
 
-    assert cpt_widget.data[0].radius_px != pytest.approx(
+    assert cpt_widget.data[0].radius != pytest.approx(
         rad, rel=1e-3
     ), "The radius should not be calculated"
 
@@ -144,12 +144,12 @@ def test_calculate_radius_fails_data_out_of_sync(
     cpt_widget.viewer.dims.set_current_step(0, 0)  # move to view 0
     cpt_widget._on_click_radius()
 
-    assert cpt_widget.data[0].radius_px == pytest.approx(
+    assert cpt_widget.data[0].radius == pytest.approx(
         rad, rel=1e-3
     ), "The radius should have been calculated"
 
     assert cpt_widget.table.item(
-        0, cpt_widget._get_table_column_index("radius_px")
+        0, cpt_widget._get_table_column_index("radius")
     ), "The radius should have been recorded"
     assert cpt_widget.table.item(
         0, cpt_widget._get_table_column_index("rpoints")
@@ -175,8 +175,8 @@ def test_radius_save_preserves_old_data(cpt_widget: ParticleTracksWidget):
     measurements_layer.selected_data = {3, 4, 5}
     cpt_widget._on_click_radius()
 
-    first_radius = cpt_widget.data[0].radius_px
-    second_radius = cpt_widget.data[1].radius_px
+    first_radius = cpt_widget.data[0].radius
+    second_radius = cpt_widget.data[1].radius
     assert (
         first_radius != second_radius
     ), "The radii of different particles should be different"
@@ -211,8 +211,8 @@ def test_calculate_length_ui(
     # click the calculate decay length button
     cpt_widget._on_click_length()
 
-    assert cpt_widget.table.item(0, cpt_widget._get_table_column_index("decay_length_px"))
-    assert cpt_widget.data[0].decay_length_px == pytest.approx(1, rel=1e-3)
+    assert cpt_widget.table.item(0, cpt_widget._get_table_column_index("decay_length"))
+    assert cpt_widget.data[0].decay_length == pytest.approx(1, rel=1e-3)
 
 
 @pytest.mark.parametrize("npoints", [1, 3, 4, 5])
@@ -280,9 +280,9 @@ def test_calculate_length_fails_data_out_of_sync(
     )
 
     assert not cpt_widget.table.item(
-        0, cpt_widget._get_table_column_index("decay_length_px")
+        0, cpt_widget._get_table_column_index("decay_length")
     ), "The decay length should not be recorded"
-    assert cpt_widget.data[0].decay_length_px != pytest.approx(
+    assert cpt_widget.data[0].decay_length != pytest.approx(
         1, rel=1e-3
     ), "The decay length should not be calculated"
 
@@ -291,9 +291,9 @@ def test_calculate_length_fails_data_out_of_sync(
     cpt_widget._on_click_length()
 
     assert cpt_widget.table.item(
-        0, cpt_widget._get_table_column_index("decay_length_px")
+        0, cpt_widget._get_table_column_index("decay_length")
     ), "The decay length should be recorded"
-    assert cpt_widget.data[0].decay_length_px == pytest.approx(
+    assert cpt_widget.data[0].decay_length == pytest.approx(
         1, rel=1e-3
     ), "The decay length should be calculated"
 
@@ -317,8 +317,8 @@ def test_length_save_preserves_old_data(cpt_widget: ParticleTracksWidget):
     measurements_layer.selected_data = {2, 3}
     cpt_widget._on_click_length()
 
-    first_decay_length = cpt_widget.data[0].decay_length_px
-    second_decay_length = cpt_widget.data[1].decay_length_px
+    first_decay_length = cpt_widget.data[0].decay_length
+    second_decay_length = cpt_widget.data[1].decay_length
     assert (
         first_decay_length != second_decay_length
     ), "The decay length of different particles should be different"
