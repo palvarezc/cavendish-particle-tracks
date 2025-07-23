@@ -50,7 +50,7 @@ This is a Napari plugin for particle tracking analysis used in the Cavendish Lab
 
 **Dialog Windows**
 - `_magnification_dialog.py`: Calibration for image magnification
-- `_stereoshift_dialog.py`: Stereo view alignment adjustments  
+- `_stereoshift_dialog.py`: Stereo view alignment adjustments
 - `_decay_angles_dialog.py`: Angular measurements interface
 
 ### Data Flow
